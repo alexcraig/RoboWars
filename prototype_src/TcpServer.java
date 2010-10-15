@@ -6,6 +6,7 @@ public class TcpServer extends Thread{
 	
 	private int PORT= 33330;
 	private ArrayList<UserProxy> proxies;
+	public TcpServer(){}
 	public void run(){
    
 	  proxies=new ArrayList<UserProxy>();
