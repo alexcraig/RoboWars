@@ -1,3 +1,5 @@
+package robowars.server.controller;
+
 import java.net.*;  // for Socket
 import java.io.*;   // for IOException and Input/OutputStream
 

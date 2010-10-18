@@ -1,4 +1,6 @@
-/*
+package robowars.server.controller;
+
+/*robowars.server.controller
  * Main Server Class
  * @mwright Oct 15
  */
