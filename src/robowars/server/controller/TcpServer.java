@@ -4,18 +4,25 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.log4j.Logger;
+
 /**
  * Listens for incoming TCP connections to a specified port, and generates a new
  * UserProxy for each new connection. This class also ensures that each
  * UserProxy is associated with an instance of ServerLobby and MediaServer.
  */
 public class TcpServer implements Runnable {
-
+	/** The logger used by this class */
+	private static Logger log = Logger.getLogger(TcpServer.class);
+	
 	/** The port number that the server should listen for incoming connections on */
 	private int listenPort;
 	
 	/** The server lobby that users connecting to the server should join */
 	private ServerLobby lobby;
+	
+	/** The media streamer that should serve video to users connecting to the server */
+	private MediaStreamer mediaStreamer;
 
 	/**
 	 * Generates a new instance of TcpServer
@@ -25,6 +32,7 @@ public class TcpServer implements Runnable {
 	public TcpServer(int port, ServerLobby lobby) {
 		listenPort = port;
 		this.lobby = lobby;
+		mediaStreamer = new MediaStreamer();
 	}
 
 	/**
@@ -32,7 +40,7 @@ public class TcpServer implements Runnable {
 	 * a new UserProxy for each incoming connection
 	 */
 	public void run() {
-
+		
 		ServerSocket socket = null;
 		
 		try {
@@ -40,7 +48,7 @@ public class TcpServer implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("TcpServer: Succesfully opened listen socket on port " + listenPort);
+		log.info("Succesfully opened listen socket on port " + listenPort);
 
 		while (true) { // Run forever, accepting and servicing connections
 			
@@ -52,10 +60,10 @@ public class TcpServer implements Runnable {
 			}
 
 			// Print details on connected client
-			System.out.println("Client: " + clientSocket.getInetAddress().getHostAddress()
+			log.info("New client connection: " + clientSocket.getInetAddress().getHostAddress()
 					+ " Port: " + clientSocket.getPort());
 
-			UserProxy newProxy = new UserProxy(clientSocket, lobby);
+			UserProxy newProxy = new UserProxy(clientSocket, lobby, mediaStreamer);
 			new Thread(newProxy).start();
 		}
 	}

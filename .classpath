@@ -4,5 +4,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="prototype_src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/classes.jar"/>
+	<classpathentry kind="lib" path="lib/jtools.jar"/>
+	<classpathentry kind="lib" path="lib/pccomm.jar"/>
+	<classpathentry kind="lib" path="lib/pctools.jar"/>
+	<classpathentry kind="lib" path="lib/bluecove.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

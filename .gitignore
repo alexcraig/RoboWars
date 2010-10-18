@@ -1,6 +1,9 @@
-# --- Ignore bin folder (prevents compiled source from generated clutter in repository) ---
+# --- Custom ignore rules ---
 
+# Ignore bin folder (prevents compiled source from generated clutter in repository)
 /bin
+# Ignore log folder
+/logs
 
 # --- Standard Ignore Rules ---
 

@@ -8,4 +8,6 @@ package robowars.server.controller;
  */
 public class MediaStreamer {
 
+	public MediaStreamer() 
+	{}
 }

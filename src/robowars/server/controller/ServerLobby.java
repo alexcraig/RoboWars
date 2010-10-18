@@ -2,6 +2,9 @@ package robowars.server.controller;
 
 import java.util.List;
 import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
+
 import robowars.shared.model.GameType;
 
 /**
@@ -11,6 +14,9 @@ import robowars.shared.model.GameType;
  * pairs, and launching new games (generating instances of GameController).
  */
 public class ServerLobby {
+	
+	/** The logger used by this class */
+	private static Logger log = Logger.getLogger(ServerLobby.class);
 	
 	/** The name of the server */
 	private String serverName;
@@ -64,7 +70,7 @@ public class ServerLobby {
 			if(users.size() < maxUsers) {
 				users.add(user);
 			} else {
-				// THROW EXCEPTION
+				// TODO: THROW EXCEPTION
 			}
 		}
 		broadcastMessage(user.getUsername() + " has joined the server.");
@@ -90,7 +96,7 @@ public class ServerLobby {
 			if(robots.size() < maxRobots) {
 				robots.add(robot);
 			} else {
-				// THROW EXCEPTION
+				// TODO: THROW EXCEPTION
 			}
 		}
 	}
@@ -111,6 +117,7 @@ public class ServerLobby {
 	 * @param message	The message to broadcast
 	 */
 	public void broadcastMessage(String message) {
+		log.debug("Broadcasting: " + message);
 		synchronized(users) {
 			for(UserProxy user : users) {
 				user.sendMessage(message);
@@ -152,5 +159,13 @@ public class ServerLobby {
 	 */
 	public String getServerName() {
 		return serverName;
+	}
+	
+	/**
+	 * Attempts to launch a new game, given that the required minimum amount of players
+	 * and an equal number of connected robots are available.
+	 */
+	public void launchGame() {
+		
 	}
 }
