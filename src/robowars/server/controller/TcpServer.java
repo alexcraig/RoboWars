@@ -13,13 +13,18 @@ public class TcpServer implements Runnable {
 
 	/** The port number that the server should listen for incoming connections on */
 	private int listenPort;
+	
+	/** The server lobby that users connecting to the server should join */
+	private ServerLobby lobby;
 
 	/**
 	 * Generates a new instance of TcpServer
 	 * @param port	The port number to listen for incoming connections on
+	 * @param lobby The server lobby that users connecting to the server should join
 	 */
-	public TcpServer(int port) {
+	public TcpServer(int port, ServerLobby lobby) {
 		listenPort = port;
+		this.lobby = lobby;
 	}
 
 	/**
@@ -50,7 +55,7 @@ public class TcpServer implements Runnable {
 			System.out.println("Client: " + clientSocket.getInetAddress().getHostAddress()
 					+ " Port: " + clientSocket.getPort());
 
-			UserProxy newProxy = new UserProxy(clientSocket);
+			UserProxy newProxy = new UserProxy(clientSocket, lobby);
 			new Thread(newProxy).start();
 		}
 	}
