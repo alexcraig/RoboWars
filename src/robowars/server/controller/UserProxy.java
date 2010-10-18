@@ -1,40 +1,73 @@
 package robowars.server.controller;
 
-import java.net.*;  // for Socket
-import java.io.*;   // for IOException and Input/OutputStream
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-public class UserProxy extends Thread {
+/**
+ * Manages communications with a single user connected through an existing 
+ * TCP socket. 
+ */
+public class UserProxy implements Runnable {
 
-	private InputStream input;
-	private OutputStream output;
+	/** Reader for client input */
+	private BufferedReader input;
+	
+	/** Writer for client output */
+	private PrintWriter output;
+	
+	/** The socket to generate input/output streams for */
 	private Socket clientSocket;
-	private int BUFSIZE = 32;   // Size of receive buffer
-	public UserProxy(Socket clientSocket, InputStream input, OutputStream output) {
+	
+	/**
+	 * Generates a new UserProxy
+	 * @param clientSocket	The connected socket to service
+	 */
+	public UserProxy(Socket clientSocket) {
 		this.clientSocket=clientSocket;
-		this.input=input;
-		this.output=output;
+		input = null;
+		output = null;
 	}
+	
 	public void run(){
-		byte[] buffer=new byte[BUFSIZE];
+		
+		System.out.println("UserProxy: Opening input/output streams.");
 		try {
-			while(input.read(buffer)!=-1){
-				System.out.println("MESSAGE RECEIVED: "+buffer);
-				if(buffer.toString()=="q")break;
-				else handle(buffer.toString());
+			this.input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			this.output = new PrintWriter(clientSocket.getOutputStream(), true);
+		} catch (IOException e) {
+			System.out.println("UserProxy: ERROR - failed to open input/output streams.");
+			e.printStackTrace();
+		}
+		
+		String incomingMessage;
+		try {
+			
+			// Read strings from socket until connection is terminated
+			while ((incomingMessage = input.readLine()) != null) {
+				System.out.println("UserProxy: Received: " + incomingMessage);
+				handle(incomingMessage);
 			}
+			System.out.println("UserProxy: Client terminated connection with server.");
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("UserProxy: Client terminated connection with server.");
+		} finally {
+			try {
+				clientSocket.close();
+			} catch (IOException e) {
+				System.out.println("UserProxy: WARNING - could not close client socket.");
+			}
 		}
-		try {
-			clientSocket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
-	/*
-	 * commands:
+	
+	/**
+	 * Dispatches user input to the relevant processing functions based on the input received.
+	 * 
+	 * Commands:
 	 * h - hello
 	 * m<x,y,z> - movement <x,y,z> angle on each axis
 	 * s - shoot
