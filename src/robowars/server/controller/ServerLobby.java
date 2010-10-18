@@ -64,41 +64,40 @@ public class ServerLobby {
 	/**
 	 * Adds a user to the end of the list of connected users.
 	 * @param user	The user to add
+	 * @return True if the user was successfully added, false if not
 	 */
-	public void addUser(UserProxy user) {
-		synchronized(users) {
-			if(users.size() < maxUsers) {
-				users.add(user);
-			} else {
-				// TODO: THROW EXCEPTION
-			}
+	public synchronized boolean addUser(UserProxy user) {
+		boolean addSuccess = false;
+		if(users.size() < maxUsers) {
+			users.add(user);
+			addSuccess = true;
+			log.debug(user.getUsername() + " added to lobby.");
 		}
-		broadcastMessage(user.getUsername() + " has joined the server.");
+		if (addSuccess) broadcastMessage(user.getUsername() + " has joined the server.");
+		return addSuccess;
 	}
 	
 	/**
 	 * Removes a user from the list of connected users.
 	 * @param user	The user to remove
 	 */
-	public void removeUser(UserProxy user) {
-		synchronized(users) {
-			users.remove(user);
-		}
+	public synchronized void removeUser(UserProxy user) {
+		users.remove(user);
 		broadcastMessage(user.getUsername() + " has left the server.");
 	}
 	
 	/**
 	 * Registers a robot to be considered for remote control pairing.
 	 * @param robot	The proxy of the robot to add
+	 * @return True if the robot was successfully added, false if not
 	 */
-	public void registerRobot(RobotProxy robot) {
-		synchronized(robots) {
-			if(robots.size() < maxRobots) {
-				robots.add(robot);
-			} else {
-				// TODO: THROW EXCEPTION
-			}
+	public synchronized boolean registerRobot(RobotProxy robot) {
+		boolean addSuccess = false;
+		if(robots.size() < maxRobots) {
+			robots.add(robot);
+			addSuccess = true;
 		}
+		return addSuccess;
 	}
 
 	/**
@@ -106,22 +105,18 @@ public class ServerLobby {
 	 * control paring.
 	 * @param robot	The proxy of the robot to remove
 	 */
-	public void unregisterRobot(RobotProxy robot) {
-		synchronized(robots) {
-			robots.remove(robot);
-		}
+	public synchronized void unregisterRobot(RobotProxy robot) {
+		robots.remove(robot);
 	}
 	
 	/**
 	 * Broadcasts a message to all connected users.
 	 * @param message	The message to broadcast
 	 */
-	public void broadcastMessage(String message) {
-		log.debug("Broadcasting: " + message);
-		synchronized(users) {
-			for(UserProxy user : users) {
-				user.sendMessage(message);
-			}
+	public synchronized void broadcastMessage(String message) {
+		log.info("Broadcasting: " + message);
+		for(UserProxy user : users) {
+			user.sendMessage(message);
 		}
 	}
 	
@@ -130,12 +125,10 @@ public class ServerLobby {
 	 * ready status of all connected clients to false.
 	 * @param newType	The game type of the next game to launch
 	 */
-	public void setGameType(GameType newType) {
+	public synchronized void setGameType(GameType newType) {
 		this.selectedGameType = newType;
-		synchronized(users) {
-			for(UserProxy user : users) {
-				user.setReady(false);
-			}
+		for(UserProxy user : users) {
+			user.setReady(false);
 		}
 	}
 	
@@ -165,7 +158,78 @@ public class ServerLobby {
 	 * Attempts to launch a new game, given that the required minimum amount of players
 	 * and an equal number of connected robots are available.
 	 */
-	public void launchGame() {
+	public synchronized void launchGame() {
+		if (gameInProgress()) {
+			log.info("Game launch requested, but game is in progress.");
+			return; // Only one game can be running at a time
+		}
 		
+		// Ensure all players are ready before launching a game
+		// TODO: Should only consider users who will actually be paired
+		for(UserProxy user : users) {
+			if(!user.isReady() && !user.isPureSpectator()) {
+				broadcastMessage("Game launch requested, but one or more players are not ready.");
+				return;
+			}
+		}
+		
+		// Check how many players are available who are not flagged as spectators
+		int availablePlayers = 0;
+		for (UserProxy user : users) {
+			if (!user.isPureSpectator()) {
+				availablePlayers++;
+			}
+		}
+		log.debug(availablePlayers + " player available for pairing.");
+		int availableRobots = robots.size();
+		log.debug(availableRobots + " robot available for pairing.");
+		
+		// If enough players and robots are available, launch a game
+		if(availablePlayers >= selectedGameType.getMinimumPlayers() &&
+				availableRobots >= selectedGameType.getMinimumPlayers()) {
+			log.info("Launching game of type: " + selectedGameType.toString());
+			currentGame = new GameController(this, selectedGameType);
+			
+			// Generate a control pairs while pairs of unused players and robots remain
+			int playerPairs = 
+				availablePlayers >= availableRobots ? availableRobots : availablePlayers;
+				
+			log.debug("Generating " + playerPairs + " control pairs.");
+			for(int i = 0; i < playerPairs; i++) {
+				UserProxy player = users.remove(0);
+				if(!player.isPureSpectator()) {
+					RobotProxy robot = robots.remove(0); 
+					currentGame.addPlayer(player, robot);
+					robots.add(robot);
+					log.debug("Pairing: " + player.getUsername() + " <-> " + robot.getIdentifier());
+				} else {
+					i--;
+				}
+				users.add(player);
+			}
+			
+			// Add all remaining players as spectators
+			for(UserProxy user : users) {
+				if(!currentGame.isPlayer(user)) {
+					currentGame.addSpectator(user);
+					log.debug("Adding spectator: " + user.getUsername());
+				}
+			}
+			
+			// Start the game
+			new Thread(currentGame).start();
+		} else {
+			log.info("Insufficient players available for game launch (minimum = " 
+					+ selectedGameType.getMinimumPlayers() + ")");
+		}
+
+	}
+	
+	/**
+	 * Removes all references to the currently running game. This should be
+	 * called by the game controller just before game termination.
+	 */
+	public void clearCurrentGame() {
+		currentGame = null;
 	}
 }

@@ -16,6 +16,9 @@ public class SystemControl {
 		// Generate the server lobby to manage user and robot connections
 		ServerLobby lobby = new ServerLobby("RoboWars Test Server", 6, 10);
 		
+		// TESTING: Add dummy robot proxy
+		lobby.registerRobot(new RobotProxy("DUMMY:MAC:ADDRESS"));
+		
 		// Start the NXT Bluetooth discovery server
 		new Thread(new BluetoothServer(lobby)).start();
 		

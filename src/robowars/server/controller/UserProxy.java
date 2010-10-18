@@ -77,7 +77,7 @@ public class UserProxy implements Runnable {
 	
 	public void run(){
 		
-		System.out.println("UserProxy: Opening input/output streams.");
+		log.debug("Opening input/output streams.");
 		try {
 			this.inputStream = new BufferedReader(new InputStreamReader(userSocket.getInputStream()));
 			this.outputStream = new PrintWriter(userSocket.getOutputStream(), true);
@@ -106,7 +106,7 @@ public class UserProxy implements Runnable {
 			String incomingMessage;
 			while ((incomingMessage = inputStream.readLine()) != null) {
 				log.debug("Received: " + incomingMessage);
-				handle(incomingMessage);
+				handleInput(incomingMessage);
 			}
 			log.info(username + " terminated connection with server.");
 			
@@ -134,50 +134,6 @@ public class UserProxy implements Runnable {
 	}
 	
 	/**
-	 * Dispatches user input to the relevant processing functions based on the input received.
-	 * 
-	 * Commands:
-	 * m:<message> - chat message 
-	 * t:<x,y,z> - tilt reading <x,y,z> angle on each axis
-	 * b:<button_chars> - button input
-	 * r:<t or f> - set ready state
-	 * s:<t or f> - set pure spectator state
-	 * g:<game_type_string> - set game type
-	 * l - launch game
-	 * q - disconnect
-	 */
-	private void handle(String command){	
-		if(command.startsWith("m:")) {
-			lobby.broadcastMessage(username + ": " + command.substring(2));
-		} else if(command.startsWith("r:")) {
-			
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				setReady(true);
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				setReady(false);
-			}
-			lobby.broadcastMessage(username + ": ready status is " + isReady);
-			
-		} else if(command.startsWith("s:")) {
-			
-			System.out.println(command.substring(2,3));
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				isPureSpectator = true;
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				isPureSpectator = false;
-			}
-			lobby.broadcastMessage(username + ": spectator status is " + isPureSpectator);
-			
-		}else if(command.startsWith("g:")) {
-			
-			lobby.broadcastMessage(username + ": requested game type " + command.substring(2));
-			
-		} else if(command.startsWith("l")) {
-			lobby.launchGame();
-		}
-	}
-	
-	/**
 	 * Checks whether the user has successfully performed the authentication
 	 * handshake (and therefore a username has been supplied).
 	 * @return true if the user has performed the connection handshake.
@@ -195,9 +151,80 @@ public class UserProxy implements Runnable {
 	}
 	
 	/**
+	 * @return	The ready status of the user.
+	 */
+	public boolean isReady() {
+		return isReady;
+	}
+	
+	/**
 	 * @return	The username of the connected user
 	 */
 	public String getUsername() {
 		return username;
+	}
+	
+	/**
+	 * @return	True if the user is a pure spectator (has opted-out of robot control)
+	 */
+	public boolean isPureSpectator() {
+		return isPureSpectator;
+	}
+	
+	/**
+	 * Dispatches user input to the relevant processing functions based on the input received.
+	 * 
+	 * Commands:
+	 * m:<message> - chat message 
+	 * t:<x,y,z> - tilt reading <x,y,z> angle on each axis
+	 * b:<button_chars> - button input
+	 * r:<t or f> - set ready state
+	 * s:<t or f> - set pure spectator state
+	 * g:<game_type_string> - set game type
+	 * l - launch game
+	 * q - disconnect
+	 */
+	private void handleInput(String command){	
+		if(command.startsWith("m:")) {
+			lobby.broadcastMessage(username + ": " + command.substring(2));
+		} else if(command.startsWith("r:")) {
+			
+			if (command.substring(2,3).equalsIgnoreCase("t")) {
+				setReady(true);
+			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
+				setReady(false);
+			}
+			lobby.broadcastMessage(username + ": ready status is " + isReady);
+			
+		} else if(command.startsWith("s:")) {
+			
+			if (command.substring(2,3).equalsIgnoreCase("t")) {
+				isPureSpectator = true;
+			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
+				isPureSpectator = false;
+			}
+			lobby.broadcastMessage(username + ": spectator status is " + isPureSpectator);
+			
+		}else if(command.startsWith("g:")) {
+			
+			lobby.broadcastMessage(username + ": requested game type " + command.substring(2));
+			
+		} else if(command.startsWith("l")) {
+			processGameLaunch();
+		}
+	}
+	
+	/**
+	 * Handles user input which requests a new game be launched.
+	 */
+	private void processGameLaunch() {
+		if(isPureSpectator) {
+			log.debug("Game launch blocked (" + username + " is a pure spectator)");
+			synchronized(outputStream) {
+				outputStream.println("Spectators may not launch a new game.");
+			}
+		} else {
+			lobby.launchGame();
+		}
 	}
 }
