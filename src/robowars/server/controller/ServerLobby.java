@@ -1,7 +1,7 @@
 package robowars.server.controller;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +37,11 @@ public class ServerLobby {
 	/** A list of all currently connected robot proxies */
 	private List<RobotProxy> robots;
 	
+	/** 
+	 * A list of listeners who should receive events when the lobby status changes
+	 */
+	private List<ServerLobbyListener> listeners;
+	
 	/** The currently selected game type (used when a new game is launched) */
 	private GameType selectedGameType;
 	
@@ -59,6 +64,25 @@ public class ServerLobby {
 		selectedGameType = GameType.getDefault();
 		users = new ArrayList<UserProxy>();
 		robots = new ArrayList<RobotProxy>();
+		listeners = new ArrayList<ServerLobbyListener>();
+	}
+	
+	/**
+	 * Registers a ServerLobbyListener to listen on events from the server lobby.
+	 * @param listener	The listener to add
+	 */
+	public synchronized void addLobbyStateListener(ServerLobbyListener listener) {
+		if(!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
+	
+	/**
+	 * Removes a ServerLobbyListener from the listener list.
+	 * @param listener	The listener to remove
+	 */
+	public synchronized void removeLobbyStateListener(ServerLobbyListener listener) {
+		listeners.remove(listener);
 	}
 	
 	/**
@@ -72,8 +96,11 @@ public class ServerLobby {
 			users.add(user);
 			addSuccess = true;
 			log.debug(user.getUsername() + " added to lobby.");
+			listeners.add(user);
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
+			}
 		}
-		if (addSuccess) broadcastMessage(user.getUsername() + " has joined the server.");
 		return addSuccess;
 	}
 	
@@ -82,8 +109,13 @@ public class ServerLobby {
 	 * @param user	The user to remove
 	 */
 	public synchronized void removeUser(UserProxy user) {
-		users.remove(user);
-		broadcastMessage(user.getUsername() + " has left the server.");
+		if(users.remove(user)) {
+			log.debug(user.getUsername() + " removed from lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
+			}
+			listeners.remove(user);
+		}
 	}
 	
 	/**
@@ -96,6 +128,10 @@ public class ServerLobby {
 		if(robots.size() < maxRobots) {
 			robots.add(robot);
 			addSuccess = true;
+			log.debug(robot.getIdentifier() + " added to lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.robotStateChanged(new RobotStateEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
+			}
 		}
 		return addSuccess;
 	}
@@ -106,17 +142,42 @@ public class ServerLobby {
 	 * @param robot	The proxy of the robot to remove
 	 */
 	public synchronized void unregisterRobot(RobotProxy robot) {
-		robots.remove(robot);
+		if(robots.remove(robot)) {
+			log.debug(robot.getIdentifier() + " removed from lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.robotStateChanged(new RobotStateEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
+			}
+		}
 	}
 	
 	/**
-	 * Broadcasts a message to all connected users.
-	 * @param message	The message to broadcast
+	 * Generates and broadcasts a chat event containing the last chat message received
+	 * from the specified user proxy to all registered event listeners (if the user
+	 * is registered to the server lobby)
+	 * @param user	The user proxy to read for the chat message
 	 */
-	public synchronized void broadcastMessage(String message) {
-		log.info("Broadcasting: " + message);
-		for(UserProxy user : users) {
-			user.sendMessage(message);
+	public synchronized void broadcastMessage(UserProxy user) {
+		if(users.contains(user)) {
+			log.debug(user.getUsername() + ": " + user.getLastChatMessage());
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_CHAT_MESSAGE, user));
+			}
+		}
+	}
+	
+	/**
+	 * Generates and broadcasts a player state update event to all registered
+	 * listeners for the specified user. This should be called when the spectator
+	 * or ready state of a user changes.
+	 * @param user	The user to broadcast state for
+	 */
+	public synchronized void broadcastUserStateUpdate(UserProxy user) {
+		if(users.contains(user)) {
+			log.debug(user.getUsername() + " state: < Ready = " + user.isReady()
+					+ ", Spectator = " + user.isPureSpectator() + ">");
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, user));
+			}
 		}
 	}
 	
@@ -127,8 +188,15 @@ public class ServerLobby {
 	 */
 	public synchronized void setGameType(GameType newType) {
 		this.selectedGameType = newType;
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAMETYPE_CHANGE, selectedGameType));
+		}
+		
 		for(UserProxy user : users) {
-			user.setReady(false);
+			if(user.isReady()) {
+				user.setReady(false);
+				broadcastUserStateUpdate(user);
+			}
 		}
 	}
 	
@@ -168,7 +236,7 @@ public class ServerLobby {
 		// TODO: Should only consider users who will actually be paired
 		for(UserProxy user : users) {
 			if(!user.isReady() && !user.isPureSpectator()) {
-				broadcastMessage("Game launch requested, but one or more players are not ready.");
+				log.info("Game launch requested, but one or more players are not ready.");
 				return;
 			}
 		}
@@ -216,6 +284,11 @@ public class ServerLobby {
 				}
 			}
 			
+			// Notify all listeners that a game is starting
+			for(ServerLobbyListener listener : listeners) {
+				listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_LAUNCH, selectedGameType));
+			}
+			
 			// Start the game
 			new Thread(currentGame).start();
 		} else {
@@ -229,7 +302,10 @@ public class ServerLobby {
 	 * Removes all references to the currently running game. This should be
 	 * called by the game controller just before game termination.
 	 */
-	public void clearCurrentGame() {
+	public synchronized void clearCurrentGame() {
 		currentGame = null;
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
+		}
 	}
 }

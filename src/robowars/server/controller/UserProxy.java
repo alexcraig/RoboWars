@@ -8,11 +8,13 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
+import robowars.shared.model.GameType;
+
 /**
  * Manages communications with a single user connected through an existing 
  * TCP socket. 
  */
-public class UserProxy implements Runnable {
+public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(UserProxy.class);
 	
@@ -42,6 +44,9 @@ public class UserProxy implements Runnable {
 	
 	/** Flag indicating if a video stream should be sent to this user */
 	private boolean videoEnabled;
+	
+	/** The last chat message sent by the player */
+	private String lastChatMessage;
 	
 	/** 
 	 * Flag indicating whether a user is a pure spectator. If true, the user should
@@ -73,6 +78,7 @@ public class UserProxy implements Runnable {
 		isReady = false;
 		videoEnabled = false;
 		isPureSpectator = false;
+		lastChatMessage = "";
 	}
 	
 	public void run(){
@@ -172,6 +178,13 @@ public class UserProxy implements Runnable {
 	}
 	
 	/**
+	 * @return	The latest chat message received from the player
+	 */
+	public String getLastChatMessage() {
+		return lastChatMessage;
+	}
+	
+	/**
 	 * Dispatches user input to the relevant processing functions based on the input received.
 	 * 
 	 * Commands:
@@ -186,7 +199,9 @@ public class UserProxy implements Runnable {
 	 */
 	private void handleInput(String command){	
 		if(command.startsWith("m:")) {
-			lobby.broadcastMessage(username + ": " + command.substring(2));
+			lastChatMessage = command.substring(2);
+			lobby.broadcastMessage(this);
+			
 		} else if(command.startsWith("r:")) {
 			
 			if (command.substring(2,3).equalsIgnoreCase("t")) {
@@ -194,7 +209,7 @@ public class UserProxy implements Runnable {
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
 				setReady(false);
 			}
-			lobby.broadcastMessage(username + ": ready status is " + isReady);
+			lobby.broadcastUserStateUpdate(this);
 			
 		} else if(command.startsWith("s:")) {
 			
@@ -203,11 +218,13 @@ public class UserProxy implements Runnable {
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
 				isPureSpectator = false;
 			}
-			lobby.broadcastMessage(username + ": spectator status is " + isPureSpectator);
+			lobby.broadcastUserStateUpdate(this);
 			
 		}else if(command.startsWith("g:")) {
 			
-			lobby.broadcastMessage(username + ": requested game type " + command.substring(2));
+			if(GameType.parseString(command.substring(2)) != null) {
+				lobby.setGameType(GameType.parseString(command.substring(2)));
+			}
 			
 		} else if(command.startsWith("l")) {
 			processGameLaunch();
@@ -226,5 +243,26 @@ public class UserProxy implements Runnable {
 		} else {
 			lobby.launchGame();
 		}
+	}
+
+	@Override
+	/** @see ServerLobbyListener#userStateChanged(UserStateEvent) */
+	public void userStateChanged(UserStateEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#robotStateChanged(RobotStateEvent) */
+	public void robotStateChanged(RobotStateEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#lobbyGameStateChanged(LobbyGameEvent) */
+	public void lobbyGameStateChanged(LobbyGameEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
 	}
 }

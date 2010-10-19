@@ -19,11 +19,11 @@ public class SystemControl {
 		// TESTING: Add dummy robot proxy
 		lobby.registerRobot(new RobotProxy("DUMMY:MAC:ADDRESS"));
 		
-		// Start the NXT Bluetooth discovery server
-		new Thread(new BluetoothServer(lobby)).start();
-		
 		// Start a new TCP server listening on port 33330
 		new Thread(new TcpServer(33330, lobby)).start();
+		
+		// Start the NXT Bluetooth discovery server
+		new Thread(new BluetoothServer(lobby)).start();
 	}
 	
 }
