@@ -12,7 +12,7 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	private GameType gameType;
 	
 	/**
-	 * Generates a new LobbyRobotEvent
+	 * Generates a new LobbyGameEvent
 	 * @param src	The ServerLobby that generated the event
 	 * @param type	The type of the event (constants defined in ServerLobbyEvent)
 	 * @param gameType	The type of the game that was just launched or terminated
