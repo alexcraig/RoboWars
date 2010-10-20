@@ -25,7 +25,7 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	/**
 	 * @return	The type of game that was just launched or terminated.
 	 */
-	public GameType getRobot() {
+	public GameType getGameType() {
 		return gameType;
 	}
 	

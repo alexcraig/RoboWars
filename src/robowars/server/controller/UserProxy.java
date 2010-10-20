@@ -18,12 +18,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(UserProxy.class);
 	
-	/** 
-	 * The protocol version string (sent to clients when they first connect
-	 * to ensure version mismatches between client and server do not occur)
-	 */
-	private static final String PROTOCOL_VERSION = "RoboWarsV0.1";
-	
 	/** The username of the connected user */
 	private String username;
 
@@ -96,7 +90,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 			// Write out the protocol version string
 			synchronized(outputStream) {
-				outputStream.println(PROTOCOL_VERSION);
+				outputStream.println(SystemControl.VERSION_STRING);
 			}
 			
 			// Handshake and UDP connection should happen here

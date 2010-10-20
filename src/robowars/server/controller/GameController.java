@@ -49,6 +49,8 @@ public class GameController implements Runnable, GameListener {
 	 */
 	public void addPlayer(UserProxy player, RobotProxy robot) {
 		controlPairs.add(new ControlPair(player, robot));
+		log.debug("Added control pair: " + player.getUsername() + " <-> " 
+				+ robot.getIdentifier());
 	}
 	
 	/**

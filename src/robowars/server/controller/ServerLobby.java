@@ -216,6 +216,13 @@ public class ServerLobby {
 	}
 	
 	/**
+	 * @return	The currently selected game type
+	 */
+	public GameType getCurrentGameType() {
+		return selectedGameType;
+	}
+	
+	/**
 	 * @return	The name of the server
 	 */
 	public String getServerName() {
@@ -307,5 +314,13 @@ public class ServerLobby {
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
 		}
+	}
+	
+	/**
+	 * Sends a shutdown message to all connected users and cleanly closes
+	 * connections with all users and robots connected to the server
+	 */
+	public void serverShutdown() {
+		// TODO: Implement
 	}
 }
