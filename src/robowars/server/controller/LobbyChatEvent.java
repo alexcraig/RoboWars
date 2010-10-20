@@ -13,7 +13,7 @@ public class LobbyChatEvent extends ServerLobbyEvent {
 	private String message;
 	
 	/**
-	 * Generates a new RobotStateEvent
+	 * Generates a new LobbyChatEvent
 	 * @param src	The ServerLobby that generated the event
 	 * @param message	The message to be carried by the event
 	 */

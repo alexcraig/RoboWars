@@ -43,7 +43,7 @@ public abstract class ServerLobbyEvent extends EventObject {
 	
 	/**
 	 * TODO: Should be replaced with a more efficient data type than string at
-	 * 		 some point
+	 * 		 some point (use java standard serialization instead)
 	 * @return	A string representation of the event which can be sent over
 	 * 			a network to connected clients.
 	 */

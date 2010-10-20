@@ -96,21 +96,26 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			synchronized(outputStream) {
 				outputStream.println(username + " connected to: " + lobby.getServerName());
 			}
-			lobby.addUser(this);
 			
-			// Read strings from socket until connection is terminated
-			String incomingMessage;
-			while ((incomingMessage = inputStream.readLine()) != null) {
-				log.debug("Received: " + incomingMessage);
-				handleInput(incomingMessage);
+			if (lobby.addUser(this)) {
+				// Read strings from socket until connection is terminated
+				String incomingMessage;
+				while ((incomingMessage = inputStream.readLine()) != null) {
+					log.debug("Received: " + incomingMessage);
+					handleInput(incomingMessage);
+				}
+				log.info(username + " terminated connection with server.");
+			} else {
+				outputStream.println("[Error - Server Full]");
 			}
-			log.info(username + " terminated connection with server.");
 			
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
 			lobby.removeUser(this);
 			try {
+				outputStream.close();
+				inputStream.close();
 				userSocket.close();
 			} catch (IOException e) {
 				log.error("Could not close client socket.");
@@ -228,15 +233,15 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 
 	@Override
-	/** @see ServerLobbyListener#userStateChanged(UserStateEvent) */
-	public void userStateChanged(UserStateEvent event) {
+	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
+	public void userStateChanged(LobbyUserEvent event) {
 		log.debug(event.serialize());
 		sendMessage(event.serialize());
 	}
 
 	@Override
-	/** @see ServerLobbyListener#robotStateChanged(RobotStateEvent) */
-	public void robotStateChanged(RobotStateEvent event) {
+	/** @see ServerLobbyListener#robotStateChanged(LobbyRobotEvent) */
+	public void robotStateChanged(LobbyRobotEvent event) {
 		log.debug(event.serialize());
 		sendMessage(event.serialize());
 	}
