@@ -1,5 +1,4 @@
 package robowars.server.controller;
-import lejos.pc.comm.*;
 
 /**
  * Uses Bluetooth to discover and attempt a connection to any available NXT

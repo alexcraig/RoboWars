@@ -8,19 +8,15 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
+import robowars.shared.model.GameType;
+
 /**
  * Manages communications with a single user connected through an existing 
  * TCP socket. 
  */
-public class UserProxy implements Runnable {
+public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(UserProxy.class);
-	
-	/** 
-	 * The protocol version string (sent to clients when they first connect
-	 * to ensure version mismatches between client and server do not occur)
-	 */
-	private static final String PROTOCOL_VERSION = "RoboWarsV0.1";
 	
 	/** The username of the connected user */
 	private String username;
@@ -90,7 +86,7 @@ public class UserProxy implements Runnable {
 			
 			// Write out the protocol version string
 			synchronized(outputStream) {
-				outputStream.println(PROTOCOL_VERSION);
+				outputStream.println(SystemControl.VERSION_STRING);
 			}
 			
 			// Handshake and UDP connection should happen here
@@ -100,21 +96,26 @@ public class UserProxy implements Runnable {
 			synchronized(outputStream) {
 				outputStream.println(username + " connected to: " + lobby.getServerName());
 			}
-			lobby.addUser(this);
 			
-			// Read strings from socket until connection is terminated
-			String incomingMessage;
-			while ((incomingMessage = inputStream.readLine()) != null) {
-				log.debug("Received: " + incomingMessage);
-				handleInput(incomingMessage);
+			if (lobby.addUser(this)) {
+				// Read strings from socket until connection is terminated
+				String incomingMessage;
+				while ((incomingMessage = inputStream.readLine()) != null) {
+					log.debug("Received: " + incomingMessage);
+					handleInput(incomingMessage);
+				}
+				log.info(username + " terminated connection with server.");
+			} else {
+				outputStream.println("[Error - Server Full]");
 			}
-			log.info(username + " terminated connection with server.");
 			
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
 			lobby.removeUser(this);
 			try {
+				outputStream.close();
+				inputStream.close();
 				userSocket.close();
 			} catch (IOException e) {
 				log.error("Could not close client socket.");
@@ -186,7 +187,8 @@ public class UserProxy implements Runnable {
 	 */
 	private void handleInput(String command){	
 		if(command.startsWith("m:")) {
-			lobby.broadcastMessage(username + ": " + command.substring(2));
+			lobby.broadcastMessage(getUsername() + ": " + command.substring(2));
+			
 		} else if(command.startsWith("r:")) {
 			
 			if (command.substring(2,3).equalsIgnoreCase("t")) {
@@ -194,7 +196,7 @@ public class UserProxy implements Runnable {
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
 				setReady(false);
 			}
-			lobby.broadcastMessage(username + ": ready status is " + isReady);
+			lobby.broadcastUserStateUpdate(this);
 			
 		} else if(command.startsWith("s:")) {
 			
@@ -203,11 +205,13 @@ public class UserProxy implements Runnable {
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
 				isPureSpectator = false;
 			}
-			lobby.broadcastMessage(username + ": spectator status is " + isPureSpectator);
+			lobby.broadcastUserStateUpdate(this);
 			
 		}else if(command.startsWith("g:")) {
 			
-			lobby.broadcastMessage(username + ": requested game type " + command.substring(2));
+			if(GameType.parseString(command.substring(2)) != null) {
+				lobby.setGameType(GameType.parseString(command.substring(2)));
+			}
 			
 		} else if(command.startsWith("l")) {
 			processGameLaunch();
@@ -226,5 +230,33 @@ public class UserProxy implements Runnable {
 		} else {
 			lobby.launchGame();
 		}
+	}
+
+	@Override
+	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
+	public void userStateChanged(LobbyUserEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#robotStateChanged(LobbyRobotEvent) */
+	public void robotStateChanged(LobbyRobotEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#lobbyGameStateChanged(LobbyGameEvent) */
+	public void lobbyGameStateChanged(LobbyGameEvent event) {
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
+	public void lobbyChatMessage(LobbyChatEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }

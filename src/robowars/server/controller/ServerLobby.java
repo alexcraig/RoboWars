@@ -1,7 +1,7 @@
 package robowars.server.controller;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +37,11 @@ public class ServerLobby {
 	/** A list of all currently connected robot proxies */
 	private List<RobotProxy> robots;
 	
+	/** 
+	 * A list of listeners who should receive events when the lobby status changes
+	 */
+	private List<ServerLobbyListener> listeners;
+	
 	/** The currently selected game type (used when a new game is launched) */
 	private GameType selectedGameType;
 	
@@ -59,6 +64,25 @@ public class ServerLobby {
 		selectedGameType = GameType.getDefault();
 		users = new ArrayList<UserProxy>();
 		robots = new ArrayList<RobotProxy>();
+		listeners = new ArrayList<ServerLobbyListener>();
+	}
+	
+	/**
+	 * Registers a ServerLobbyListener to listen on events from the server lobby.
+	 * @param listener	The listener to add
+	 */
+	public synchronized void addLobbyStateListener(ServerLobbyListener listener) {
+		if(!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
+	
+	/**
+	 * Removes a ServerLobbyListener from the listener list.
+	 * @param listener	The listener to remove
+	 */
+	public synchronized void removeLobbyStateListener(ServerLobbyListener listener) {
+		listeners.remove(listener);
 	}
 	
 	/**
@@ -72,8 +96,13 @@ public class ServerLobby {
 			users.add(user);
 			addSuccess = true;
 			log.debug(user.getUsername() + " added to lobby.");
+			listeners.add(user);
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
+			}
+		} else {
+			log.debug(user.getUsername() + " attempted to join full server.");
 		}
-		if (addSuccess) broadcastMessage(user.getUsername() + " has joined the server.");
 		return addSuccess;
 	}
 	
@@ -82,8 +111,13 @@ public class ServerLobby {
 	 * @param user	The user to remove
 	 */
 	public synchronized void removeUser(UserProxy user) {
-		users.remove(user);
-		broadcastMessage(user.getUsername() + " has left the server.");
+		if(users.remove(user)) {
+			log.debug(user.getUsername() + " removed from lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
+			}
+			listeners.remove(user);
+		}
 	}
 	
 	/**
@@ -96,6 +130,10 @@ public class ServerLobby {
 		if(robots.size() < maxRobots) {
 			robots.add(robot);
 			addSuccess = true;
+			log.debug(robot.getIdentifier() + " added to lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
+			}
 		}
 		return addSuccess;
 	}
@@ -106,17 +144,38 @@ public class ServerLobby {
 	 * @param robot	The proxy of the robot to remove
 	 */
 	public synchronized void unregisterRobot(RobotProxy robot) {
-		robots.remove(robot);
+		if(robots.remove(robot)) {
+			log.debug(robot.getIdentifier() + " removed from lobby.");
+			for(ServerLobbyListener listener : listeners) {
+				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
+			}
+		}
 	}
 	
 	/**
-	 * Broadcasts a message to all connected users.
-	 * @param message	The message to broadcast
+	 * Generates and broadcasts a chat event to all registered event listeners
+	 * @param user	The chat message to be sent
 	 */
 	public synchronized void broadcastMessage(String message) {
-		log.info("Broadcasting: " + message);
-		for(UserProxy user : users) {
-			user.sendMessage(message);
+		log.debug(message);
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyChatMessage(new LobbyChatEvent(this, message));
+		}
+	}
+	
+	/**
+	 * Generates and broadcasts a player state update event to all registered
+	 * listeners for the specified user. This should be called when the spectator
+	 * or ready state of a user changes.
+	 * @param user	The user to broadcast state for
+	 */
+	public synchronized void broadcastUserStateUpdate(UserProxy user) {
+		if(users.contains(user)) {
+			log.debug(user.getUsername() + " state: < Ready = " + user.isReady()
+					+ ", Spectator = " + user.isPureSpectator() + ">");
+			for(ServerLobbyListener listener : listeners) {
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, user));
+			}
 		}
 	}
 	
@@ -127,8 +186,15 @@ public class ServerLobby {
 	 */
 	public synchronized void setGameType(GameType newType) {
 		this.selectedGameType = newType;
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAMETYPE_CHANGE, selectedGameType));
+		}
+		
 		for(UserProxy user : users) {
-			user.setReady(false);
+			if(user.isReady()) {
+				user.setReady(false);
+				broadcastUserStateUpdate(user);
+			}
 		}
 	}
 	
@@ -148,6 +214,13 @@ public class ServerLobby {
 	}
 	
 	/**
+	 * @return	The currently selected game type
+	 */
+	public GameType getCurrentGameType() {
+		return selectedGameType;
+	}
+	
+	/**
 	 * @return	The name of the server
 	 */
 	public String getServerName() {
@@ -159,77 +232,94 @@ public class ServerLobby {
 	 * and an equal number of connected robots are available.
 	 */
 	public synchronized void launchGame() {
+		// Only one game can be running at a time
 		if (gameInProgress()) {
-			log.info("Game launch requested, but game is in progress.");
-			return; // Only one game can be running at a time
+			log.debug("Game launch requested, but game is in progress.");
+			broadcastMessage("<Server> Game launch requested, but game is in progress.");
+			return;
 		}
 		
-		// Ensure all players are ready before launching a game
-		// TODO: Should only consider users who will actually be paired
-		for(UserProxy user : users) {
-			if(!user.isReady() && !user.isPureSpectator()) {
-				broadcastMessage("Game launch requested, but one or more players are not ready.");
-				return;
-			}
-		}
-		
-		// Check how many players are available who are not flagged as spectators
-		int availablePlayers = 0;
-		for (UserProxy user : users) {
-			if (!user.isPureSpectator()) {
-				availablePlayers++;
-			}
-		}
-		log.debug(availablePlayers + " player available for pairing.");
+		// Ensure enough robots are available for the selected game type
 		int availableRobots = robots.size();
-		log.debug(availableRobots + " robot available for pairing.");
-		
-		// If enough players and robots are available, launch a game
-		if(availablePlayers >= selectedGameType.getMinimumPlayers() &&
-				availableRobots >= selectedGameType.getMinimumPlayers()) {
-			log.info("Launching game of type: " + selectedGameType.toString());
-			currentGame = new GameController(this, selectedGameType);
-			
-			// Generate a control pairs while pairs of unused players and robots remain
-			int playerPairs = 
-				availablePlayers >= availableRobots ? availableRobots : availablePlayers;
-				
-			log.debug("Generating " + playerPairs + " control pairs.");
-			for(int i = 0; i < playerPairs; i++) {
-				UserProxy player = users.remove(0);
-				if(!player.isPureSpectator()) {
-					RobotProxy robot = robots.remove(0); 
-					currentGame.addPlayer(player, robot);
-					robots.add(robot);
-					log.debug("Pairing: " + player.getUsername() + " <-> " + robot.getIdentifier());
-				} else {
-					i--;
-				}
-				users.add(player);
-			}
-			
-			// Add all remaining players as spectators
-			for(UserProxy user : users) {
-				if(!currentGame.isPlayer(user)) {
-					currentGame.addSpectator(user);
-					log.debug("Adding spectator: " + user.getUsername());
-				}
-			}
-			
-			// Start the game
-			new Thread(currentGame).start();
-		} else {
-			log.info("Insufficient players available for game launch (minimum = " 
-					+ selectedGameType.getMinimumPlayers() + ")");
+		log.debug(availableRobots + " robot(s) available for pairing.");
+		if(availableRobots < selectedGameType.getMinimumPlayers()) {
+			log.debug("Insufficient robots to launch selected game type.");
+			broadcastMessage("<Server> Insufficient robots to launch selected game type.");
+			return;
 		}
-
+		
+		// Select the players who will be paired to robots, and ensure they are all ready
+		List<UserProxy> players = new ArrayList<UserProxy>();
+		for(UserProxy user : users) {
+			if(!user.isPureSpectator()) {
+				if(players.size() < availableRobots && !user.isReady()) {
+					// If not enough players have been selected to control all available
+					// robots and player selected for pairing is not ready, cancel the game launch
+					log.debug("Game launch requested, but one or more players are not ready.");
+					broadcastMessage("<Server> Game launch requested, but one or more players are not ready.");
+					return;
+				} else if (players.size() < availableRobots && user.isReady()) {
+					// If the game still requires more players and the player is ready,
+					// add them to the list of players
+					players.add(user);
+					
+					if(players.size() == availableRobots) {
+						break; // All players have been found
+					}
+				}
+			}
+		}
+		
+		// Cancel the launch if insufficient players for the game to launch were found
+		if(players.size() < selectedGameType.getMinimumPlayers()) {
+			log.debug("Insufficient players available for game launch (minimum = " 
+					+ selectedGameType.getMinimumPlayers() + ")");
+			broadcastMessage("<Server> Insufficient players available for game launch (minimum = " 
+					+ selectedGameType.getMinimumPlayers() + ")");
+			return;
+		}
+		
+		log.debug(players.size() + " player(s) available for pairing.");
+		
+		// Generate the game controller and register control pairs
+		log.debug("Launching game of type: " + selectedGameType.toString());
+		
+		currentGame = new GameController(this, selectedGameType);
+		
+		for(UserProxy player : players) {
+			users.remove(player);
+			RobotProxy pairedRobot = robots.remove(0);
+			log.debug("Pairing: " + player.getUsername() + " <-> " + pairedRobot.getIdentifier());
+			currentGame.addPlayer(player, pairedRobot);
+			users.add(player);
+			robots.add(pairedRobot);
+		}
+		
+		// Notify all listeners that a game is starting
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_LAUNCH, selectedGameType));
+		}
+		
+		// Start the game
+		new Thread(currentGame).start();
 	}
 	
 	/**
 	 * Removes all references to the currently running game. This should be
 	 * called by the game controller just before game termination.
 	 */
-	public void clearCurrentGame() {
+	public synchronized void clearCurrentGame() {
 		currentGame = null;
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
+		}
+	}
+	
+	/**
+	 * Sends a shutdown message to all connected users and cleanly closes
+	 * connections with all users and robots connected to the server
+	 */
+	public void serverShutdown() {
+		// TODO: Implement
 	}
 }
