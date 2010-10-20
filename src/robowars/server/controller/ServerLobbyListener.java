@@ -23,5 +23,10 @@ public interface ServerLobbyListener extends EventListener {
 	 * Called whenever the server lobby launches or terminates a game.
 	 */
 	public void lobbyGameStateChanged(LobbyGameEvent event);
+	
+	/**
+	 * Called whenever a chat message is broadcasted through the server lobby.
+	 */
+	public void lobbyChatMessage(LobbyChatEvent event);
 
 }

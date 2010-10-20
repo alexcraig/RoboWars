@@ -151,17 +151,13 @@ public class ServerLobby {
 	}
 	
 	/**
-	 * Generates and broadcasts a chat event containing the last chat message received
-	 * from the specified user proxy to all registered event listeners (if the user
-	 * is registered to the server lobby)
-	 * @param user	The user proxy to read for the chat message
+	 * Generates and broadcasts a chat event to all registered event listeners
+	 * @param user	The chat message to be sent
 	 */
-	public synchronized void broadcastMessage(UserProxy user) {
-		if(users.contains(user)) {
-			log.debug(user.getUsername() + ": " + user.getLastChatMessage());
-			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_CHAT_MESSAGE, user));
-			}
+	public synchronized void broadcastMessage(String message) {
+		log.debug(message);
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyChatMessage(new LobbyChatEvent(this, message));
 		}
 	}
 	

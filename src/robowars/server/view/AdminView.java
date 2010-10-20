@@ -150,10 +150,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_LEFT) {
 			userListModel.removeElement(event.getUser().getUsername());
 			addLineToMainChat(event.getUser().getUsername() + " has left the server.");
-		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_CHAT_MESSAGE) {
-			addLineToMainChat(event.getUser().getUsername() + ": " + event.getUser().getLastChatMessage());
 		}
-		
 	}
 
 	@Override
@@ -200,5 +197,12 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	private void setGameTypeLabel(GameType gameType) {
 		curGameType.setText("Selected Game Type: " + gameType.toString());
 		this.pack();
+	}
+
+
+	@Override
+	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
+	public void lobbyChatMessage(LobbyChatEvent event) {
+		 addLineToMainChat(event.getMessage());
 	}
 }

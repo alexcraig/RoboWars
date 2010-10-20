@@ -41,9 +41,6 @@ public class UserStateEvent extends ServerLobbyEvent {
 		case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
 			return "[" + ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE + "|" + user.getUsername()
 				+ "|" + user.isPureSpectator() + "|" + user.isReady() + "]";
-		case ServerLobbyEvent.EVENT_PLAYER_CHAT_MESSAGE:
-			return "[" + ServerLobbyEvent.EVENT_PLAYER_CHAT_MESSAGE + "|" + user.getUsername()
-				+ "|" + user.getLastChatMessage() + "]";
 		default:
 			return "[ERROR]"; // TODO: Throw exception here
 		}

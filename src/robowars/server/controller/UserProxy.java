@@ -39,9 +39,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** Flag indicating if a video stream should be sent to this user */
 	private boolean videoEnabled;
 	
-	/** The last chat message sent by the player */
-	private String lastChatMessage;
-	
 	/** 
 	 * Flag indicating whether a user is a pure spectator. If true, the user should
 	 * not be considered for control pairing with robots.
@@ -72,7 +69,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		isReady = false;
 		videoEnabled = false;
 		isPureSpectator = false;
-		lastChatMessage = "";
 	}
 	
 	public void run(){
@@ -172,13 +168,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	/**
-	 * @return	The latest chat message received from the player
-	 */
-	public String getLastChatMessage() {
-		return lastChatMessage;
-	}
-	
-	/**
 	 * Dispatches user input to the relevant processing functions based on the input received.
 	 * 
 	 * Commands:
@@ -193,8 +182,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 */
 	private void handleInput(String command){	
 		if(command.startsWith("m:")) {
-			lastChatMessage = command.substring(2);
-			lobby.broadcastMessage(this);
+			lobby.broadcastMessage(getUsername() + ": " + command.substring(2));
 			
 		} else if(command.startsWith("r:")) {
 			
@@ -258,5 +246,12 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	public void lobbyGameStateChanged(LobbyGameEvent event) {
 		log.debug(event.serialize());
 		sendMessage(event.serialize());
+	}
+
+	@Override
+	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
+	public void lobbyChatMessage(LobbyChatEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }

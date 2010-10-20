@@ -13,7 +13,7 @@ public abstract class ServerLobbyEvent extends EventObject {
 	/** Constants defining event type */
 	public static final int EVENT_PLAYER_JOINED = 0;
 	public static final int EVENT_PLAYER_LEFT = 1;
-	public static final int EVENT_PLAYER_CHAT_MESSAGE = 2;
+	public static final int EVENT_CHAT_MESSAGE = 2;
 	public static final int EVENT_ROBOT_REGISTERED = 3;
 	public static final int EVENT_ROBOT_UNREGISTERED = 4;
 	public static final int EVENT_PLAYER_STATE_CHANGE = 5;
