@@ -2,9 +2,8 @@ package robowars.server.controller;
 
 /**
  * Event class indicating that the state of a user connected to a server
- * lobby has changed (either the player has joined/left the server, their
- * spectator / ready status has been modified, or their latest chat message
- * has changed).
+ * lobby has changed (either the player has joined/left the server or their
+ * spectator / ready status has been modified.
  */
 public class LobbyUserEvent extends ServerLobbyEvent {
 	

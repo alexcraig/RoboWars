@@ -100,6 +100,8 @@ public class ServerLobby {
 			for(ServerLobbyListener listener : listeners) {
 				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
 			}
+		} else {
+			log.debug(user.getUsername() + " attempted to join full server.");
 		}
 		return addSuccess;
 	}
@@ -230,75 +232,76 @@ public class ServerLobby {
 	 * and an equal number of connected robots are available.
 	 */
 	public synchronized void launchGame() {
+		// Only one game can be running at a time
 		if (gameInProgress()) {
-			log.info("Game launch requested, but game is in progress.");
-			return; // Only one game can be running at a time
+			log.debug("Game launch requested, but game is in progress.");
+			broadcastMessage("<Server> Game launch requested, but game is in progress.");
+			return;
 		}
 		
-		// Ensure all players are ready before launching a game
-		// TODO: Should only consider users who will actually be paired
-		for(UserProxy user : users) {
-			if(!user.isReady() && !user.isPureSpectator()) {
-				log.info("Game launch requested, but one or more players are not ready.");
-				return;
-			}
-		}
-		
-		// Check how many players are available who are not flagged as spectators
-		int availablePlayers = 0;
-		for (UserProxy user : users) {
-			if (!user.isPureSpectator()) {
-				availablePlayers++;
-			}
-		}
-		log.debug(availablePlayers + " player available for pairing.");
+		// Ensure enough robots are available for the selected game type
 		int availableRobots = robots.size();
-		log.debug(availableRobots + " robot available for pairing.");
-		
-		// If enough players and robots are available, launch a game
-		if(availablePlayers >= selectedGameType.getMinimumPlayers() &&
-				availableRobots >= selectedGameType.getMinimumPlayers()) {
-			log.info("Launching game of type: " + selectedGameType.toString());
-			currentGame = new GameController(this, selectedGameType);
-			
-			// Generate a control pairs while pairs of unused players and robots remain
-			int playerPairs = 
-				availablePlayers >= availableRobots ? availableRobots : availablePlayers;
-				
-			log.debug("Generating " + playerPairs + " control pairs.");
-			for(int i = 0; i < playerPairs; i++) {
-				UserProxy player = users.remove(0);
-				if(!player.isPureSpectator()) {
-					RobotProxy robot = robots.remove(0); 
-					currentGame.addPlayer(player, robot);
-					robots.add(robot);
-					log.debug("Pairing: " + player.getUsername() + " <-> " + robot.getIdentifier());
-				} else {
-					i--;
-				}
-				users.add(player);
-			}
-			
-			// Add all remaining players as spectators
-			for(UserProxy user : users) {
-				if(!currentGame.isPlayer(user)) {
-					currentGame.addSpectator(user);
-					log.debug("Adding spectator: " + user.getUsername());
-				}
-			}
-			
-			// Notify all listeners that a game is starting
-			for(ServerLobbyListener listener : listeners) {
-				listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_LAUNCH, selectedGameType));
-			}
-			
-			// Start the game
-			new Thread(currentGame).start();
-		} else {
-			log.info("Insufficient players available for game launch (minimum = " 
-					+ selectedGameType.getMinimumPlayers() + ")");
+		log.debug(availableRobots + " robot(s) available for pairing.");
+		if(availableRobots < selectedGameType.getMinimumPlayers()) {
+			log.debug("Insufficient robots to launch selected game type.");
+			broadcastMessage("<Server> Insufficient robots to launch selected game type.");
+			return;
 		}
-
+		
+		// Select the players who will be paired to robots, and ensure they are all ready
+		List<UserProxy> players = new ArrayList<UserProxy>();
+		for(UserProxy user : users) {
+			if(!user.isPureSpectator()) {
+				if(players.size() < availableRobots && !user.isReady()) {
+					// If not enough players have been selected to control all available
+					// robots and player selected for pairing is not ready, cancel the game launch
+					log.debug("Game launch requested, but one or more players are not ready.");
+					broadcastMessage("<Server> Game launch requested, but one or more players are not ready.");
+					return;
+				} else if (players.size() < availableRobots && user.isReady()) {
+					// If the game still requires more players and the player is ready,
+					// add them to the list of players
+					players.add(user);
+					
+					if(players.size() == availableRobots) {
+						break; // All players have been found
+					}
+				}
+			}
+		}
+		
+		// Cancel the launch if insufficient players for the game to launch were found
+		if(players.size() < selectedGameType.getMinimumPlayers()) {
+			log.debug("Insufficient players available for game launch (minimum = " 
+					+ selectedGameType.getMinimumPlayers() + ")");
+			broadcastMessage("<Server> Insufficient players available for game launch (minimum = " 
+					+ selectedGameType.getMinimumPlayers() + ")");
+			return;
+		}
+		
+		log.debug(players.size() + " player(s) available for pairing.");
+		
+		// Generate the game controller and register control pairs
+		log.debug("Launching game of type: " + selectedGameType.toString());
+		
+		currentGame = new GameController(this, selectedGameType);
+		
+		for(UserProxy player : players) {
+			users.remove(player);
+			RobotProxy pairedRobot = robots.remove(0);
+			log.debug("Pairing: " + player.getUsername() + " <-> " + pairedRobot.getIdentifier());
+			currentGame.addPlayer(player, pairedRobot);
+			users.add(player);
+			robots.add(pairedRobot);
+		}
+		
+		// Notify all listeners that a game is starting
+		for(ServerLobbyListener listener : listeners) {
+			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_LAUNCH, selectedGameType));
+		}
+		
+		// Start the game
+		new Thread(currentGame).start();
 	}
 	
 	/**

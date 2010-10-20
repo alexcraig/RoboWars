@@ -96,21 +96,26 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			synchronized(outputStream) {
 				outputStream.println(username + " connected to: " + lobby.getServerName());
 			}
-			lobby.addUser(this);
 			
-			// Read strings from socket until connection is terminated
-			String incomingMessage;
-			while ((incomingMessage = inputStream.readLine()) != null) {
-				log.debug("Received: " + incomingMessage);
-				handleInput(incomingMessage);
+			if (lobby.addUser(this)) {
+				// Read strings from socket until connection is terminated
+				String incomingMessage;
+				while ((incomingMessage = inputStream.readLine()) != null) {
+					log.debug("Received: " + incomingMessage);
+					handleInput(incomingMessage);
+				}
+				log.info(username + " terminated connection with server.");
+			} else {
+				outputStream.println("[Error - Server Full]");
 			}
-			log.info(username + " terminated connection with server.");
 			
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
 			lobby.removeUser(this);
 			try {
+				outputStream.close();
+				inputStream.close();
 				userSocket.close();
 			} catch (IOException e) {
 				log.error("Could not close client socket.");

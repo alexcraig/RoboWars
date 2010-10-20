@@ -150,6 +150,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_LEFT) {
 			userListModel.removeElement(event.getUser().getUsername());
 			addLineToMainChat(event.getUser().getUsername() + " has left the server.");
+		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE) {
+			addLineToMainChat("< " + event.getUser().getUsername() + " Ready = " +
+					event.getUser().isReady() +", Spectator = " + event.getUser().isPureSpectator() + " >");
 		}
 	}
 
