@@ -256,7 +256,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	@Override
 	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
 	public void lobbyChatMessage(LobbyChatEvent event) {
-		// TODO Auto-generated method stub
-		
+		log.debug(event.serialize());
+		sendMessage(event.serialize());
 	}
 }

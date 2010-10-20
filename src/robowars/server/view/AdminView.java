@@ -198,7 +198,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	 * @param gameType	The game type to display
 	 */
 	private void setGameTypeLabel(GameType gameType) {
-		curGameType.setText("Selected Game Type: " + gameType.toString());
+		curGameType.setText("Selected Game Type: " + gameType.toString() + " (Minimum players = "
+				+ gameType.getMinimumPlayers() + ")");
 		this.pack();
 	}
 

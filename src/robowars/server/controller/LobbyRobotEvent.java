@@ -37,7 +37,7 @@ public class LobbyRobotEvent extends ServerLobbyEvent {
 		case ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED:
 			return "[" + ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED + "|" + robot.getIdentifier() + "]";
 		default:
-			return "[ERROR]"; // TODO: Throw exception here
+			return "[ERROR]";
 		}
 	}
 }

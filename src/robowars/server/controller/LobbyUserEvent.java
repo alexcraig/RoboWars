@@ -41,7 +41,7 @@ public class LobbyUserEvent extends ServerLobbyEvent {
 			return "[" + ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE + "|" + user.getUsername()
 				+ "|" + user.isPureSpectator() + "|" + user.isReady() + "]";
 		default:
-			return "[ERROR]"; // TODO: Throw exception here
+			return "[ERROR]";
 		}
 	}
 }

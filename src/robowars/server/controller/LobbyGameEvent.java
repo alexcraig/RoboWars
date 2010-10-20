@@ -39,7 +39,7 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 		case ServerLobbyEvent.EVENT_GAMETYPE_CHANGE:
 			return "[" + getEventType() + "|" + gameType.toString() + "]";
 		default:
-			return "[ERROR]"; // TODO: Throw exception here
+			return "[ERROR]";
 		}
 	}
 }
