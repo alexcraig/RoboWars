@@ -4,18 +4,18 @@ package robowars.server.controller;
  * Event class indicating that a robot proxy has either joined or left a
  * server lobby.
  */
-public class RobotStateEvent extends ServerLobbyEvent {
+public class LobbyRobotEvent extends ServerLobbyEvent {
 	
 	/** The proxy representing the robot who's state has changed */
 	private RobotProxy robot;
 	
 	/**
-	 * Generates a new RobotStateEvent
+	 * Generates a new LobbyRobotEvent
 	 * @param src	The ServerLobby that generated the event
 	 * @param type	The type of the event (constants defined in ServerLobbyEvent)
 	 * @param user	The robot the event refers to
 	 */
-	public RobotStateEvent(ServerLobby src, int type, RobotProxy robot) {
+	public LobbyRobotEvent(ServerLobby src, int type, RobotProxy robot) {
 		super(src, type);
 		this.robot = robot;
 	}

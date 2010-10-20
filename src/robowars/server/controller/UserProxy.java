@@ -228,15 +228,15 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 
 	@Override
-	/** @see ServerLobbyListener#userStateChanged(UserStateEvent) */
-	public void userStateChanged(UserStateEvent event) {
+	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
+	public void userStateChanged(LobbyUserEvent event) {
 		log.debug(event.serialize());
 		sendMessage(event.serialize());
 	}
 
 	@Override
-	/** @see ServerLobbyListener#robotStateChanged(RobotStateEvent) */
-	public void robotStateChanged(RobotStateEvent event) {
+	/** @see ServerLobbyListener#robotStateChanged(LobbyRobotEvent) */
+	public void robotStateChanged(LobbyRobotEvent event) {
 		log.debug(event.serialize());
 		sendMessage(event.serialize());
 	}

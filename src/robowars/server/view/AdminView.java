@@ -142,8 +142,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	}
 
 	@Override
-	/** @see ServerLobbyListener#userStateChanged(UserStateEvent) */
-	public void userStateChanged(UserStateEvent event) {
+	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
+	public void userStateChanged(LobbyUserEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_JOINED) {
 			userListModel.addElement(event.getUser().getUsername());
 			addLineToMainChat(event.getUser().getUsername() + " has joined the server.");
@@ -154,8 +154,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	}
 
 	@Override
-	/** @see ServerLobbyListener#robotStateChanged(RobotStateEvent) */
-	public void robotStateChanged(RobotStateEvent event) {
+	/** @see ServerLobbyListener#robotStateChanged(LobbyRobotEvent) */
+	public void robotStateChanged(LobbyRobotEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_ROBOT_REGISTERED) {
 			robotListModel.addElement(event.getRobot().getIdentifier());
 			addLineToMainChat("Robot " + event.getRobot().getIdentifier() + " has registered with the server.");

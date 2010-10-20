@@ -98,7 +98,7 @@ public class ServerLobby {
 			log.debug(user.getUsername() + " added to lobby.");
 			listeners.add(user);
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
 			}
 		}
 		return addSuccess;
@@ -112,7 +112,7 @@ public class ServerLobby {
 		if(users.remove(user)) {
 			log.debug(user.getUsername() + " removed from lobby.");
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
 			}
 			listeners.remove(user);
 		}
@@ -130,7 +130,7 @@ public class ServerLobby {
 			addSuccess = true;
 			log.debug(robot.getIdentifier() + " added to lobby.");
 			for(ServerLobbyListener listener : listeners) {
-				listener.robotStateChanged(new RobotStateEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
+				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
 			}
 		}
 		return addSuccess;
@@ -145,7 +145,7 @@ public class ServerLobby {
 		if(robots.remove(robot)) {
 			log.debug(robot.getIdentifier() + " removed from lobby.");
 			for(ServerLobbyListener listener : listeners) {
-				listener.robotStateChanged(new RobotStateEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
+				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
 		}
 	}
@@ -172,7 +172,7 @@ public class ServerLobby {
 			log.debug(user.getUsername() + " state: < Ready = " + user.isReady()
 					+ ", Spectator = " + user.isPureSpectator() + ">");
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new UserStateEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, user));
 			}
 		}
 	}

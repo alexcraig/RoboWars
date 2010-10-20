@@ -12,12 +12,12 @@ public interface ServerLobbyListener extends EventListener {
 	 * Called whenever a user joins or leaves the server, and whenever a player's
 	 * ready status or spectator status changes.
 	 */
-	public void userStateChanged(UserStateEvent event);
+	public void userStateChanged(LobbyUserEvent event);
 	
 	/**
 	 * Called whenever a robot registers or unregisters from the server lobby.
 	 */
-	public void robotStateChanged(RobotStateEvent event);
+	public void robotStateChanged(LobbyRobotEvent event);
 	
 	/**
 	 * Called whenever the server lobby launches or terminates a game.
