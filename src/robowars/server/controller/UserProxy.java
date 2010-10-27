@@ -90,7 +90,8 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			}
 			
 			// Handshake and UDP connection should happen here
-			username = inputStream.readLine();
+			String name = inputStream.readLine();
+			setUsername(name);
 			log.debug("Client username: " + username);
 			
 			synchronized(outputStream) {
@@ -170,6 +171,14 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 */
 	public boolean isPureSpectator() {
 		return isPureSpectator;
+	}
+	
+	/**
+	 * Sets the registered username of the connected user
+	 * @param username	The new username
+	 */
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	
 	/**

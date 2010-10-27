@@ -72,6 +72,7 @@ public class ServerLobby {
 	 * @param listener	The listener to add
 	 */
 	public synchronized void addLobbyStateListener(ServerLobbyListener listener) {
+		if(listener == null) return;
 		if(!listeners.contains(listener)) {
 			listeners.add(listener);
 		}
@@ -82,6 +83,7 @@ public class ServerLobby {
 	 * @param listener	The listener to remove
 	 */
 	public synchronized void removeLobbyStateListener(ServerLobbyListener listener) {
+		if(listener == null) return;
 		listeners.remove(listener);
 	}
 	
@@ -92,7 +94,7 @@ public class ServerLobby {
 	 */
 	public synchronized boolean addUser(UserProxy user) {
 		boolean addSuccess = false;
-		if(users.size() < maxUsers) {
+		if(users.size() < maxUsers && user != null) {
 			users.add(user);
 			addSuccess = true;
 			log.debug(user.getUsername() + " added to lobby.");
@@ -101,7 +103,9 @@ public class ServerLobby {
 				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
 			}
 		} else {
-			log.debug(user.getUsername() + " attempted to join full server.");
+			if(user != null) {
+				log.debug(user.getUsername() + " attempted to join full server.");
+			}
 		}
 		return addSuccess;
 	}
@@ -157,6 +161,11 @@ public class ServerLobby {
 	 * @param user	The chat message to be sent
 	 */
 	public synchronized void broadcastMessage(String message) {
+		if(message == null) {
+			log.error("Attempted to broadcast null message.");
+			return;
+		}
+		
 		log.debug(message);
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyChatMessage(new LobbyChatEvent(this, message));
