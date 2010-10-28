@@ -121,6 +121,8 @@ public class ServerLobby {
 				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
 			}
 			listeners.remove(user);
+			
+			// TODO: If user is currently playing, terminate the game
 		}
 	}
 	
@@ -153,6 +155,8 @@ public class ServerLobby {
 			for(ServerLobbyListener listener : listeners) {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
+			
+			// TODO: Stop game in progress
 		}
 	}
 	
@@ -194,6 +198,8 @@ public class ServerLobby {
 	 * @param newType	The game type of the next game to launch
 	 */
 	public synchronized void setGameType(GameType newType) {
+		if(newType == null) return;
+		
 		this.selectedGameType = newType;
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAMETYPE_CHANGE, selectedGameType));
@@ -314,11 +320,13 @@ public class ServerLobby {
 	}
 	
 	/**
-	 * Removes all references to the currently running game. This should be
-	 * called by the game controller just before game termination.
+	 * Ends the current game (removing all references to users and robots from
+	 * the game controller), and removes all references to the game controller. This
+	 * should be called when a game's end condition is met or when an active player
+	 * leaves the server.
 	 */
-	public synchronized void clearCurrentGame() {
-		currentGame = null;
+	public synchronized void endCurrentGame() {
+		currentGame = null; // TODO: More complete termination
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
 		}

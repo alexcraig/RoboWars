@@ -52,20 +52,26 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testServerLobby() {
-		assertEquals(testLobby.getServerName(), "Test Server");
-		assertEquals(testLobby.getCurrentGameType(), GameType.getDefault());
-		assertEquals(testLobby.getCurrentGame(), null);
+		// Ensure construction conditions hold true
+		assertEquals("Test Server", testLobby.getServerName());
+		assertEquals(GameType.getDefault(), testLobby.getCurrentGameType());
+		assertEquals(null, testLobby.getCurrentGame());
 	}
 
 	@Test
 	public void testAddLobbyStateListener() {
 		TestLobbyListener testAdd = new TestLobbyListener();
+		
+		// Test double and null addition
 		testLobby.addLobbyStateListener(testAdd);
 		testLobby.addLobbyStateListener(testAdd);
 		testLobby.addLobbyStateListener(null);
+		
 		testLobby.broadcastMessage("Test Chat");
-		assertEquals(testAdd.getLastChatEvent().getMessage(), "Test Chat");
-		assertEquals(testAdd.getNumEvents(), 1);
+		
+		// Check that chat message event was received properly
+		assertEquals("Test Chat", testAdd.getLastChatEvent().getMessage());
+		assertEquals(1, testAdd.getNumEvents());
 		testLobby.removeLobbyStateListener(testAdd);
 	}
 
@@ -73,34 +79,43 @@ public class ServerLobbyTest {
 	public void testRemoveLobbyStateListener() {
 		TestLobbyListener testRemove = new TestLobbyListener();
 		testLobby.addLobbyStateListener(testRemove);
+		
+		// Test valid removal
 		testLobby.removeLobbyStateListener(testRemove);
+		
+		// Test null and invalid removal
 		testLobby.removeLobbyStateListener(null);
+		testLobby.removeLobbyStateListener(testRemove);
+		
+		// Make sure listener was removed (no events received)
 		testLobby.broadcastMessage("Test Chat");
-		assertEquals(testRemove.getLastChatEvent(), null);
-		assertEquals(testRemove.getNumEvents(), 0);
+		assertEquals(null, testRemove.getLastChatEvent());
+		assertEquals(0, testRemove.getNumEvents());
 	}
 
 	@Test
 	public void testAddUser() {
 		ArrayList<TestUserProxy> testUsers = new ArrayList<TestUserProxy>();
 		for(int i = 0; i < TEST_MAX_PLAYERS + 1; i++) {
-			TestUserProxy testUser = new TestUserProxy(testLobby);
-			testUser.setUsername("TestUser" + Integer.toString(i));
+			TestUserProxy testUser = new TestUserProxy(testLobby,
+					"TestUser" + Integer.toString(i));
 			testUsers.add(testUser);
 		}
 		
+		// Test valid additions
 		for(int i = 0; i < TEST_MAX_PLAYERS; i++) {
 			testLobby.addUser(testUsers.get(i));
-			assertEquals(testListener.getLastUserEvent().getUser(), 
-					testUsers.get(i));
-			assertEquals(testListener.getLastUserEvent().getEventType(),
-					ServerLobbyEvent.EVENT_PLAYER_JOINED);
+			assertEquals(testUsers.get(i), 
+					testListener.getLastUserEvent().getUser());
+			assertEquals(ServerLobbyEvent.EVENT_PLAYER_JOINED,
+					testListener.getLastUserEvent().getEventType());
 		}
 		
+		// Test addition over maximum and null addition
 		testListener.clearNumEvents();
-		assertEquals(testLobby.addUser(testUsers.get(TEST_MAX_PLAYERS)), false);
-		assertEquals(testLobby.addUser(null), false);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(false, testLobby.addUser(testUsers.get(TEST_MAX_PLAYERS)));
+		assertEquals(false, testLobby.addUser(null));
+		assertEquals(0, testListener.getNumEvents());
 		
 		while(!testUsers.isEmpty()) {
 			TestUserProxy testUser = testUsers.remove(0);
@@ -111,20 +126,25 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testRemoveUser() {
-		TestUserProxy testUser = new TestUserProxy(testLobby);
-		TestUserProxy testUser2 = new TestUserProxy(testLobby);
+		TestUserProxy testUser = new TestUserProxy(testLobby, "User1");
+		TestUserProxy testUser2 = new TestUserProxy(testLobby, "User2");
 		testLobby.addUser(testUser);
 		
 		testListener.clearNumEvents();
 		
+		// Test null removal
 		testLobby.removeUser(null);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test removal of unregistered user
 		testLobby.removeUser(testUser2);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test valid removal
 		testLobby.removeUser(testUser);
-		assertEquals(testListener.getLastUserEvent().getUser(), testUser);
-		assertEquals(testListener.getLastUserEvent().getEventType(),
-				ServerLobbyEvent.EVENT_PLAYER_LEFT);
+		assertEquals(testUser, testListener.getLastUserEvent().getUser());
+		assertEquals(ServerLobbyEvent.EVENT_PLAYER_LEFT, 
+				testListener.getLastUserEvent().getEventType());
 	}
 
 	@Test
@@ -135,18 +155,20 @@ public class ServerLobbyTest {
 			testRobots.add(testRobot);
 		}
 		
+		// Test valid registration
 		for(int i = 0; i < TEST_MAX_ROBOTS; i++) {
 			testLobby.registerRobot(testRobots.get(i));
-			assertEquals(testListener.getLastRobotEvent().getRobot(), 
-					testRobots.get(i));
-			assertEquals(testListener.getLastRobotEvent().getEventType(),
-					ServerLobbyEvent.EVENT_ROBOT_REGISTERED);
+			assertEquals(testRobots.get(i), 
+					testListener.getLastRobotEvent().getRobot());
+			assertEquals(ServerLobbyEvent.EVENT_ROBOT_REGISTERED,
+					testListener.getLastRobotEvent().getEventType());
 		}
 		
+		// Test registration over maximum and null registration
 		testListener.clearNumEvents();
-		assertEquals(testLobby.registerRobot(testRobots.get(TEST_MAX_ROBOTS)), false);
-		assertEquals(testLobby.registerRobot(null), false);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(false, testLobby.registerRobot(testRobots.get(TEST_MAX_ROBOTS)));
+		assertEquals(false, testLobby.registerRobot(null));
+		assertEquals(0, testListener.getNumEvents());
 		
 		while(!testRobots.isEmpty()) {
 			RobotProxy testRobot = testRobots.remove(0);
@@ -163,39 +185,83 @@ public class ServerLobbyTest {
 		
 		testListener.clearNumEvents();
 		
+		// Test null removal
 		testLobby.removeUser(null);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test removal of unregistered robot
 		testLobby.unregisterRobot(testRobot2);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test valid removal
 		testLobby.unregisterRobot(testRobot);
-		assertEquals(testListener.getLastRobotEvent().getRobot(), testRobot);
-		assertEquals(testListener.getLastRobotEvent().getEventType(),
-				ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED);
+		assertEquals(testRobot, testListener.getLastRobotEvent().getRobot());
+		assertEquals(ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, 
+				testListener.getLastRobotEvent().getEventType());
 	}
 
 	@Test
 	public void testBroadcastMessage() {
+		// Test valid chat message
 		testLobby.broadcastMessage("Test Message");
-		assertEquals(testListener.getNumEvents(), 1);
-		assertEquals(testListener.getLastChatEvent().getMessage(), "Test Message");
+		assertEquals(1, testListener.getNumEvents());
+		assertEquals("Test Message", testListener.getLastChatEvent().getMessage());
 		testListener.clearNumEvents();
+		
+		// Test null broadcast
 		testLobby.broadcastMessage(null);
-		assertEquals(testListener.getNumEvents(), 0);
+		assertEquals(0, testListener.getNumEvents());
 	}
 
 	@Test
 	public void testBroadcastUserStateUpdate() {
-		fail("Not yet implemented");
+		TestUserProxy testUser = new TestUserProxy(testLobby, "Test User");
+		
+		// Test state update of unregistered user (should be no event generated)
+		testLobby.broadcastUserStateUpdate(testUser);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test null user
+		testLobby.broadcastUserStateUpdate(null);
+		assertEquals(0, testListener.getNumEvents());
+		
+		// Test valid state update
+		testLobby.addUser(testUser);
+		testLobby.broadcastUserStateUpdate(testUser);
+		assertEquals(testUser, testListener.getLastUserEvent().getUser());
 	}
 
 	@Test
 	public void testSetGameType() {
-		fail("Not yet implemented");
+		// Test valid game types
+		testLobby.setGameType(GameType.TANK_SIMULATION);
+		assertEquals(GameType.TANK_SIMULATION, testLobby.getCurrentGameType());
+		testLobby.setGameType(GameType.LIGHTCYCLES);
+		assertEquals(GameType.LIGHTCYCLES, testLobby.getCurrentGameType());
+		
+		// Test null game type
+		testLobby.setGameType(null);
+		assertEquals(GameType.LIGHTCYCLES, testLobby.getCurrentGameType());
 	}
 
 	@Test
 	public void testGameInProgress() {
-		fail("Not yet implemented");
+		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
+		user.setReady(true);
+		RobotProxy robot = new RobotProxy("test:mac:addr");
+		
+		testLobby.addUser(user);
+		testLobby.registerRobot(robot);
+		
+		assertEquals(testLobby.gameInProgress(), false);
+		
+		testLobby.launchGame();
+		
+		assertEquals(testLobby.gameInProgress(), true);
+		
+		testLobby.endCurrentGame();
+		
+		assertEquals(testLobby.gameInProgress(), false);
 	}
 
 	@Test
@@ -219,7 +285,7 @@ public class ServerLobbyTest {
 	}
 
 	@Test
-	public void testClearCurrentGame() {
+	public void testEndCurrentGame() {
 	}
 
 	@Test
@@ -298,8 +364,9 @@ public class ServerLobbyTest {
 	 * Testing user proxy with network components disabled.
 	 */
 	private class TestUserProxy extends UserProxy {
-		public TestUserProxy(ServerLobby lobby) {
+		public TestUserProxy(ServerLobby lobby, String username) {
 			super(null, lobby, null);
+			setUsername(username);
 		}
 
 		/**

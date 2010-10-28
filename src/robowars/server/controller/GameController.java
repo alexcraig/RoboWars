@@ -92,7 +92,7 @@ public class GameController implements Runnable, GameListener {
 	 */
 	public void terminateGame() {
 		log.info("Game terminating.");
-		lobby.clearCurrentGame();
+		lobby.endCurrentGame();
 		lobby = null;controlPairs.clear();
 		controlPairs = null;
 		spectators.clear();
