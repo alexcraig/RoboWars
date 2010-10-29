@@ -6,6 +6,7 @@ public class Obstacle extends GameEntity{
 
 	private static final long serialVersionUID = 2354988184568266965L;
 	private int strength;
+	private int lifeTime;
 	private boolean destroyOnContact;
 	private boolean destroyByProjectile;
 
@@ -14,6 +15,7 @@ public class Obstacle extends GameEntity{
 		this.strength=strength;
 		this.destroyByProjectile=destroyByProjectile;
 		this.destroyOnContact=destroyOnContact;
+		lifeTime = 0;
 	}
 	public void shrink(int factor){
 		if(factor>=1)this.setLength(this.getLength() / factor);
@@ -21,6 +23,10 @@ public class Obstacle extends GameEntity{
 	public void grow(int factor){
 		if(factor>=1)this.setLength(this.getLength() * factor);
 	}
+	public void passTime(int time){
+		lifeTime += time;
+	}
+	public int getTime() {return lifeTime;}
 	public boolean isHittable(){return destroyOnContact;}
 	public boolean isShootable(){return destroyByProjectile;}
 	public int getStrength(){return strength;}

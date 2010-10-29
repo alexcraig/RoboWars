@@ -15,5 +15,10 @@ public class GameEvent extends EventObject{
 	
 	public GameEvent(GameModel model, int type){
 		super(model);
+		this.type = type;
+	}
+	
+	public int getEventType() {
+		return type;
 	}
 }

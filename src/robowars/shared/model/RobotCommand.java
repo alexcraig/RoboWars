@@ -19,35 +19,26 @@ public class RobotCommand implements Serializable{
 		this.type = type;
 		this.robot = robot;
 		
-		if (type == CommandType.MOVE_CONTINUOUS){
-			throttle = MAX_SPEED;
-			turnBearing = 0;
-		}
-		
-		if (type == CommandType.TURN_RIGHT_ANGLE_LEFT){
-			throttle = 0;
-			turnBearing = 90;
-		}
-		
-		if (type == CommandType.TURN_RIGHT_ANGLE_RIGHT){
-			throttle = 0;
-			turnBearing = -90;
-		}
-		
-		if (type == CommandType.RETURN_TO_START_POSITION){
-
-		}
-		
-		if (type == CommandType.MOVE_COORDINATE){
+		switch(type){
+			case MOVE_CONTINUOUS:
+				throttle = MAX_SPEED;
+				turnBearing = 0; break;
+				
+			case TURN_RIGHT_ANGLE_LEFT:
+				throttle = 0;
+				turnBearing = 90; break;
+				
+			case TURN_RIGHT_ANGLE_RIGHT:
+				throttle = 0;
+				turnBearing = -90; break;
+				
+			case RETURN_TO_START_POSITION: break;
+				
+			case MOVE_COORDINATE: break;
 			
-		}
-		
-		if (type == CommandType.MOVE_DEGREE_TURN){
+			case MOVE_DEGREE_TURN: break;
 			
-		}
-		
-		if (type == CommandType.FIRE_PROJECTILE){
-			specialFlags = "Fire";
+			case FIRE_PROJECTILE: specialFlags = "Fire"; break;
 		}
 	}
 	

@@ -9,7 +9,7 @@ public abstract class GameModel implements Serializable{
 	protected GameType gameType;
 	protected ControlType controlType;
 	protected int minimumPlayers;
-	protected Vector<Float> arenaSize; //Why are we using floats in our vectors and not integers?
+	protected Vector<Float> arenaSize;
 	protected boolean inProgress;
 	protected ArrayList<GameEntity> entities;
 	
@@ -42,9 +42,7 @@ public abstract class GameModel implements Serializable{
 		return entities;
 	}
 	
-	public void updateGameState(int timeElapsed) {
-		
-	}
+	public abstract void updateGameState(int timeElapsed);
 	
 	public void updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
 		GameRobot robot = (GameRobot) entities.get(0);
@@ -97,9 +95,8 @@ public abstract class GameModel implements Serializable{
 		return controlType;
 	}
 	
-	public boolean checkGameOver() {
-		return false;
-	}
+	public abstract boolean checkGameOver();
+
 	
 	public void addRobot(String identifier) {
 		//In the constructor of GameRobot, two parameters id and robotid, what's the difference?

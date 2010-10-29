@@ -1,6 +1,8 @@
 package robowars.shared.model;
 
-/** Placeholder */
-public interface GameListener {
+import java.util.EventListener;
 
+public interface GameListener extends EventListener{
+
+	
 }
