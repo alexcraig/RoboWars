@@ -6,7 +6,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import robowars.shared.model.GameListener;
+import robowars.shared.model.GameModel;
 import robowars.shared.model.GameType;
+import robowars.shared.model.LightCycles;
+import robowars.shared.model.TankSimulation;
 
 /**
  * Manages communication with an instance of GameModel. This classes 
@@ -27,17 +30,16 @@ public class GameController implements Runnable, GameListener {
 	/** The server lobby to notify when the game is complete. */
 	private ServerLobby lobby;
 	
-	/** The game type which this controller should generate and control. */
-	private GameType gameType;
+	/** The instance of a GameModel subclass that this controller should control */
+	private GameModel model;
 	
 	/**
 	 * Generates a new GameController
 	 * @param lobby	The server lobby to notify when the game is complete.
-	 * @param type	The game type to generate and control
 	 */
-	public GameController(ServerLobby lobby, GameType type) {
+	public GameController(ServerLobby lobby) {
 		this.lobby = lobby;
-		this.gameType = type;
+		model = null;
 		controlPairs = new ArrayList<ControlPair>();
 		spectators = new ArrayList<UserProxy>();
 	}
@@ -49,6 +51,7 @@ public class GameController implements Runnable, GameListener {
 	 */
 	public void addPlayer(UserProxy player, RobotProxy robot) {
 		controlPairs.add(new ControlPair(player, robot));
+		
 		log.debug("Added control pair: " + player.getUsername() + " <-> " 
 				+ robot.getIdentifier());
 	}
@@ -93,10 +96,25 @@ public class GameController implements Runnable, GameListener {
 	public void terminateGame() {
 		log.info("Game terminating.");
 		lobby.endCurrentGame();
-		lobby = null;controlPairs.clear();
+		lobby = null;
+		controlPairs.clear();
 		controlPairs = null;
 		spectators.clear();
 		spectators = null;
-		gameType = null;
+		model = null;
+	}
+	
+	/**
+	 * Generates a new instance of a GameModel subclass based on the currently
+	 */
+	public void generateGameModel(GameType gameType) {
+		switch(gameType) {
+		case LIGHTCYCLES:
+			model = new LightCycles();
+			break;
+		case TANK_SIMULATION:
+			model = new TankSimulation();
+			break;
+		}
 	}
 }

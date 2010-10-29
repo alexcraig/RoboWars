@@ -262,6 +262,9 @@ public class ServerLobbyTest {
 		testLobby.endCurrentGame();
 		
 		assertEquals(testLobby.gameInProgress(), false);
+		
+		testLobby.removeUser(user);
+		testLobby.unregisterRobot(robot);
 	}
 
 	@Test
@@ -271,7 +274,8 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testGetCurrentGameType() {
-		fail("Not yet implemented");
+		assertEquals(GameType.getDefault(), testLobby.getCurrentGameType());
+		
 	}
 
 	@Test
