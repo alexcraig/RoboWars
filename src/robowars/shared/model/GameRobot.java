@@ -21,7 +21,7 @@ public class GameRobot extends GameEntity{
 		// TODO Auto-generated constructor stub
 	}
 	public RobotCommand getResetPath(GameRobot[] hazzards){
-		return new RobotCommand();
+		return new RobotCommand(this, CommandType.RETURN_TO_START_POSITION);
 	}
 	public boolean checkCollision(GameEntity target){
 		float closestX=clamp(this.getX(), target.getX()-target.getLength(), target.getX()+target.getLength());

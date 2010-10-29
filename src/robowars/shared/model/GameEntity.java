@@ -52,6 +52,7 @@ public abstract class GameEntity implements Serializable{
 		return length;
 	}
 	public Vector<Float> getHeading(){return heading;}
+	public Vector<Float> getPosition(){return position;}
 	public int getId(){return id;}
 	public float getWidth(){return width;}
 
