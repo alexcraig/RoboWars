@@ -299,7 +299,8 @@ public class ServerLobby {
 		// Generate the game controller and register control pairs
 		log.debug("Launching game of type: " + selectedGameType.toString());
 		
-		currentGame = new GameController(this, selectedGameType);
+		currentGame = new GameController(this);
+		currentGame.generateGameModel(selectedGameType);
 		
 		for(UserProxy player : players) {
 			users.remove(player);
