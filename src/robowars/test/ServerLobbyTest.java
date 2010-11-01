@@ -20,6 +20,7 @@ import robowars.server.controller.ServerLobbyEvent;
 import robowars.server.controller.ServerLobbyListener;
 import robowars.server.controller.UserProxy;
 import robowars.shared.model.GameType;
+import robowars.shared.model.User;
 
 public class ServerLobbyTest {
 	public static int TEST_MAX_PLAYERS = 4;
@@ -94,7 +95,7 @@ public class ServerLobbyTest {
 	}
 
 	@Test
-	public void testAddUser() {
+	public void testAddUserProxy() {
 		ArrayList<TestUserProxy> testUsers = new ArrayList<TestUserProxy>();
 		for(int i = 0; i < TEST_MAX_PLAYERS + 1; i++) {
 			TestUserProxy testUser = new TestUserProxy(testLobby,
@@ -104,8 +105,8 @@ public class ServerLobbyTest {
 		
 		// Test valid additions
 		for(int i = 0; i < TEST_MAX_PLAYERS; i++) {
-			testLobby.addUser(testUsers.get(i));
-			assertEquals(testUsers.get(i), 
+			testLobby.addUserProxy(testUsers.get(i));
+			assertEquals(testUsers.get(i).getUser(), 
 					testListener.getLastUserEvent().getUser());
 			assertEquals(ServerLobbyEvent.EVENT_PLAYER_JOINED,
 					testListener.getLastUserEvent().getEventType());
@@ -113,13 +114,13 @@ public class ServerLobbyTest {
 		
 		// Test addition over maximum and null addition
 		testListener.clearNumEvents();
-		assertEquals(false, testLobby.addUser(testUsers.get(TEST_MAX_PLAYERS)));
-		assertEquals(false, testLobby.addUser(null));
+		assertEquals(false, testLobby.addUserProxy(testUsers.get(TEST_MAX_PLAYERS)));
+		assertEquals(false, testLobby.addUserProxy(null));
 		assertEquals(0, testListener.getNumEvents());
 		
 		while(!testUsers.isEmpty()) {
 			TestUserProxy testUser = testUsers.remove(0);
-			testLobby.removeUser(testUser);
+			testLobby.removeUserProxy(testUser);
 			testUser = null;
 		}
 	}
@@ -128,21 +129,22 @@ public class ServerLobbyTest {
 	public void testRemoveUser() {
 		TestUserProxy testUser = new TestUserProxy(testLobby, "User1");
 		TestUserProxy testUser2 = new TestUserProxy(testLobby, "User2");
-		testLobby.addUser(testUser);
+		testLobby.addUserProxy(testUser);
 		
 		testListener.clearNumEvents();
 		
 		// Test null removal
-		testLobby.removeUser(null);
+		testLobby.removeUserProxy(null);
 		assertEquals(0, testListener.getNumEvents());
 		
 		// Test removal of unregistered user
-		testLobby.removeUser(testUser2);
+		testLobby.removeUserProxy(testUser2);
 		assertEquals(0, testListener.getNumEvents());
 		
 		// Test valid removal
-		testLobby.removeUser(testUser);
-		assertEquals(testUser, testListener.getLastUserEvent().getUser());
+		testLobby.removeUserProxy(testUser);
+		assertEquals(testUser.getUser(), 
+				testListener.getLastUserEvent().getUser());
 		assertEquals(ServerLobbyEvent.EVENT_PLAYER_LEFT, 
 				testListener.getLastUserEvent().getEventType());
 	}
@@ -186,7 +188,7 @@ public class ServerLobbyTest {
 		testListener.clearNumEvents();
 		
 		// Test null removal
-		testLobby.removeUser(null);
+		testLobby.removeUserProxy(null);
 		assertEquals(0, testListener.getNumEvents());
 		
 		// Test removal of unregistered robot
@@ -226,9 +228,9 @@ public class ServerLobbyTest {
 		assertEquals(0, testListener.getNumEvents());
 		
 		// Test valid state update
-		testLobby.addUser(testUser);
+		testLobby.addUserProxy(testUser);
 		testLobby.broadcastUserStateUpdate(testUser);
-		assertEquals(testUser, testListener.getLastUserEvent().getUser());
+		assertEquals(testUser.getUser(), testListener.getLastUserEvent().getUser());
 	}
 
 	@Test
@@ -247,10 +249,10 @@ public class ServerLobbyTest {
 	@Test
 	public void testGameInProgress() {
 		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
-		user.setReady(true);
+		user.getUser().setReady(true);
 		RobotProxy robot = new RobotProxy("test:mac:addr");
 		
-		testLobby.addUser(user);
+		testLobby.addUserProxy(user);
 		testLobby.registerRobot(robot);
 		
 		assertEquals(testLobby.gameInProgress(), false);
@@ -263,7 +265,7 @@ public class ServerLobbyTest {
 		
 		assertEquals(testLobby.gameInProgress(), false);
 		
-		testLobby.removeUser(user);
+		testLobby.removeUserProxy(user);
 		testLobby.unregisterRobot(robot);
 	}
 
@@ -280,7 +282,7 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testGetServerName() {
-		assertEquals(testLobby.getServerName(), "TestServer");
+		assertEquals(testLobby.getServerName(), "Test Server");
 	}
 
 	@Test
@@ -370,7 +372,7 @@ public class ServerLobbyTest {
 	private class TestUserProxy extends UserProxy {
 		public TestUserProxy(ServerLobby lobby, String username) {
 			super(null, lobby, null);
-			setUsername(username);
+			setUser(new User(username));
 		}
 
 		/**

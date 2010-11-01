@@ -45,14 +45,14 @@ public class GameController implements Runnable, GameListener {
 	}
 	
 	/**
-	 * Generates a control pair from the provided player and user proxy.
+	 * Generates a control pair from the provided user and robot proxy.
 	 * @param player	The user to issue remote commands
 	 * @param robot	The robot to be controlled
 	 */
 	public void addPlayer(UserProxy player, RobotProxy robot) {
 		controlPairs.add(new ControlPair(player, robot));
 		
-		log.debug("Added control pair: " + player.getUsername() + " <-> " 
+		log.debug("Added control pair: " + player.getUser().getUsername() + " <-> " 
 				+ robot.getIdentifier());
 	}
 	

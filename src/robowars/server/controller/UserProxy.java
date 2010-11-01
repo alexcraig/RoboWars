@@ -9,6 +9,7 @@ import java.net.Socket;
 import org.apache.log4j.Logger;
 
 import robowars.shared.model.GameType;
+import robowars.shared.model.User;
 
 /**
  * Manages communications with a single user connected through an existing 
@@ -18,8 +19,11 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(UserProxy.class);
 	
-	/** The username of the connected user */
-	private String username;
+	/** 
+	 * The User object which stores information on the state of the user
+	 * connected to this proxy.
+	 */
+	private User user;
 
 	/** Reader for client input */
 	private BufferedReader inputStream;
@@ -29,21 +33,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	
 	/** The socket to generate input/output streams for */
 	private Socket userSocket;
-	
-	/** Flag to determine if the connection handshake has been performed */
-	private boolean handshakeComplete;
-	
-	/** The "ready" status of the user (used to determine if a new game can start */
-	private boolean isReady;
-	
-	/** Flag indicating if a video stream should be sent to this user */
-	private boolean videoEnabled;
-	
-	/** 
-	 * Flag indicating whether a user is a pure spectator. If true, the user should
-	 * not be considered for control pairing with robots.
-	 */
-	private boolean isPureSpectator;
 	
 	/** The server lobby that manages the user */
 	private ServerLobby lobby;
@@ -64,11 +53,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		this.mediaStreamer = media;
 		inputStream = null;
 		outputStream = null;
-		handshakeComplete = false;
-		username = null;
-		isReady = false;
-		videoEnabled = false;
-		isPureSpectator = false;
 	}
 	
 	public void run(){
@@ -91,21 +75,21 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 			// Handshake and UDP connection should happen here
 			String name = inputStream.readLine();
-			setUsername(name);
-			log.debug("Client username: " + username);
+			user = new User(name);
+			log.debug("Client username: " + user.getUsername());
 			
 			synchronized(outputStream) {
-				outputStream.println(username + " connected to: " + lobby.getServerName());
+				outputStream.println(user.getUsername() + " connected to: " + lobby.getServerName());
 			}
 			
-			if (lobby.addUser(this)) {
+			if (lobby.addUserProxy(this)) {
 				// Read strings from socket until connection is terminated
 				String incomingMessage;
 				while ((incomingMessage = inputStream.readLine()) != null) {
 					log.debug("Received: " + incomingMessage);
 					handleInput(incomingMessage);
 				}
-				log.info(username + " terminated connection with server.");
+				log.info(user.getUsername() + " terminated connection with server.");
 			} else {
 				outputStream.println("[Error - Server Full]");
 			}
@@ -113,7 +97,8 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
-			lobby.removeUser(this);
+			lobby.removeUserProxy(this);
+			user = null;
 			try {
 				outputStream.close();
 				inputStream.close();
@@ -123,6 +108,21 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			}
 		}
 		
+	}
+	
+	/**
+	 * Sets the user object that this proxy is managing communication with.
+	 * @param user	The user object that this proxy is managing communication with
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	/**
+	 * @return	The User object this proxy is managing communication with
+	 */
+	public User getUser() {
+		return user;
 	}
 	
 	/**
@@ -137,48 +137,11 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	
 	/**
 	 * Checks whether the user has successfully performed the authentication
-	 * handshake (and therefore a username has been supplied).
-	 * @return true if the user has performed the connection handshake.
+	 * handshake (determined by checking if an associated User object exists).
+	 * @return true if the proxy is associated with a valid User object
 	 */
 	public boolean isConnected() {
-		return (handshakeComplete && username != null);
-	}
-	
-	/**
-	 * Sets the ready status of the user.
-	 * @param isReady	The ready status of the user (true if a new game can start)
-	 */
-	public void setReady(boolean isReady) {
-		this.isReady = isReady;
-	}
-	
-	/**
-	 * @return	The ready status of the user.
-	 */
-	public boolean isReady() {
-		return isReady;
-	}
-	
-	/**
-	 * @return	The username of the connected user
-	 */
-	public String getUsername() {
-		return username;
-	}
-	
-	/**
-	 * @return	True if the user is a pure spectator (has opted-out of robot control)
-	 */
-	public boolean isPureSpectator() {
-		return isPureSpectator;
-	}
-	
-	/**
-	 * Sets the registered username of the connected user
-	 * @param username	The new username
-	 */
-	public void setUsername(String username) {
-		this.username = username;
+		return (user != null);
 	}
 	
 	/**
@@ -194,25 +157,30 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * l - launch game
 	 * q - disconnect
 	 */
-	private void handleInput(String command){	
+	private void handleInput(String command){
+		if(user == null) {
+			log.error("Proxy attempted to handle input with no associated user.");
+			return;
+		}
+		
 		if(command.startsWith("m:")) {
-			lobby.broadcastMessage(getUsername() + ": " + command.substring(2));
+			lobby.broadcastMessage(user.getUsername() + ": " + command.substring(2));
 			
 		} else if(command.startsWith("r:")) {
 			
 			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				setReady(true);
+				user.setReady(true);
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				setReady(false);
+				user.setReady(false);
 			}
 			lobby.broadcastUserStateUpdate(this);
 			
 		} else if(command.startsWith("s:")) {
 			
 			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				isPureSpectator = true;
+				user.setPureSpectator(true);
 			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				isPureSpectator = false;
+				user.setPureSpectator(false);
 			}
 			lobby.broadcastUserStateUpdate(this);
 			
@@ -231,8 +199,8 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * Handles user input which requests a new game be launched.
 	 */
 	private void processGameLaunch() {
-		if(isPureSpectator) {
-			log.debug("Game launch blocked (" + username + " is a pure spectator)");
+		if(user.isPureSpectator()) {
+			log.debug("Game launch blocked (" + user.getUsername() + " is a pure spectator)");
 			synchronized(outputStream) {
 				outputStream.println("Spectators may not launch a new game.");
 			}

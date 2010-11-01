@@ -88,23 +88,30 @@ public class ServerLobby {
 	}
 	
 	/**
-	 * Adds a user to the end of the list of connected users.
-	 * @param user	The user to add
+	 * Adds a user to the end of the list of connected users. The user
+	 * must already be connected (i.e. has gone through the authentication
+	 * and user name selection handshake).
+	 * @param userProxy	The user to add
 	 * @return True if the user was successfully added, false if not
 	 */
-	public synchronized boolean addUser(UserProxy user) {
+	public synchronized boolean addUserProxy(UserProxy userProxy) {
+		if(userProxy == null || !userProxy.isConnected()) {
+			log.error("Attempt to add null or unconnected user proxy.");
+			return false;
+		}
+		
 		boolean addSuccess = false;
-		if(users.size() < maxUsers && user != null) {
-			users.add(user);
+		if(users.size() < maxUsers) {
+			users.add(userProxy);
 			addSuccess = true;
-			log.debug(user.getUsername() + " added to lobby.");
-			listeners.add(user);
+			log.debug(userProxy.getUser().getUsername() + " added to lobby.");
+			listeners.add(userProxy);
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, userProxy.getUser()));
 			}
 		} else {
-			if(user != null) {
-				log.debug(user.getUsername() + " attempted to join full server.");
+			if(userProxy != null) {
+				log.debug(userProxy.getUser().getUsername() + " attempted to join full server.");
 			}
 		}
 		return addSuccess;
@@ -112,15 +119,15 @@ public class ServerLobby {
 	
 	/**
 	 * Removes a user from the list of connected users.
-	 * @param user	The user to remove
+	 * @param userProxy	The user to remove
 	 */
-	public synchronized void removeUser(UserProxy user) {
-		if(users.remove(user)) {
-			log.debug(user.getUsername() + " removed from lobby.");
+	public synchronized void removeUserProxy(UserProxy userProxy) {
+		if(users.remove(userProxy)) {
+			log.debug(userProxy.getUser().getUsername() + " removed from lobby.");
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, userProxy.getUser()));
 			}
-			listeners.remove(user);
+			listeners.remove(userProxy);
 			
 			// TODO: If user is currently playing, terminate the game
 		}
@@ -179,15 +186,19 @@ public class ServerLobby {
 	/**
 	 * Generates and broadcasts a player state update event to all registered
 	 * listeners for the specified user. This should be called when the spectator
-	 * or ready state of a user changes.
-	 * @param user	The user to broadcast state for
+	 * or ready state of a user changes. The passed user must be registered
+	 * with this server lobby, otherwise no action is taken.
+	 * 
+	 * @param userProxy	The userProxy to broadcast state for
 	 */
-	public synchronized void broadcastUserStateUpdate(UserProxy user) {
-		if(users.contains(user)) {
-			log.debug(user.getUsername() + " state: < Ready = " + user.isReady()
-					+ ", Spectator = " + user.isPureSpectator() + ">");
+	public synchronized void broadcastUserStateUpdate(UserProxy userProxy) {
+		if(users.contains(userProxy)) {
+			log.debug(userProxy.getUser().getUsername() + " state: < Ready = " + 
+					userProxy.getUser().isReady()
+					+ ", Spectator = " + userProxy.getUser().isPureSpectator() + ">");
 			for(ServerLobbyListener listener : listeners) {
-				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, user));
+				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE, 
+						userProxy.getUser()));
 			}
 		}
 	}
@@ -205,10 +216,10 @@ public class ServerLobby {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAMETYPE_CHANGE, selectedGameType));
 		}
 		
-		for(UserProxy user : users) {
-			if(user.isReady()) {
-				user.setReady(false);
-				broadcastUserStateUpdate(user);
+		for(UserProxy userProxy : users) {
+			if(userProxy.getUser().isReady()) {
+				userProxy.getUser().setReady(false);
+				broadcastUserStateUpdate(userProxy);
 			}
 		}
 	}
@@ -265,18 +276,18 @@ public class ServerLobby {
 		
 		// Select the players who will be paired to robots, and ensure they are all ready
 		List<UserProxy> players = new ArrayList<UserProxy>();
-		for(UserProxy user : users) {
-			if(!user.isPureSpectator()) {
-				if(players.size() < availableRobots && !user.isReady()) {
+		for(UserProxy userProxy : users) {
+			if(!userProxy.getUser().isPureSpectator()) {
+				if(players.size() < availableRobots && !userProxy.getUser().isReady()) {
 					// If not enough players have been selected to control all available
 					// robots and player selected for pairing is not ready, cancel the game launch
 					log.debug("Game launch requested, but one or more players are not ready.");
 					broadcastMessage("<Server> Game launch requested, but one or more players are not ready.");
 					return;
-				} else if (players.size() < availableRobots && user.isReady()) {
+				} else if (players.size() < availableRobots && userProxy.getUser().isReady()) {
 					// If the game still requires more players and the player is ready,
 					// add them to the list of players
-					players.add(user);
+					players.add(userProxy);
 					
 					if(players.size() == availableRobots) {
 						break; // All players have been found
@@ -305,10 +316,17 @@ public class ServerLobby {
 		for(UserProxy player : players) {
 			users.remove(player);
 			RobotProxy pairedRobot = robots.remove(0);
-			log.debug("Pairing: " + player.getUsername() + " <-> " + pairedRobot.getIdentifier());
+			log.debug("Pairing: " + player.getUser().getUsername() + " <-> " + pairedRobot.getIdentifier());
 			currentGame.addPlayer(player, pairedRobot);
 			users.add(player);
 			robots.add(pairedRobot);
+		}
+		
+		// Add all remaining players as spectators
+		for(UserProxy spectator : users) {
+			if(!players.contains(spectator)) {
+				currentGame.addSpectator(spectator);
+			}
 		}
 		
 		// Notify all listeners that a game is starting
