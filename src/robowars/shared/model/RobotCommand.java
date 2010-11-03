@@ -6,7 +6,6 @@ import java.util.Vector;
 public class RobotCommand implements Serializable{
 	
 	private CommandType type;
-	private GameRobot robot;
 	private float throttle;
 	private float turnBearing;
 	private String specialFlags;
@@ -14,10 +13,9 @@ public class RobotCommand implements Serializable{
 	
 	public static final float MAX_SPEED = 100;
 	
-	public RobotCommand(GameRobot robot, CommandType type)
+	public RobotCommand(CommandType type)
 	{
 		this.type = type;
-		this.robot = robot;
 		
 		switch(type){
 			case MOVE_CONTINUOUS:
@@ -32,6 +30,10 @@ public class RobotCommand implements Serializable{
 				throttle = 0;
 				turnBearing = -90; break;
 				
+			case STOP:
+				throttle = 0;
+				turnBearing = 0; break;
+				
 			case RETURN_TO_START_POSITION: break;
 				
 			case MOVE_COORDINATE: break;
@@ -42,9 +44,8 @@ public class RobotCommand implements Serializable{
 		}
 	}
 	
-	public RobotCommand(GameRobot robot, float throttle, float turnBearing, String specialFlags)
+	public RobotCommand(float throttle, float turnBearing, String specialFlags)
 	{
-		this.robot = robot;
 		this.throttle = throttle;
 		this.turnBearing = turnBearing;
 		this.specialFlags = specialFlags;

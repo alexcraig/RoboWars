@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
@@ -40,6 +41,12 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The media server that streams video to the user */
 	private MediaStreamer mediaStreamer;
 	
+	/** 
+	 * The GameController object managing the game this proxy is
+	 * participating in (null if no game is in progress).
+	 */
+	private GameController controller;
+	
 	/**
 	 * Generates a new UserProxy
 	 * @param clientSocket	The connected socket to service
@@ -53,6 +60,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		this.mediaStreamer = media;
 		inputStream = null;
 		outputStream = null;
+		controller = null;
 	}
 	
 	public void run(){
@@ -145,15 +153,34 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	/**
+	 * Sets the instance of GameController that this UserProxy should pass
+	 * input commands to.
+	 * @param controller	The GameController instance to pass inputs to.
+	 */
+	public void setGameController(GameController controller) {
+		if(controller != null) {
+			this.controller = controller;
+		}
+	}
+	
+	/**
+	 * Clears all references to a GameController for the proxy.
+	 */
+	public void clearGameController() {
+		controller = null;
+	}
+	
+	/**
 	 * Dispatches user input to the relevant processing functions based on the input received.
 	 * 
 	 * Commands:
 	 * m:<message> - chat message 
-	 * t:<x,y,z> - tilt reading <x,y,z> angle on each axis
-	 * b:<button_chars> - button input
 	 * r:<t or f> - set ready state
 	 * s:<t or f> - set pure spectator state
 	 * g:<game_type_string> - set game type
+	 * c:<x,y,z> or c:<x,y,z>button_string 
+	 * 		a command string to be passed to a paired robot
+	 * 		(Note: If no gyro is available tilt should always be <0,0,0>
 	 * l - launch game
 	 * q - disconnect
 	 */
@@ -163,29 +190,22 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			return;
 		}
 		
-		if(command.startsWith("m:")) {
+		if(command.startsWith("c:")) {
+			handleGameplayCommand(command.substring(2));
+		} else if(command.startsWith("m:")) {
+			// Chat message
 			lobby.broadcastMessage(user.getUsername() + ": " + command.substring(2));
 			
 		} else if(command.startsWith("r:")) {
-			
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				user.setReady(true);
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				user.setReady(false);
-			}
-			lobby.broadcastUserStateUpdate(this);
+			// Change of ready state
+			handleChangeReadyState(command.substring(2,3));
 			
 		} else if(command.startsWith("s:")) {
+			// Change of spectator state
+			handleChangeSpectatorState(command.substring(2,3));
 			
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				user.setPureSpectator(true);
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				user.setPureSpectator(false);
-			}
-			lobby.broadcastUserStateUpdate(this);
-			
-		}else if(command.startsWith("g:")) {
-			
+		} else if(command.startsWith("g:")) {
+			// Change of game type
 			if(GameType.parseString(command.substring(2)) != null) {
 				lobby.setGameType(GameType.parseString(command.substring(2)));
 			}
@@ -207,6 +227,85 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		} else {
 			lobby.launchGame();
 		}
+	}
+	
+	/**
+	 * Handles client input that corresponds to a change in ready state.
+	 * @param newState	The new ready state (either "t" or "f")
+	 */
+	private void handleChangeReadyState(String newState) {
+		if (newState.equalsIgnoreCase("t")) {
+			user.setReady(true);
+		} else if (newState.equalsIgnoreCase("f")) {
+			user.setReady(false);
+		} else {
+			// Ensures broadcast only occurs if state actually changed
+			return;
+		}
+		
+		lobby.broadcastUserStateUpdate(this);
+	}
+	
+	/**
+	 * Handles client input that corresponds to a change in spectator state.
+	 * @param newState	The new spectator state (either "t" or "f")
+	 */
+	private void handleChangeSpectatorState(String newState) {
+		if (newState.equalsIgnoreCase("t")) {
+			user.setPureSpectator(true);
+		} else if (newState.equalsIgnoreCase("f")) {
+			user.setPureSpectator(false);
+		} else {
+			// Ensures broadcast only occurs if state actually changed
+			return;
+		}
+		lobby.broadcastUserStateUpdate(this);
+	}
+	
+	/**
+	 * Handles user input that should be passed to the game controller
+	 * and treated as a remote robot command.
+	 * @param command	The command string received from the client
+	 */
+	private void handleGameplayCommand(String command) {
+		// Ignore commands from unpaired players
+		if(controller == null) { return; }
+		
+		// Rough check of tilt validity (use regex instead?)
+		if(!command.startsWith("<") || !command.contains(">")) {
+			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			return;
+		}
+		
+		
+		// Assume valid input at this point
+		Vector<Float> tilt = new Vector<Float>();
+		
+		try {
+			// Get X tilt
+			Float tiltX = Float.parseFloat(command.substring(1, command.indexOf(",")));
+			command = command.substring(command.indexOf(",") + 1);
+			
+			// Get Y tilt
+			Float tiltY = Float.parseFloat(command.substring(0, command.indexOf(",")));
+			command = command.substring(command.indexOf(",") + 1);
+
+			// Get Z tilt
+			Float tiltZ = Float.parseFloat(command.substring(0, command.indexOf(">")));
+			command = command.substring(command.indexOf(">") + 1);
+
+			// Read tilt floats into a vector
+			tilt.addElement(tiltX);
+			tilt.addElement(tiltY);
+			tilt.addElement(tiltZ);
+			
+		} catch (NumberFormatException e) {
+			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			return;
+		}
+		
+		controller.processInput(this, tilt, command);
+		
 	}
 
 	@Override
