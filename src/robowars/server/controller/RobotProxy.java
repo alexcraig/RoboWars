@@ -70,6 +70,7 @@ public class RobotProxy {
 			e.printStackTrace();
 		}
 		outputStream = nxtComm.getOutputStream();
+		lobby.registerRobot(this);
 	}
 	
 	/**
