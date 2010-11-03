@@ -177,9 +177,18 @@ public class GameController implements Runnable, GameListener {
 			return ;
 		}
 		
-		if(player == null || tilt.size() != 3) {
+		if(player == null || (tilt != null && tilt.size() != 3)) {
 			log.error("Input ignored - null played proxy or invalid tilt vector specified.");
 			return;
+		}
+		
+		if(tilt != null) {
+			log.info("Got command from " + player.getUser().getUsername() +": Tilt: <" 
+					+ tilt.get(0) + "," + tilt.get(1) + "," + tilt.get(2) + ">  Buttons: <" 
+					+ buttons + ">");
+		} else {
+			log.info("Got command from " + player.getUser().getUsername() +": Buttons: <" 
+					+ buttons + ">");
 		}
 		
 		RobotProxy pairedRobot = getPairedRobot(player);

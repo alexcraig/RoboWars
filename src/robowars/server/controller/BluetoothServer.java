@@ -53,6 +53,7 @@ public class BluetoothServer implements Runnable {
 				
 			} catch (NXTCommException e) {
 				log.error("Bluetooth device could not be found. Robot registration will not be supported.");
+				return;
 			}
 			
 		}
