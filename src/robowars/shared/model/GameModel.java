@@ -13,6 +13,7 @@ public abstract class GameModel implements Serializable{
 	protected boolean inProgress;
 	protected ArrayList<GameEntity> entities;
 	protected ArrayList<GameRobot> robots;
+	protected int numRobots;
 	protected GameListener listener;
 	
 	public static final float DEFAULT_ARENA_SIZE = 100;
@@ -22,6 +23,8 @@ public abstract class GameModel implements Serializable{
 			return new LightCycles();
 		if(gameType == GameType.TANK_SIMULATION)
 			return new TankSimulation();
+		if(gameType == GameType.FREETEST)
+			return new FreeTest();
 		return null;
 	}
 	
@@ -30,6 +33,7 @@ public abstract class GameModel implements Serializable{
 		inProgress = false;
 		entities = new ArrayList<GameEntity>();
 		minimumPlayers = gameType.getMinimumPlayers();
+		numRobots = 0;
 		
 		arenaSize.add(DEFAULT_ARENA_SIZE);//x
 		arenaSize.add(DEFAULT_ARENA_SIZE);//y
@@ -39,9 +43,15 @@ public abstract class GameModel implements Serializable{
 		this.listener = listener;
 	}
 	
-	public void startGame() {
-		if(robots.get(0) != null && robots.get(1) != null)
+	public boolean startGame() {
+		
+		for(int i = 0; i < minimumPlayers; i++){
+			if(robots.get(i) == null){
+				return inProgress;
+			}
+		}
 			inProgress = true;
+			return inProgress;
 	}
 	
 	public ArrayList<GameEntity> getEntities() {
@@ -110,7 +120,18 @@ public abstract class GameModel implements Serializable{
 	public void addRobot(String identifier) {
 		//In the constructor of GameRobot, two parameters id and robotid, what's the difference?
 		//GameRobot newRobot = new GameRobot(new Vector<Float>(),new Vector<Float>(),1,1,0,1,identifier);
-		GameRobot newRobot = new GameRobot(1,1,identifier);
+		GameRobot newRobot;
+		switch(numRobots){
+			case 0:
+				newRobot = new GameRobot(1,1,identifier);break;
+			case 1:
+				Vector<Float> v = new Vector<Float>();
+				v.add(Float.valueOf(DEFAULT_ARENA_SIZE));
+				v.add(Float.valueOf(DEFAULT_ARENA_SIZE));
+				newRobot = new GameRobot(v,v,1,1,0,1,identifier);break;
+			default:
+				newRobot = new GameRobot(1,1,identifier);break;
+		}
 		entities.add(newRobot);
 		robots.add(newRobot);
 	}

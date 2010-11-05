@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 public class LightCycles extends GameModel {
+	
+	/**The constant width of the walls. */
 	private float wallWidth;
+	
+	/** The amount of time can pass before the wall starts shrinking.
+	 * If zero, the walls are persistent.*/
 	private int wallFadeTime;
 	private ArrayList<Obstacle> wallsOne;
 	private ArrayList<Obstacle> wallsTwo;
