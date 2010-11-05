@@ -12,6 +12,8 @@ public abstract class GameModel implements Serializable{
 	protected Vector<Float> arenaSize;
 	protected boolean inProgress;
 	protected ArrayList<GameEntity> entities;
+	protected ArrayList<GameRobot> robots;
+	protected GameListener listener;
 	
 	public static final float DEFAULT_ARENA_SIZE = 100;
 	
@@ -33,8 +35,12 @@ public abstract class GameModel implements Serializable{
 		arenaSize.add(DEFAULT_ARENA_SIZE);//y
 	}
 	
+	public void addListener(GameListener listener){
+		this.listener = listener;
+	}
+	
 	public void startGame() {
-		if(entities.get(0) != null && entities.get(1) != null)
+		if(robots.get(0) != null && robots.get(1) != null)
 			inProgress = true;
 	}
 	
@@ -44,15 +50,20 @@ public abstract class GameModel implements Serializable{
 	
 	public abstract void updateGameState(int timeElapsed);
 	
-	public void updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
-		GameRobot robot = (GameRobot) entities.get(0);
-		if(robot.getRobotId() != identifier)
-			robot = (GameRobot) entities.get(1);
-		if(robot.getRobotId() != identifier)
-			return;//error, robot with specified identifier doesn't exist.
+	public boolean updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
+		GameRobot robot = null;
+		
+		for(GameRobot r : robots){
+			if(r.getRobotId() == identifier)
+				robot = r;
+		}
+		
+		if(robot == null)
+			return false;//error, robot with specified identifier doesn't exist.
 		
 		robot.setPosition(pos);
 		robot.setHeading(heading);
+		return true;
 	}
 	
 	public RobotCommand getCurrentRobotCommand(String identifier) {
@@ -60,14 +71,12 @@ public abstract class GameModel implements Serializable{
 	}
 	
 	public GameRobot getGameRobot(String identifier) {
-		//Indices 0 and 1 should always store the two robots. Probably not going to keep it this way cause it seems messy.
-		GameRobot robot = (GameRobot) entities.get(0);
-		if(robot.getRobotId() == identifier){
-			return robot;
-		}else if(robot.getRobotId() == identifier)
-			return robot;
-		else
-			return null;
+		
+		for (GameRobot robot : robots){
+			if (robot.getRobotId() == identifier)
+				return robot;
+		}
+		return null;
 	}
 	
 	public void processCommand(RobotCommand command) {
@@ -100,7 +109,10 @@ public abstract class GameModel implements Serializable{
 	
 	public void addRobot(String identifier) {
 		//In the constructor of GameRobot, two parameters id and robotid, what's the difference?
-		entities.add(new GameRobot(new Vector<Float>(),new Vector<Float>(),1,1,0,1,identifier)); 
+		//GameRobot newRobot = new GameRobot(new Vector<Float>(),new Vector<Float>(),1,1,0,1,identifier);
+		GameRobot newRobot = new GameRobot(1,1,identifier);
+		entities.add(newRobot);
+		robots.add(newRobot);
 	}
 	
 	private byte[] serializeState() {

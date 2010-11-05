@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import robowars.shared.model.CommandType;
 import robowars.shared.model.ControlType;
 import robowars.shared.model.GameListener;
+import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameModel;
 import robowars.shared.model.GameType;
 import robowars.shared.model.LightCycles;
@@ -162,6 +163,7 @@ public class GameController implements Runnable, GameListener {
 			model = new TankSimulation();
 			break;
 		}
+		model.addListener(this);
 	}
 	
 	/**
@@ -235,5 +237,9 @@ public class GameController implements Runnable, GameListener {
 	
 	public void updateRobotPosition(RobotProxy robot, Vector<Float> position, 
 			Vector<Float> heading) {
+	}
+	
+	public void gameStateChanged(GameEvent event){
+		
 	}
 }

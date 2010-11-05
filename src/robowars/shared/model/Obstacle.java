@@ -10,18 +10,20 @@ public class Obstacle extends GameEntity{
 	private boolean destroyOnContact;
 	private boolean destroyByProjectile;
 
-	public Obstacle(Vector<Float> position, Vector<Float> heading, float length, float width, int strength, boolean destroyOnContact, boolean destroyByProjectile, int id) {
+	public Obstacle(Vector<Float> position, Vector<Float> heading, 
+			float length, float width, int strength, boolean destroyOnContact,
+			boolean destroyByProjectile, int id) {
 		super(position, heading, length, width, id);
 		this.strength=strength;
 		this.destroyByProjectile=destroyByProjectile;
 		this.destroyOnContact=destroyOnContact;
 		lifeTime = 0;
 	}
-	public void shrink(int factor){
-		if(factor>=1)this.setLength(this.getLength() / factor);
+	public void shrink(int amount){
+		if(amount>=1)this.setLength(this.getLength() - amount);
 	}
-	public void grow(int factor){
-		if(factor>=1)this.setLength(this.getLength() * factor);
+	public void grow(int amount){
+		if(amount>=1)this.setLength(this.getLength() + amount);
 	}
 	public void passTime(int time){
 		lifeTime += time;
