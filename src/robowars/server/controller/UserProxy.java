@@ -298,8 +298,8 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			tilt.addElement(tiltY);
 			tilt.addElement(tiltZ);
 			
-		} catch (NumberFormatException e) {
-			log.error("Invalid gameplay command format (tilt vector format invalid).");
+		} catch (Exception e) {
+			log.error("Invalid gameplay command format (gameplay command format invalid).");
 			return;
 		}
 		
