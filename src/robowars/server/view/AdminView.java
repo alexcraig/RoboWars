@@ -19,6 +19,7 @@ import javax.swing.*;
 import org.apache.log4j.Logger;
 
 import robowars.server.controller.*;
+import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameListener;
 import robowars.shared.model.GameType;
 
@@ -208,5 +209,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
 	public void lobbyChatMessage(LobbyChatEvent event) {
 		 addLineToMainChat(event.getMessage());
+	}
+	
+	public void gameStateChanged(GameEvent event){
+		
 	}
 }

@@ -17,7 +17,6 @@ public abstract class GameEntity implements Serializable{
 	private Vector<Float> heading;
 	private float length;
 	private float width;
-	private boolean exists;
 	private int id;
 
 	public GameEntity(Vector<Float> position, Vector<Float> heading, float length, float width, int id){
@@ -25,7 +24,6 @@ public abstract class GameEntity implements Serializable{
 		this.heading=heading;
 		this.setLength(length);
 		this.width=width;
-		this.exists=true;
 		this.id=id;
 	}
 	public boolean checkCollision(GameEntity target){

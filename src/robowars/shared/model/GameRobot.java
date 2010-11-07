@@ -14,6 +14,8 @@ public class GameRobot extends GameEntity{
 	private int health;
 	private int startingHealth;
 	private Vector<Float> initLocation;
+	private Vector<Float> lastLocation;
+	private Vector<Float> lastHeading;
 	private String robotIdentifier;
 	
 	public GameRobot(Vector<Float> position, Vector<Float> heading, float length, float width, int id, int health, String robotId) {
@@ -21,6 +23,8 @@ public class GameRobot extends GameEntity{
 		this.startingHealth=health;
 		this.health=health;
 		this.initLocation=position;
+		this.lastLocation=position;
+		this.lastHeading=heading;
 		this.robotIdentifier=robotId;
 		// TODO Auto-generated constructor stub
 	}
@@ -48,6 +52,8 @@ public class GameRobot extends GameEntity{
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
 		initLocation = position;
+		lastLocation = position;
+		lastHeading = heading;
 		
 		robotIdentifier = identifier;
 	}
@@ -69,6 +75,24 @@ public class GameRobot extends GameEntity{
 		if (value > max) return max;
 		if (value < min) return min;
 		return value;
+	}
+	
+	public Vector<Float> getLastLocation(){
+		return lastLocation;
+	}
+	
+	public Vector<Float> getLastHeading(){
+		return lastHeading;
+	}
+	
+	public void setPosition(Vector<Float> newPos){
+		lastLocation = super.getPosition();
+		super.setPosition(newPos);
+	}
+	
+	public void setHeading(Vector<Float> newHeading){
+		lastHeading = super.getHeading();
+		super.setPosition(newHeading);
 	}
 	
 	public void decreaseHealth(int change){health-=change;}
