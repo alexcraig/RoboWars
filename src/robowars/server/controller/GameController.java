@@ -174,7 +174,7 @@ public class GameController implements Runnable, GameListener {
 	public void processInput(UserProxy player, Vector<Float> tilt, String buttons) {
 		if(model == null) {
 			log.error("Input ignored - no game model loaded.");
-			return ;
+			return;
 		}
 		
 		if(player == null || (tilt != null && tilt.size() != 3)) {
@@ -216,8 +216,7 @@ public class GameController implements Runnable, GameListener {
 	 * @param controlType	The control scheme to use for generating commands
 	 * @return	A valid RobotCommand, or null if no command should be issued.
 	 */
-	private RobotCommand generateCommand(Vector<Float> tilt, String buttons, 
-			ControlType controlType) {
+	private RobotCommand generateCommand(Vector<Float> tilt, String buttons, ControlType controlType) {
 		// TODO: Ignore control type for now
 		// Using W A S D commands for testing
 		if(buttons.contains("w")) {

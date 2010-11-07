@@ -9,14 +9,15 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * Client-side TCP connection thread.
+ * @author Steve Legere
+ * @version 5/11/2010
  * 
- * TODO: TcpClient is passed a reference to the view, this
- * 		 will be changed shortly.
+ * Handles TCP connection to the server.
+ * @see robowars.server.controller
  */
-public class TcpClient extends Thread
+public class TcpClient extends Thread implements MessageType
 {
-	private RoboWars view;
+	private LobbyModel model;
 	
 	private String IPAddress;
 	private int port;
@@ -24,32 +25,31 @@ public class TcpClient extends Thread
 	private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    
     private boolean connected;
     
-	public TcpClient(RoboWars view)
+	public TcpClient(LobbyModel model)
 	{
-		this.view = view;
+		this.model = model;
 		this.connected = false;
 	}
 	
 	public void run()
     {
-		/* Initial handshake... */
-		sendMessage("JoeUser");		//TODO: Username
+		handshake();
 		
         /* Run forever, handling incoming messages. */
         String response;
         try { while ((response = in.readLine()) != null) handle(response); }
-        catch (IOException e) { view.printMessage("Lost connection to the server."); }
+        catch (IOException e) { model.printMessage(ERROR, "Lost connection to the server."); }
         finally {
         	try {
+        		sendMessage("q");		// Quit
 				out.close();
 				in.close();
 				socket.close();
-				view.printMessage("Socket Disconnected!");
+				model.printMessage(EVENT, "Socket Disconnected!");
 			} catch (IOException e) {
-				view.printMessage("Could not close socket.");
+				model.printMessage(ERROR, "Could not close socket.");
 			}
         }
     }
@@ -59,32 +59,59 @@ public class TcpClient extends Thread
 		this.IPAddress = IPAddress;
 		this.port = port;
 		
-		view.printMessage("Connecting...");
+		printMessage(EVENT, "Connecting...");
 		try {
             socket = new Socket(IPAddress, port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
             connected = true;
-            view.printMessage("Connected!");
+            
+            printMessage(EVENT, "Connected!");
         } catch (UnknownHostException e1) {
-            view.printMessage("Could not resolve host.");
-            view.printMessage("Address: " + IPAddress + ":" + port);
+            printMessage(ERROR, "Could not resolve host.");
+            printMessage(ERROR, "Address: " + IPAddress + ":" + port);
         } catch (IOException e2) {
-            view.printMessage("Could not get I/O for the connection.");
-            view.printMessage("Address: " + IPAddress + ":" + port);
+            printMessage(ERROR, "Could not get I/O for the connection.");
+            printMessage(ERROR, "Address: " + IPAddress + ":" + port);
         }
 		
         if (connected) this.start();
 	}
 	
-	public void handle(String message)
+	/**
+	 * Provide initial information to the server.
+	 */
+	public void handshake()
 	{
-		view.printMessage(message);
+		if (model.getMyUser() != null)
+		{
+			
+		}
+		sendMessage("JoeUser");	
 	}
 	
+	/**
+	 * @param message
+	 * Determines what to do, given an input message.
+	 */
+	public void handle(String message)
+	{
+		//TODO: Handle de-serializing.
+		model.printMessage(EVENT, message);
+	}
+	
+	/**
+	 * @param message
+	 * Sends a command to the server.
+	 */
 	public void sendMessage(String message)
 	{
 		if (connected) out.println(message);
+	}
+	
+	private void printMessage(int type, String message)
+	{
+		model.printMessage(type, message);
 	}
 }

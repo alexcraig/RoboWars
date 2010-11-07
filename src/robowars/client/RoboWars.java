@@ -11,11 +11,12 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
-public class RoboWars extends Activity implements Observer
+public class RoboWars extends Activity implements Observer, MessageType
 {
 	TextView chat;
 	EditText entry, server, port, user, pass;
 	
+	LobbyModel model;
 	TcpClient tcp;
 	
     /**
@@ -44,6 +45,8 @@ public class RoboWars extends Activity implements Observer
     	tabHost.addTab(spec2);
     	tabHost.addTab(spec3);
     	
+    	model = new LobbyModel();
+    	
     	chat 	= (TextView) findViewById(R.id.chat);
     	entry 	= (EditText) findViewById(R.id.entry);
     	server 	= (EditText) findViewById(R.id.server);
@@ -64,7 +67,7 @@ public class RoboWars extends Activity implements Observer
     public void sendClicked(View view)
     {
     	String message = entry.getText().toString();
-    	tcp.sendMessage("m:" + message);
+    	tcp.sendMessage(message);
     }
     
     public void connectClicked(View view)
@@ -72,14 +75,40 @@ public class RoboWars extends Activity implements Observer
     	String address 	= server.getText().toString();
     	int portNumber	= Integer.parseInt(port.getText().toString());
     	
-    	tcp = new TcpClient(this);
+    	tcp = new TcpClient(model);
     	tcp.connect(address, portNumber);
+    }
+    
+    public void goForward(View view)
+    {
+    	tcp.sendMessage("c:w");
+    }
+    
+    public void goBackward(View view)
+    {
+    	tcp.sendMessage("c:s");
+    }
+    
+    public void goLeft(View view)
+    {
+    	tcp.sendMessage("c:a");
+    }
+    
+    public void goRight(View view)
+    {
+    	tcp.sendMessage("c:d");
+    }
+    
+    public void stop(View view)
+    {
+    	tcp.sendMessage("c:");
     }
 
 	/**
 	 * Updates based on changes to the model.
 	 */
-	public void update(Observable observable, Object data) {
-		//TODO: Implement
+	public void update(Observable observable, Object data)
+	{
+		//TODO: Implement.
 	}
 }
