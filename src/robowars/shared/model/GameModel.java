@@ -58,7 +58,7 @@ public abstract class GameModel implements Serializable{
 		return entities;
 	}
 	
-	public abstract void updateGameState(int timeElapsed);
+	public abstract void updateGameState(long timeElapsed);
 	
 	public boolean updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
 		GameRobot robot = null;

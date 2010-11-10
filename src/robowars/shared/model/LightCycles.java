@@ -10,7 +10,7 @@ public class LightCycles extends GameModel {
 	
 	/** The amount of time can pass before the wall starts shrinking.
 	 * If zero, the walls are persistent.*/
-	private int wallFadeTime;
+	private long wallFadeTime;
 	private ArrayList<Obstacle> wallsOne;
 	private ArrayList<Obstacle> wallsTwo;
 	
@@ -35,7 +35,7 @@ public class LightCycles extends GameModel {
 		super.initVariables();
 	}
 	
-	public void updateGameState(int timeElapsed) {
+	public void updateGameState(long timeElapsed) {
 		
 		for(Obstacle w1 : wallsOne){
 			w1.passTime(timeElapsed);
@@ -48,19 +48,23 @@ public class LightCycles extends GameModel {
 		Obstacle w2 = wallsTwo.get(wallsTwo.size() - 1);
 		
 		if(w1.getTime() > wallFadeTime){
-			w1.shrink(w1.getTime() - wallFadeTime);
+			// TODO: Casting here may cause an overflow
+			w1.shrink((int)(w1.getTime() - wallFadeTime));
 			w1.passTime(wallFadeTime - w1.getTime());
-			if(w1.getLength() <= 0)
+			if(w1.getLength() <= 0) {
 				wallsOne.remove(w1);
 				entities.remove(w1);
+			}
 		}
 		
 		if(w2.getTime() > wallFadeTime){
-			w2.shrink(w2.getTime() - wallFadeTime);
+			// TODO: Casting here may cause an overflow
+			w2.shrink((int)(w2.getTime() - wallFadeTime));
 			w2.passTime(wallFadeTime - w2.getTime());
-			if(w2.getLength() <= 0)
+			if(w2.getLength() <= 0) {
 				wallsTwo.remove(w2);
 				entities.remove(w2);
+			}
 		}
 		
 		if(checkGameOver()){

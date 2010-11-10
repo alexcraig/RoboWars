@@ -33,6 +33,8 @@ public enum GameType {
 			return LIGHTCYCLES;
 		} else if (gameType.equalsIgnoreCase("Tank Simulation")) {
 			return TANK_SIMULATION;
+		} else if (gameType.equalsIgnoreCase("Free Test")) {
+			return FREETEST;
 		} else {
 			return null;
 		}
@@ -47,6 +49,8 @@ public enum GameType {
 			return "Tank Simulation";
 		case LIGHTCYCLES:
 			return "Light Cycles";
+		case FREETEST:
+			return "Free Test";
 		default:
 			return null;
 		}

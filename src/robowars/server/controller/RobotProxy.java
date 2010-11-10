@@ -61,6 +61,12 @@ public class RobotProxy {
 		openConnection(nxtInfo);
 	}
 	
+	/**
+	 * Opens a connection to the remote robot using the provided NXTInfo
+	 * object.
+	 * @param nxtInfo	An NXTInfo object defining the robot to be connected
+	 * 					to (usually from a call to search on an NXTComm object)
+	 */
 	private void openConnection(NXTInfo nxtInfo) {
 		try {
 			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);

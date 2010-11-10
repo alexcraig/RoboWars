@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import robowars.shared.model.CommandType;
 import robowars.shared.model.ControlType;
+import robowars.shared.model.FreeTest;
 import robowars.shared.model.GameListener;
 import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameModel;
@@ -49,12 +50,12 @@ public class GameController implements Runnable, GameListener {
 	 * Generates a new GameController
 	 * @param lobby	The server lobby to notify when the game is complete.
 	 */
-	public GameController(ServerLobby lobby) {
+	public GameController(ServerLobby lobby, GameType gameType) {
 		this.lobby = lobby;
-		model = null;
 		controlPairs = new ArrayList<ControlPair>();
 		spectators = new ArrayList<UserProxy>();
 		terminateFlag = false;
+		generateGameModel(gameType);
 	}
 	
 	/**
@@ -115,13 +116,24 @@ public class GameController implements Runnable, GameListener {
 	public void run() {
 		log.info("Game execution starting.");
 		lobby.broadcastMessage("<Server> Game launched - 60 second duration.");
+		long gameStartTime = System.currentTimeMillis();
+		long lastUpdateTime = gameStartTime;
+		long timeElapsed = 0;
 		
 		while(!terminateFlag) {
 			try {
 				Thread.sleep(60000);
-				terminateFlag = true;
+				timeElapsed = System.currentTimeMillis() - lastUpdateTime;
+				lastUpdateTime = System.currentTimeMillis();
+				model.updateGameState(timeElapsed);
+				terminateFlag = model.checkGameOver();
+				
+				// TESTING
+				if(lastUpdateTime - gameStartTime >= 60000) {
+					terminateFlag = true;
+				}
 			}
-			catch (InterruptedException e) {}; // TESTING
+			catch (InterruptedException e) {};
 		}
 		
 		lobby.broadcastMessage("<Server> Game terminating.");
@@ -152,15 +164,24 @@ public class GameController implements Runnable, GameListener {
 	}
 	
 	/**
-	 * Generates a new instance of a GameModel subclass based on the currently
+	 * Generates a new instance of a GameModel subclass based on the passed
+	 * GameType. Generates a game of the default game type if a null gameType
+	 * was passed.
 	 */
-	public void generateGameModel(GameType gameType) {
+	private void generateGameModel(GameType gameType) {
+		if(gameType == null) {
+			gameType = GameType.getDefault();
+		}
+		
 		switch(gameType) {
 		case LIGHTCYCLES:
 			model = new LightCycles();
 			break;
 		case TANK_SIMULATION:
 			model = new TankSimulation();
+			break;
+		case FREETEST:
+			model = new FreeTest();
 			break;
 		}
 		model.addListener(this);

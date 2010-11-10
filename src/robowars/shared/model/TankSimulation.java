@@ -22,7 +22,7 @@ public class TankSimulation extends GameModel {
 		this.initialObstacles = initialObstacles;
 	}
 	
-	public void updateGameState(int timeElapsed) {
+	public void updateGameState(long timeElapsed) {
 		
 	}
 	
