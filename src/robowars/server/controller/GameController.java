@@ -63,10 +63,12 @@ public class GameController implements Runnable, GameListener {
 	 * @param player	The user to issue remote commands
 	 * @param robot	The robot to be controlled
 	 */
-	public synchronized void addPlayer(UserProxy player, RobotProxy robot) {
-		controlPairs.add(new ControlPair(player, robot));
-		player.setGameController(this);
-		robot.setGameController(this);
+	public void addPlayer(UserProxy player, RobotProxy robot) {
+		synchronized(controlPairs) {
+			controlPairs.add(new ControlPair(player, robot));
+			player.setGameController(this);
+			robot.setGameController(this);
+		}
 		
 		log.debug("Added control pair: " + player.getUser().getUsername() + " <-> " 
 				+ robot.getIdentifier());
@@ -76,8 +78,10 @@ public class GameController implements Runnable, GameListener {
 	 * Adds a spectator to the game
 	 * @param player	The player to spectate
 	 */
-	public synchronized void addSpectator(UserProxy player) {
-		spectators.add(player);
+	public void addSpectator(UserProxy player) {
+		synchronized(spectators) {
+			spectators.add(player);
+		}
 	}
 	
 	/**
@@ -85,9 +89,11 @@ public class GameController implements Runnable, GameListener {
 	 * @return	True if the passed player proxy is part of a robot control pair
 	 */
 	public synchronized boolean isPlayer(UserProxy player) {
-		for(ControlPair pair : controlPairs) {
-			if(pair.getUserProxy() == player) {
-				return true;
+		synchronized(controlPairs) {
+			for(ControlPair pair : controlPairs) {
+				if(pair.getUserProxy() == player) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -100,9 +106,11 @@ public class GameController implements Runnable, GameListener {
 	 * 			control pair
 	 */
 	public synchronized RobotProxy getPairedRobot(UserProxy player) {
-		for (ControlPair pair : controlPairs) {
-			if(pair.getUserProxy() == player) {
-				return pair.getRobotProxy();
+		synchronized(controlPairs) {
+			for (ControlPair pair : controlPairs) {
+				if(pair.getUserProxy() == player) {
+					return pair.getRobotProxy();
+				}
 			}
 		}
 		
@@ -125,7 +133,22 @@ public class GameController implements Runnable, GameListener {
 				Thread.sleep(60000);
 				timeElapsed = System.currentTimeMillis() - lastUpdateTime;
 				lastUpdateTime = System.currentTimeMillis();
+				
+				// Update game physics
 				model.updateGameState(timeElapsed);
+				
+				// Fetch and send any required commands to robots
+				synchronized(controlPairs) {
+					for(ControlPair pair : controlPairs) {
+						RobotCommand command = 
+							model.getCurrentRobotCommand(pair.getRobotProxy().getIdentifier());
+						if(command != null) {
+							pair.getRobotProxy().sendCommand(command);
+						}
+					}
+				}
+				
+				// Check for game termination state
 				terminateFlag = model.checkGameOver();
 				
 				// TESTING

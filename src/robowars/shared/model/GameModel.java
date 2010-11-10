@@ -95,6 +95,8 @@ public abstract class GameModel implements Serializable{
 	}
 	
 	public boolean isValidCommand(RobotCommand command){
+		// TODO: This should be implemented through overriding the method
+		// in the subclasses for the individual game modes
 		if (gameType == GameType.LIGHTCYCLES){
 			if (command.getType() == CommandType.MOVE_CONTINUOUS || 
 					command.getType() == CommandType.TURN_RIGHT_ANGLE_LEFT || 
