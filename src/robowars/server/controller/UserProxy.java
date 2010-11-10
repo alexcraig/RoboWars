@@ -275,6 +275,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		if(!command.startsWith("<") || !command.contains(">")) {
 			log.info("No tilt information provided with gameplay command.");
 			controller.processInput(this, null, command);
+			return;
 		}
 		
 		// Assume valid input at this point

@@ -143,7 +143,7 @@ public class ServerLobby {
 		if(robots.size() < maxRobots) {
 			robots.add(robot);
 			addSuccess = true;
-			log.debug(robot.getIdentifier() + " added to lobby.");
+			log.debug("Robot: " + robot.getIdentifier() + " added to lobby.");
 			for(ServerLobbyListener listener : listeners) {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
 			}
@@ -158,12 +158,12 @@ public class ServerLobby {
 	 */
 	public synchronized void unregisterRobot(RobotProxy robot) {
 		if(robots.remove(robot)) {
-			log.debug(robot.getIdentifier() + " removed from lobby.");
+			log.debug("Robot: " + robot.getIdentifier() + " removed from lobby.");
 			for(ServerLobbyListener listener : listeners) {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
 			
-			// TODO: Stop game in progress
+			// TODO: Stop game in progress if robot was in use
 		}
 	}
 	

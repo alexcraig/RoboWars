@@ -50,10 +50,12 @@ public class RobotProxy {
 	 * @param identifier	A string identifier for this robot
 	 */
 	public RobotProxy(ServerLobby lobby, NXTInfo nxtInfo) {
+		this.lobby = lobby;
+		
 		// Use test sizes for now, actual dimensions should probably be sent
 		// by the robot
-		this.lobby = lobby;
 		robot = new GameRobot(50, 50, nxtInfo.name);
+		
 		controller = null;
 		nxtComm = null;
 		outputStream = null;
@@ -67,7 +69,7 @@ public class RobotProxy {
 	 * @param nxtInfo	An NXTInfo object defining the robot to be connected
 	 * 					to (usually from a call to search on an NXTComm object)
 	 */
-	private void openConnection(NXTInfo nxtInfo) {
+	public void openConnection(NXTInfo nxtInfo) {
 		try {
 			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
 			nxtComm.open(nxtInfo);
@@ -77,6 +79,13 @@ public class RobotProxy {
 		}
 		outputStream = nxtComm.getOutputStream();
 		lobby.registerRobot(this);
+	}
+	
+	/**
+	 * @return	The lobby that the RobotProxy is associated with.
+	 */
+	public ServerLobby getServerLobby() {
+		return lobby;
 	}
 	
 	/**
