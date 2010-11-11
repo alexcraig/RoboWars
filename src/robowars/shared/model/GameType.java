@@ -1,7 +1,7 @@
 package robowars.shared.model;
 
 public enum GameType {
-	TANK_SIMULATION, LIGHTCYCLES;
+	TANK_SIMULATION, LIGHTCYCLES, FREETEST;
 	
 	public static GameType getDefault() {
 		return LIGHTCYCLES;
@@ -17,6 +17,8 @@ public enum GameType {
 			return 2;
 		case LIGHTCYCLES:
 			return 1;
+		case FREETEST:
+			return 1;
 		default:
 			return 0;
 		}
@@ -31,6 +33,8 @@ public enum GameType {
 			return LIGHTCYCLES;
 		} else if (gameType.equalsIgnoreCase("Tank Simulation")) {
 			return TANK_SIMULATION;
+		} else if (gameType.equalsIgnoreCase("Free Test")) {
+			return FREETEST;
 		} else {
 			return null;
 		}
@@ -45,6 +49,8 @@ public enum GameType {
 			return "Tank Simulation";
 		case LIGHTCYCLES:
 			return "Light Cycles";
+		case FREETEST:
+			return "Free Test";
 		default:
 			return null;
 		}

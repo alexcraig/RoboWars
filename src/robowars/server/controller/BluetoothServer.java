@@ -34,7 +34,11 @@ public class BluetoothServer implements Runnable {
 		// TODO: Properly ensure duplicate connections don't occur (check ServerLobby
 		// to see if robot already exists?)
 		
+<<<<<<< HEAD
 		ArrayList<String> triedInfos = new ArrayList<String>();
+=======
+		ArrayList<String> triedInfoNames = new ArrayList<String>();
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 		
 		// Generate NXTComm object to manage Bluetooth connections
 		while(true) {
@@ -44,15 +48,26 @@ public class BluetoothServer implements Runnable {
 			
 				NXTInfo[] allNxts = nxtComm.search("NXT",NXTCommFactory.BLUETOOTH);
 				for(NXTInfo nxt : allNxts) {
+<<<<<<< HEAD
 					if(!triedInfos.contains(nxt.name)) {
 						log.info("Discovered NXT: " + nxt.name);
 						new RobotProxy(lobby, nxt);
 						triedInfos.add(nxt.name);
+=======
+					if(!triedInfoNames.contains(nxt.name)) {
+						log.info("Discovered NXT: " + nxt.name);
+						new RobotProxy(lobby, nxt);
+						triedInfoNames.add(nxt.name);
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 					}
 				}
 				
 			} catch (NXTCommException e) {
 				log.error("Bluetooth device could not be found. Robot registration will not be supported.");
+<<<<<<< HEAD
+=======
+				return;
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 			}
 			
 		}

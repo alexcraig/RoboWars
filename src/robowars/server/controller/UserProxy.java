@@ -178,7 +178,11 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * r:<t or f> - set ready state
 	 * s:<t or f> - set pure spectator state
 	 * g:<game_type_string> - set game type
+<<<<<<< HEAD
 	 * c:<x,y,z> or c:<x,y,z>button_string 
+=======
+	 * c:<x,y,z> or c:<x,y,z>button_string  or c:button_string
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 	 * 		a command string to be passed to a paired robot
 	 * 		(Note: If no gyro is available tilt should always be <0,0,0>
 	 * l - launch game
@@ -273,11 +277,19 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		
 		// Rough check of tilt validity (use regex instead?)
 		if(!command.startsWith("<") || !command.contains(">")) {
+<<<<<<< HEAD
 			log.error("Invalid gameplay command format (tilt vector format invalid).");
 			return;
 		}
 		
 		
+=======
+			log.info("No tilt information provided with gameplay command.");
+			controller.processInput(this, null, command);
+			return;
+		}
+		
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 		// Assume valid input at this point
 		Vector<Float> tilt = new Vector<Float>();
 		
@@ -299,6 +311,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			tilt.addElement(tiltY);
 			tilt.addElement(tiltZ);
 			
+<<<<<<< HEAD
 		} catch (NumberFormatException e) {
 			log.error("Invalid gameplay command format (tilt vector format invalid).");
 			return;
@@ -306,6 +319,14 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		
 		controller.processInput(this, tilt, command);
 		
+=======
+		} catch (Exception e) {
+			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			log.error("Invalid gameplay command format (gameplay command format invalid).");
+			return;
+		}
+		
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 	}
 
 	@Override

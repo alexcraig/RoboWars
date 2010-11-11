@@ -3,6 +3,8 @@ package robowars.server.controller;
 import org.apache.log4j.PropertyConfigurator;
 
 import robowars.server.view.AdminView;
+import robowars.shared.model.CommandType;
+import robowars.test.TestRobotProxy;
 
 /**
  * Entry point for the RoboWars server. This class is responsible for launching
@@ -32,6 +34,10 @@ public class SystemControl {
 		
 		// Start the NXT Bluetooth discovery server
 		new Thread(new BluetoothServer(lobby)).start();
+		
+		// TESTING
+		new TestRobotProxy(lobby, "Robot1");
+		new TestRobotProxy(lobby, "Robot2");
 	}
 	
 }

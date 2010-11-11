@@ -143,7 +143,7 @@ public class ServerLobby {
 		if(robots.size() < maxRobots) {
 			robots.add(robot);
 			addSuccess = true;
-			log.debug(robot.getIdentifier() + " added to lobby.");
+			log.debug("Robot: " + robot.getIdentifier() + " added to lobby.");
 			for(ServerLobbyListener listener : listeners) {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_REGISTERED, robot));
 			}
@@ -158,12 +158,16 @@ public class ServerLobby {
 	 */
 	public synchronized void unregisterRobot(RobotProxy robot) {
 		if(robots.remove(robot)) {
-			log.debug(robot.getIdentifier() + " removed from lobby.");
+			log.debug("Robot: " + robot.getIdentifier() + " removed from lobby.");
 			for(ServerLobbyListener listener : listeners) {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
 			
+<<<<<<< HEAD
 			// TODO: Stop game in progress
+=======
+			// TODO: Stop game in progress if robot was in use
+>>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 		}
 	}
 	
@@ -262,6 +266,11 @@ public class ServerLobby {
 		if (gameInProgress()) {
 			log.debug("Game launch requested, but game is in progress.");
 			broadcastMessage("<Server> Game launch requested, but game is in progress.");
+			return;
+		}
+		
+		if(selectedGameType == null) {
+			log.error("Attempted game launch with null game type.");
 			return;
 		}
 		

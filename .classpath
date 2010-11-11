@@ -5,9 +5,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/bluecove.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/leJOS NXJ/lib/classes.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/leJOS NXJ/lib/jtools.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/leJOS NXJ/lib/pccomm.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/leJOS NXJ/lib/pctools.jar"/>
+	<classpathentry kind="lib" path="lib/classes.jar"/>
+	<classpathentry kind="lib" path="lib/jtools.jar"/>
+	<classpathentry kind="lib" path="lib/pccomm.jar"/>
+	<classpathentry kind="lib" path="lib/pctools.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

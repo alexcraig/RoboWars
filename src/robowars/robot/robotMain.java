@@ -6,6 +6,7 @@ import lejos.nxt.*;
 public class robotMain {
 	private static DataOutputStream dataOut;
 	private static DataInputStream dataIn;
+	
 	public static void main (String args[]){
 	    RobotMovement move = new RobotMovement();
 		NXTConnection connection = USB.waitForConnection();

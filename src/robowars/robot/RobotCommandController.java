@@ -20,6 +20,7 @@ public class RobotCommandController extends Thread{
 		 dataIn=connection.openDataInputStream();
 		 move=new RobotMovement();
 	}
+	
 	public void run(){
 		int input;
 		try {
