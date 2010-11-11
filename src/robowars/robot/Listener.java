@@ -63,6 +63,37 @@ public class Listener implements KeyListener{
 				e.printStackTrace();
 			}
 		}
+		if(arg0.getKeyCode()==KeyEvent.VK_F){
+			try {
+				System.out.println("faster");
+				dataOut.write(6);
+				dataOut.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(arg0.getKeyCode()==KeyEvent.VK_D){
+			try {
+				System.out.println("Slower");
+				dataOut.write(7);
+				dataOut.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(arg0.getKeyCode()==KeyEvent.VK_X){
+			try {
+				System.out.println("Exit");
+				dataOut.write(8);
+				dataOut.flush();
+				System.exit(0);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 	}
 

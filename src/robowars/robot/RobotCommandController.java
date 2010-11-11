@@ -6,12 +6,17 @@ import lejos.nxt.comm.*;
 
 public class RobotCommandController extends Thread{
 	private RobotMovement move;
-	private DataOutputStream dataOut;
+	private ObjectOutputStream dataOut;
 	private DataInputStream dataIn;
 	
 	public RobotCommandController(){
 		 NXTConnection connection = USB.waitForConnection();
-		 dataOut=connection.openDataOutputStream();
+		 try {
+			dataOut=new ObjectOutputStream(connection.openDataOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		 dataIn=connection.openDataInputStream();
 		 move=new RobotMovement();
 	}
@@ -20,7 +25,6 @@ public class RobotCommandController extends Thread{
 		try {
 			while((input=dataIn.readInt())!=-1){
 				if(input==1){
-					System.out.println("I GET HERE");
 					move.moveForward();
 				}
 				if(input==2){
@@ -32,6 +36,13 @@ public class RobotCommandController extends Thread{
 				if(input==4){
 					move.turnLeft();
 				}
+				if(input==5){
+					move.stop();
+				}
+				if(input==6){move.speedUp();}
+				if(input==7)move.slowDown();
+				if(input==8)System.exit(0);
+				dataOut.writeObject(move.getPosition());
 			}
 		} catch (IOException e) {
 		}

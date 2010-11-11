@@ -12,8 +12,8 @@ public class KeyController {
 	public static void main (String args[]){
 		NXTComm nxtComm = null;
 		try {
-			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.USB);
-			nxtComm.open(nxtComm.search(null, NXTCommFactory.USB)[0]);
+			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
+			nxtComm.open(nxtComm.search(null, NXTCommFactory.BLUETOOTH)[0]);
 		} catch (NXTCommException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

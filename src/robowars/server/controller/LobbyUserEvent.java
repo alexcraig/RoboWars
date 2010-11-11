@@ -1,5 +1,7 @@
 package robowars.server.controller;
 
+import robowars.shared.model.User;
+
 /**
  * Event class indicating that the state of a user connected to a server
  * lobby has changed (either the player has joined/left the server or their
@@ -7,8 +9,8 @@ package robowars.server.controller;
  */
 public class LobbyUserEvent extends ServerLobbyEvent {
 	
-	/** The proxy representing the user who's state has changed */
-	private UserProxy user;
+	/** The user who's state has changed */
+	private User user;
 	
 	/**
 	 * Generates a new LobbyUserEvent
@@ -16,7 +18,7 @@ public class LobbyUserEvent extends ServerLobbyEvent {
 	 * @param type	The type of the event (constants defined in ServerLobbyEvent)
 	 * @param user	The user the event refers to
 	 */
-	public LobbyUserEvent(ServerLobby src, int type, UserProxy user) {
+	public LobbyUserEvent(ServerLobby src, int type, User user) {
 		super(src, type);
 		this.user = user;
 	}
@@ -24,7 +26,7 @@ public class LobbyUserEvent extends ServerLobbyEvent {
 	/**
 	 * @return	The user this event refers to
 	 */
-	public UserProxy getUser() {
+	public User getUser() {
 		return user;
 	}
 	

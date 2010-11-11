@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 import robowars.shared.model.GameType;
+import robowars.shared.model.User;
 
 /**
  * Manages communications with a single user connected through an existing 
@@ -18,8 +20,11 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(UserProxy.class);
 	
-	/** The username of the connected user */
-	private String username;
+	/** 
+	 * The User object which stores information on the state of the user
+	 * connected to this proxy.
+	 */
+	private User user;
 
 	/** Reader for client input */
 	private BufferedReader inputStream;
@@ -30,26 +35,17 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The socket to generate input/output streams for */
 	private Socket userSocket;
 	
-	/** Flag to determine if the connection handshake has been performed */
-	private boolean handshakeComplete;
-	
-	/** The "ready" status of the user (used to determine if a new game can start */
-	private boolean isReady;
-	
-	/** Flag indicating if a video stream should be sent to this user */
-	private boolean videoEnabled;
-	
-	/** 
-	 * Flag indicating whether a user is a pure spectator. If true, the user should
-	 * not be considered for control pairing with robots.
-	 */
-	private boolean isPureSpectator;
-	
 	/** The server lobby that manages the user */
 	private ServerLobby lobby;
 	
 	/** The media server that streams video to the user */
 	private MediaStreamer mediaStreamer;
+	
+	/** 
+	 * The GameController object managing the game this proxy is
+	 * participating in (null if no game is in progress).
+	 */
+	private GameController controller;
 	
 	/**
 	 * Generates a new UserProxy
@@ -64,11 +60,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		this.mediaStreamer = media;
 		inputStream = null;
 		outputStream = null;
-		handshakeComplete = false;
-		username = null;
-		isReady = false;
-		videoEnabled = false;
-		isPureSpectator = false;
+		controller = null;
 	}
 	
 	public void run(){
@@ -90,21 +82,22 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			}
 			
 			// Handshake and UDP connection should happen here
-			username = inputStream.readLine();
-			log.debug("Client username: " + username);
+			String name = inputStream.readLine();
+			user = new User(name);
+			log.debug("Client username: " + user.getUsername());
 			
 			synchronized(outputStream) {
-				outputStream.println(username + " connected to: " + lobby.getServerName());
+				outputStream.println(user.getUsername() + " connected to: " + lobby.getServerName());
 			}
 			
-			if (lobby.addUser(this)) {
+			if (lobby.addUserProxy(this)) {
 				// Read strings from socket until connection is terminated
 				String incomingMessage;
 				while ((incomingMessage = inputStream.readLine()) != null) {
 					log.debug("Received: " + incomingMessage);
 					handleInput(incomingMessage);
 				}
-				log.info(username + " terminated connection with server.");
+				log.info(user.getUsername() + " terminated connection with server.");
 			} else {
 				outputStream.println("[Error - Server Full]");
 			}
@@ -112,7 +105,8 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
-			lobby.removeUser(this);
+			lobby.removeUserProxy(this);
+			user = null;
 			try {
 				outputStream.close();
 				inputStream.close();
@@ -122,6 +116,21 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			}
 		}
 		
+	}
+	
+	/**
+	 * Sets the user object that this proxy is managing communication with.
+	 * @param user	The user object that this proxy is managing communication with
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	/**
+	 * @return	The User object this proxy is managing communication with
+	 */
+	public User getUser() {
+		return user;
 	}
 	
 	/**
@@ -136,40 +145,29 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	
 	/**
 	 * Checks whether the user has successfully performed the authentication
-	 * handshake (and therefore a username has been supplied).
-	 * @return true if the user has performed the connection handshake.
+	 * handshake (determined by checking if an associated User object exists).
+	 * @return true if the proxy is associated with a valid User object
 	 */
 	public boolean isConnected() {
-		return (handshakeComplete && username != null);
+		return (user != null);
 	}
 	
 	/**
-	 * Sets the ready status of the user.
-	 * @param isReady	The ready status of the user (true if a new game can start)
+	 * Sets the instance of GameController that this UserProxy should pass
+	 * input commands to.
+	 * @param controller	The GameController instance to pass inputs to.
 	 */
-	public void setReady(boolean isReady) {
-		this.isReady = isReady;
+	public void setGameController(GameController controller) {
+		if(controller != null) {
+			this.controller = controller;
+		}
 	}
 	
 	/**
-	 * @return	The ready status of the user.
+	 * Clears all references to a GameController for the proxy.
 	 */
-	public boolean isReady() {
-		return isReady;
-	}
-	
-	/**
-	 * @return	The username of the connected user
-	 */
-	public String getUsername() {
-		return username;
-	}
-	
-	/**
-	 * @return	True if the user is a pure spectator (has opted-out of robot control)
-	 */
-	public boolean isPureSpectator() {
-		return isPureSpectator;
+	public void clearGameController() {
+		controller = null;
 	}
 	
 	/**
@@ -177,38 +175,37 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * 
 	 * Commands:
 	 * m:<message> - chat message 
-	 * t:<x,y,z> - tilt reading <x,y,z> angle on each axis
-	 * b:<button_chars> - button input
 	 * r:<t or f> - set ready state
 	 * s:<t or f> - set pure spectator state
 	 * g:<game_type_string> - set game type
+	 * c:<x,y,z> or c:<x,y,z>button_string 
+	 * 		a command string to be passed to a paired robot
+	 * 		(Note: If no gyro is available tilt should always be <0,0,0>
 	 * l - launch game
 	 * q - disconnect
 	 */
-	private void handleInput(String command){	
-		if(command.startsWith("m:")) {
-			lobby.broadcastMessage(getUsername() + ": " + command.substring(2));
+	private void handleInput(String command){
+		if(user == null) {
+			log.error("Proxy attempted to handle input with no associated user.");
+			return;
+		}
+		
+		if(command.startsWith("c:")) {
+			handleGameplayCommand(command.substring(2));
+		} else if(command.startsWith("m:")) {
+			// Chat message
+			lobby.broadcastMessage(user.getUsername() + ": " + command.substring(2));
 			
 		} else if(command.startsWith("r:")) {
-			
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				setReady(true);
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				setReady(false);
-			}
-			lobby.broadcastUserStateUpdate(this);
+			// Change of ready state
+			handleChangeReadyState(command.substring(2,3));
 			
 		} else if(command.startsWith("s:")) {
+			// Change of spectator state
+			handleChangeSpectatorState(command.substring(2,3));
 			
-			if (command.substring(2,3).equalsIgnoreCase("t")) {
-				isPureSpectator = true;
-			} else if (command.substring(2,3).equalsIgnoreCase("f")) {
-				isPureSpectator = false;
-			}
-			lobby.broadcastUserStateUpdate(this);
-			
-		}else if(command.startsWith("g:")) {
-			
+		} else if(command.startsWith("g:")) {
+			// Change of game type
 			if(GameType.parseString(command.substring(2)) != null) {
 				lobby.setGameType(GameType.parseString(command.substring(2)));
 			}
@@ -222,14 +219,93 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * Handles user input which requests a new game be launched.
 	 */
 	private void processGameLaunch() {
-		if(isPureSpectator) {
-			log.debug("Game launch blocked (" + username + " is a pure spectator)");
+		if(user.isPureSpectator()) {
+			log.debug("Game launch blocked (" + user.getUsername() + " is a pure spectator)");
 			synchronized(outputStream) {
 				outputStream.println("Spectators may not launch a new game.");
 			}
 		} else {
 			lobby.launchGame();
 		}
+	}
+	
+	/**
+	 * Handles client input that corresponds to a change in ready state.
+	 * @param newState	The new ready state (either "t" or "f")
+	 */
+	private void handleChangeReadyState(String newState) {
+		if (newState.equalsIgnoreCase("t")) {
+			user.setReady(true);
+		} else if (newState.equalsIgnoreCase("f")) {
+			user.setReady(false);
+		} else {
+			// Ensures broadcast only occurs if state actually changed
+			return;
+		}
+		
+		lobby.broadcastUserStateUpdate(this);
+	}
+	
+	/**
+	 * Handles client input that corresponds to a change in spectator state.
+	 * @param newState	The new spectator state (either "t" or "f")
+	 */
+	private void handleChangeSpectatorState(String newState) {
+		if (newState.equalsIgnoreCase("t")) {
+			user.setPureSpectator(true);
+		} else if (newState.equalsIgnoreCase("f")) {
+			user.setPureSpectator(false);
+		} else {
+			// Ensures broadcast only occurs if state actually changed
+			return;
+		}
+		lobby.broadcastUserStateUpdate(this);
+	}
+	
+	/**
+	 * Handles user input that should be passed to the game controller
+	 * and treated as a remote robot command.
+	 * @param command	The command string received from the client
+	 */
+	private void handleGameplayCommand(String command) {
+		// Ignore commands from unpaired players
+		if(controller == null) { return; }
+		
+		// Rough check of tilt validity (use regex instead?)
+		if(!command.startsWith("<") || !command.contains(">")) {
+			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			return;
+		}
+		
+		
+		// Assume valid input at this point
+		Vector<Float> tilt = new Vector<Float>();
+		
+		try {
+			// Get X tilt
+			Float tiltX = Float.parseFloat(command.substring(1, command.indexOf(",")));
+			command = command.substring(command.indexOf(",") + 1);
+			
+			// Get Y tilt
+			Float tiltY = Float.parseFloat(command.substring(0, command.indexOf(",")));
+			command = command.substring(command.indexOf(",") + 1);
+
+			// Get Z tilt
+			Float tiltZ = Float.parseFloat(command.substring(0, command.indexOf(">")));
+			command = command.substring(command.indexOf(">") + 1);
+
+			// Read tilt floats into a vector
+			tilt.addElement(tiltX);
+			tilt.addElement(tiltY);
+			tilt.addElement(tiltZ);
+			
+		} catch (NumberFormatException e) {
+			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			return;
+		}
+		
+		controller.processInput(this, tilt, command);
+		
 	}
 
 	@Override

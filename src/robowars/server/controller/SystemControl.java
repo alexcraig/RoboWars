@@ -27,10 +27,6 @@ public class SystemControl {
 		// Generate the administrator GUI
 		new AdminView(VERSION_STRING, lobby);
 		
-		// TESTING: Add dummy robot proxies
-		lobby.registerRobot(new RobotProxy("DUMMY:MAC:ADDRESS:1"));
-		lobby.registerRobot(new RobotProxy("DUMMY:MAC:ADDRESS:2"));
-		
 		// Start a new TCP server listening on port 33330
 		new Thread(new TcpServer(33330, lobby)).start();
 		

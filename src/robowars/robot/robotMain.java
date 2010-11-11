@@ -27,6 +27,10 @@ public class robotMain {
 				if(input==4){
 					move.turnLeft();
 				}
+				if(input==5)move.stop();
+				if(input==6)move.speedUp();
+				if(input==7)move.slowDown();
+				if(input==8)System.exit(0);
 			}
 		} catch (IOException e) {
 		}

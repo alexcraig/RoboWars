@@ -12,9 +12,9 @@ public class ControlPair {
 	private RobotProxy robot;
 
 	/**
-	 * Generates a new control pair
-	 * @param user	The user issuing remote control commands
-	 * @param robot	The robot being controlled
+	 * Generates a new control pair from a user and robot proxy
+	 * @param user	The user proxy issuing remote control commands
+	 * @param robot	The robot proxy of the robot under control
 	 */
 	public ControlPair(UserProxy user, RobotProxy robot) {
 		this.user = user;
@@ -24,14 +24,14 @@ public class ControlPair {
 	/**
 	 * @return	The user proxy of the control pairing
 	 */
-	public UserProxy getUser() {
+	public UserProxy getUserProxy() {
 		return user;
 	}
 	
 	/**
 	 * @return	The robot proxy of the control pairing
 	 */
-	public RobotProxy getRobot() {
+	public RobotProxy getRobotProxy() {
 		return robot;
 	}
 }
