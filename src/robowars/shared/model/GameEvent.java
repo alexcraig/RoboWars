@@ -9,11 +9,8 @@ public class GameEvent extends EventObject{
 	public static final int COLLISION_DETECTED = 2;
 	public static final int PROJECTILE_FIRED = 3;
 	public static final int PROJECTILE_HIT = 4;
-<<<<<<< HEAD
-=======
 	public static final int PLAYER_1_WINS = 5;
 	public static final int PLAYER_2_WINS = 6;
->>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 
 	
 	private int type;
