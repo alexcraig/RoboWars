@@ -163,11 +163,7 @@ public class ServerLobby {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
 			
-<<<<<<< HEAD
-			// TODO: Stop game in progress
-=======
 			// TODO: Stop game in progress if robot was in use
->>>>>>> 9a5d31a390e7d072a22f5916cd27c8da2d306806
 		}
 	}
 	
