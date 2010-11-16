@@ -2,6 +2,7 @@ package robowars.server.controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Vector;
@@ -29,6 +30,9 @@ public class RobotProxy {
 	
 	/** Stream for robot output */
 	private OutputStream outputStream;
+	
+	/** Stream for robot input (needs a separate thread to continually read) */
+	private ObjectInputStream inputStream;
 	
 	/** The server lobby that the robot should register with. */
 	private ServerLobby lobby;
@@ -77,7 +81,27 @@ public class RobotProxy {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		outputStream = nxtComm.getOutputStream();
+		
+		try {
+			inputStream = new ObjectInputStream(nxtComm.getInputStream());
+			
+			// Once input stream is open, generate new thread to continually
+			// read input
+			new Thread(new Runnable(){
+
+				@Override
+				public void run() {
+					// TODO: Read incoming Pose information here
+				}
+				
+			}).start();
+			
+		} catch (IOException e) {
+			log.error("Error creating input stream for robot: " + 
+					getIdentifier());
+		}
 		lobby.registerRobot(this);
 	}
 	
