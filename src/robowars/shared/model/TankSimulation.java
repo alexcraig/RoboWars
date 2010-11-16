@@ -37,7 +37,7 @@ public class TankSimulation extends GameModel {
 	}
 
 	private void generateProjectile(GameRobot robot) {
-		entities.add(new Projectile(robot.getPosition(),robot.getHeading(),1,1,1,0));
+		entities.add(new Projectile(robot.getPose(),1,1,1,0));
 	}
 
 }

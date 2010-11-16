@@ -1,6 +1,7 @@
 package robowars.shared.model;
 
 import java.util.Vector;
+import lejos.robotics.Pose;
 
 public class FreeTest extends GameModel{
 
@@ -9,10 +10,8 @@ public class FreeTest extends GameModel{
 	public FreeTest() {
 		super.gameType = GameType.FREETEST;
 		super.initVariables();
-		Vector<Float> v = new Vector<Float>();
-		v.add(Float.valueOf(100));
-		v.add(Float.valueOf(0));
-		theWall = new Obstacle(v,null,10,10,0,false,false,0);
+		Pose p = new Pose(100,0,0);
+		theWall = new Obstacle(p,10,10,0,false,false,0);
 		entities.add(theWall);
 	}
 	

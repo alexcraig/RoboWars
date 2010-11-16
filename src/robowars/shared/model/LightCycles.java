@@ -2,6 +2,7 @@ package robowars.shared.model;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import lejos.robotics.Pose;
 
 public class LightCycles extends GameModel {
 
@@ -74,7 +75,7 @@ public class LightCycles extends GameModel {
 
 	}
 
-	public boolean updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
+	public boolean updateRobotPosition(String identifier, Pose pose) {
 		GameRobot robot = null;
 		for(GameRobot r : robots){
 			if(r.getRobotId() == identifier)
@@ -84,15 +85,15 @@ public class LightCycles extends GameModel {
 		if(robot == null)
 			return false;
 
-		if(!heading.equals(robot.getLastHeading())){
+		if(robot.getPose().getHeading() != robot.getLastPose().getHeading()){
 			spawnNewWall(robot);
 		}
 
-		return super.updateRobotPosition(identifier, pos, heading);
+		return super.updateRobotPosition(identifier, pose);
 	}
 
 	public void spawnNewWall(GameRobot robot) {
-		Obstacle newWall = new Obstacle(robot.getPosition(),robot.getHeading(),0,wallWidth,1,false,false,0);
+		Obstacle newWall = new Obstacle(robot.getPose(),0,wallWidth,1,false,false,0);
 		entities.add(newWall);
 		if(robot == super.robots.get(0)){
 			wallsOne.add(0, newWall);
@@ -105,11 +106,13 @@ public class LightCycles extends GameModel {
 		for(GameEntity e : entities){
 			if (e instanceof Obstacle){
 				if(robots.get(0).checkCollision(e)){
+					robots.get(0).setCommandOverride(new RobotCommand(CommandType.STOP));
 					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_1_WINS));
 					inProgress = false;
 					return true;
 				}
 				if(robots.get(1).checkCollision(e)){
+					robots.get(1).setCommandOverride(new RobotCommand(CommandType.STOP));
 					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_2_WINS));
 					inProgress = false;
 					return true;

@@ -3,6 +3,7 @@ package robowars.shared.model;
 import java.io.Serializable;
 import java.util.Vector;
 import java.util.ArrayList;
+import lejos.robotics.Pose;
 
 public abstract class GameModel implements Serializable{
 
@@ -60,7 +61,7 @@ public abstract class GameModel implements Serializable{
 
 	public abstract void updateGameState(long timeElapsed);
 
-	public boolean updateRobotPosition(String identifier, Vector<Float> pos, Vector<Float> heading) {
+	public boolean updateRobotPosition(String identifier, Pose pose) {
 		GameRobot robot = null;
 
 		for(GameRobot r : robots){
@@ -71,13 +72,17 @@ public abstract class GameModel implements Serializable{
 		if(robot == null)
 			return false;//error, robot with specified identifier doesn't exist.
 
-		robot.setPosition(pos);
-		robot.setHeading(heading);
+		robot.setPose(pose);
 		return true;
 	}
 
 	public RobotCommand getCurrentRobotCommand(String identifier) {
-		return null;
+		for(GameRobot r : robots){
+			if(r.getRobotId() == identifier){
+				return r.getCommandOverride();
+			}
+		}
+			return null;
 	}
 
 	public GameRobot getGameRobot(String identifier) {
@@ -127,10 +132,8 @@ public abstract class GameModel implements Serializable{
 			case 0:
 				newRobot = new GameRobot(1,1,identifier);break;
 			case 1:
-				Vector<Float> v = new Vector<Float>();
-				v.add(Float.valueOf(DEFAULT_ARENA_SIZE));
-				v.add(Float.valueOf(DEFAULT_ARENA_SIZE));
-				newRobot = new GameRobot(v,v,1,1,0,1,identifier);break;
+				Pose p = new Pose(DEFAULT_ARENA_SIZE,DEFAULT_ARENA_SIZE,180);
+				newRobot = new GameRobot(p,1,1,0,1,identifier);break;
 			default:
 				newRobot = new GameRobot(1,1,identifier);break;
 			}

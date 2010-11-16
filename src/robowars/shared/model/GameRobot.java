@@ -1,6 +1,8 @@
 package robowars.shared.model;
 
 import java.util.Vector;
+import lejos.robotics.Pose;
+import lejos.geom.Point;
 
 public class GameRobot extends GameEntity{
 
@@ -13,49 +15,39 @@ public class GameRobot extends GameEntity{
 
 	private int health;
 	private int startingHealth;
-	private Vector<Float> initLocation;
-	private Vector<Float> lastLocation;
-	private Vector<Float> lastHeading;
+	private Point initLocation;
+	private Pose lastPose;
 	private String robotIdentifier;
+	private RobotCommand commandOverride;
 
-	public GameRobot(Vector<Float> position, Vector<Float> heading, float length, float width, int id, int health, String robotId) {
-		super(position, heading, length, width, id);
+	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
+		super(pose, length, width, id);
 		this.startingHealth=health;
 		this.health=health;
-		this.initLocation=position;
-		this.lastLocation=position;
-		this.lastHeading=heading;
+		this.initLocation=pose.getLocation();
+		this.lastPose = pose;
 		this.robotIdentifier=robotId;
+		commandOverride = null;
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
-	* Generates a new robot with a position and heading of <0,0> and it's
-	* id set to 0.
+	* Generates a new robot with a position (0,0) and heading of 0 (looking 
+	* along positive x-axis) and it's id set to 0.
 	* @param length The length of the robot being represented
 	* @param width The width of the robot being represented
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
 	public GameRobot(float length, float width, String identifier) {
-		super(null, null, length, width, 0);
-
-		Vector<Float> position = new Vector<Float>();
-		position.addElement(Float.valueOf(0));
-		position.addElement(Float.valueOf(0));
-		setPosition(position);
-
-		Vector<Float> heading = new Vector<Float>();
-		heading.addElement(Float.valueOf(0));
-		heading.addElement(Float.valueOf(0));
-		setHeading(heading);
+		super(new Pose(0,0,0), length, width, 0);
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
-		initLocation = position;
-		lastLocation = position;
-		lastHeading = heading;
+		this.initLocation=pose.getLocation();
+		this.lastPose = pose;
 
 		robotIdentifier = identifier;
+		commandOverride = null;
 	}
 
 	public RobotCommand getResetPath(GameRobot[] hazzards){
@@ -63,10 +55,10 @@ public class GameRobot extends GameEntity{
 	}
 
 	public boolean checkCollision(GameEntity target){
-		float closestX=clamp(this.getX(), target.getX()-target.getLength(), target.getX()+target.getLength());
-		float closestY=clamp(this.getY(), target.getY()-target.getWidth(), target.getY()+target.getWidth());
-		float distanceX=closestX-this.getX();
-		float distanceY=closestY-this.getY();
+		float closestX=clamp(this.getPose().getX(), target.getPose().getX()-target.getLength(), target.getPose().getX()+target.getLength());
+		float closestY=clamp(this.getPose().getY(), target.getPose().getY()-target.getWidth(), target.getPose().getY()+target.getWidth());
+		float distanceX=closestX-this.getPose().getX();
+		float distanceY=closestY-this.getPose().getY();
 		if(((distanceX*distanceX)+(distanceY*distanceY))<=this.getWidth()*this.getWidth())return true;
 		return false;
 	}
@@ -77,23 +69,23 @@ public class GameRobot extends GameEntity{
 		return value;
 	}
 
-	public Vector<Float> getLastLocation(){
-		return lastLocation;
+	public Pose getLastPose(){
+		return lastPose;
 	}
 
-	public Vector<Float> getLastHeading(){
-		return lastHeading;
+	public void setPose(Pose newPose){
+		lastPose = super.getPose();
+		super.setPose(newPose);
+	}
+	
+	public void setCommandOverride(RobotCommand command){
+		commandOverride = command;
+	}
+	
+	public RobotCommand getCommandOverride(){
+		return commandOverride;
 	}
 
-	public void setPosition(Vector<Float> newPos){
-		lastLocation = super.getPosition();
-		super.setPosition(newPos);
-	}
-
-	public void setHeading(Vector<Float> newHeading){
-		lastHeading = super.getHeading();
-		super.setPosition(newHeading);
-	}
 
 	public void decreaseHealth(int change){health-=change;}
 	public String getRobotId(){return robotIdentifier;}

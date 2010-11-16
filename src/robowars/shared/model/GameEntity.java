@@ -2,6 +2,8 @@ package robowars.shared.model;
 
 import java.io.Serializable;
 import java.util.Vector;
+import lejos.robotics.Pose;
+import lejos.geom.Point;
 
 /**
 *
@@ -13,35 +15,24 @@ public abstract class GameEntity implements Serializable{
 
 
 	private static final long serialVersionUID = 5016873544195577415L;
-	private Vector<Float> position;
-	private Vector<Float> heading;
-	private float length;
-	private float width;
-	private int id;
+	protected Pose pose;
+	protected float length;
+	protected float width;
+	protected int id;
 
-	public GameEntity(Vector<Float> position, Vector<Float> heading, float length, float width, int id){
-		this.position=position;
-		this.heading=heading;
+	public GameEntity(Pose pose, float length, float width, int id){
+		this.pose = pose;
 		this.setLength(length);
 		this.width=width;
 		this.id=id;
 	}
 	public boolean checkCollision(GameEntity target){
-		if(((Float)position.get(0))-width<=target.getX()&&((Float)position.get(0))+width>=target.getX()&&
-			((Float)position.get(1))-getLength()<=target.getY()&&((Float)position.get(1))+getLength()>=target.getY())return true;
+		if((pose.getX())-width<=target.getPose().getX()&&(pose.getX())+width>=target.getPose().getX()&&
+			(pose.getY())-getLength()<=target.getPose().getY()&&(pose.getY())+getLength()>=target.getPose().getY())return true;
 		else return false;
 	}
-	public float getX() {
-		return position.get(0);
-	}
-	public float getY() {
-		return position.get(1);
-	}
-	public void setPosition(Vector<Float> newPos){
-		this.position=newPos;
-	}
-	public void setHeading(Vector<Float> newHeading){
-		this.heading=newHeading;
+	public void setPose(Pose pose){
+		this.pose = pose;
 	}
 	public void setLength(float length) {
 		this.length = length;
@@ -49,8 +40,9 @@ public abstract class GameEntity implements Serializable{
 	public float getLength() {
 		return length;
 	}
-	public Vector<Float> getHeading(){return heading;}
-	public Vector<Float> getPosition(){return position;}
+	public Pose getPose(){
+		return pose;
+	}
 	public int getId(){return id;}
 	public float getWidth(){return width;}
 
