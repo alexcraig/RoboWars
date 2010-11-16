@@ -44,7 +44,7 @@ public class GameController implements Runnable, GameListener {
 	 * soon as this flag becomes true the controller thread will terminate and 
 	 * remove all references to a game model and user / robot proxies.
 	 */
-	private boolean terminateFlag;
+	private volatile boolean terminateFlag;
 	
 	/**
 	 * Generates a new GameController
@@ -70,6 +70,7 @@ public class GameController implements Runnable, GameListener {
 			robot.setGameController(this);
 		}
 		
+		model.addRobot(robot.getIdentifier());
 		log.debug("Added control pair: " + player.getUser().getUsername() + " <-> " 
 				+ robot.getIdentifier());
 	}
@@ -88,7 +89,7 @@ public class GameController implements Runnable, GameListener {
 	 * @param player The player proxy to check against
 	 * @return	True if the passed player proxy is part of a robot control pair
 	 */
-	public synchronized boolean isPlayer(UserProxy player) {
+	public boolean isPlayer(UserProxy player) {
 		synchronized(controlPairs) {
 			for(ControlPair pair : controlPairs) {
 				if(pair.getUserProxy() == player) {
@@ -96,6 +97,22 @@ public class GameController implements Runnable, GameListener {
 				}
 			}
 		}
+		return false;
+	}
+	
+	/**
+	 * @param robot	The robot proxy to check against
+	 * @return	True if the passed robot proxy is involved in a running game.
+	 */
+	public boolean isActiveRobot(RobotProxy robot) {
+		synchronized(controlPairs) {
+			for(ControlPair pair : controlPairs) {
+				if(pair.getRobotProxy() == robot) {
+					return true;
+				}
+			}
+		}
+		
 		return false;
 	}
 	
@@ -123,56 +140,73 @@ public class GameController implements Runnable, GameListener {
 	 */
 	public void run() {
 		log.info("Game execution starting.");
-		lobby.broadcastMessage("<Server> Game launched - 60 second duration.");
+		lobby.broadcastMessage("<Server> Game launched.");
 		long gameStartTime = System.currentTimeMillis();
 		long lastUpdateTime = gameStartTime;
 		long timeElapsed = 0;
 		
 		while(!terminateFlag) {
-			try {
-				Thread.sleep(60000);
-				timeElapsed = System.currentTimeMillis() - lastUpdateTime;
-				lastUpdateTime = System.currentTimeMillis();
-				
-				// Update game physics
-				model.updateGameState(timeElapsed);
-				
-				// Fetch and send any required commands to robots
-				synchronized(controlPairs) {
-					for(ControlPair pair : controlPairs) {
-						RobotCommand command = 
-							model.getCurrentRobotCommand(pair.getRobotProxy().getIdentifier());
-						if(command != null) {
-							pair.getRobotProxy().sendCommand(command);
-						}
+			timeElapsed = System.currentTimeMillis() - lastUpdateTime;
+			lastUpdateTime = System.currentTimeMillis();
+			
+			// Update game physics
+			model.updateGameState(timeElapsed);
+			
+			// Fetch and send any required commands to robots
+			synchronized(controlPairs) {
+				for(ControlPair pair : controlPairs) {
+					RobotCommand command = 
+						model.getCurrentRobotCommand(pair.getRobotProxy().getIdentifier());
+					if(command != null) {
+						pair.getRobotProxy().sendCommand(command);
 					}
 				}
-				
-				// Check for game termination state
-				terminateFlag = model.checkGameOver();
-				
-				// TESTING
-				if(lastUpdateTime - gameStartTime >= 60000) {
-					terminateFlag = true;
-				}
 			}
-			catch (InterruptedException e) {};
+			
+			// Check for game termination state if the termination
+			// trigger is not already set.
+			if(!terminateFlag) {
+				terminateFlag = model.checkGameOver();
+			}
+			
+			// TESTING - 60 Second Limit
+			if(lastUpdateTime - gameStartTime >= 60000) {
+				terminateFlag = true;
+				lobby.broadcastMessage("<Server> 60 Second testing duration expired.");
+			}
 		}
 		
 		lobby.broadcastMessage("<Server> Game terminating.");
 		terminateGame();
 	}
 	
+	/**
+	 * Sets the termination flag of the GameController. This will cause the
+	 * controller to terminate the game and notify the lobby of the termination
+	 * on the next run through the game loop.
+	 */
+	public void triggerTermination() {
+		terminateFlag = true;
+	}
+	
+
+	/**
+	 * @return	True if the termination flag has been set.
+	 */
+	public synchronized boolean isTerminating() {
+		return terminateFlag;
+	}
 	/** 
 	 * Signals the lobby to remove references to the current game, and clears
 	 * all references to user and robot proxies.
 	 */
-	public synchronized void terminateGame() {
+	private synchronized void terminateGame() {
 		log.info("Game terminating.");
 		
 		for(ControlPair pair : controlPairs) {
 			pair.getUserProxy().clearGameController();
 			pair.getRobotProxy().clearGameController();
+			model.removeRobot(pair.getRobotProxy().getIdentifier());
 		}
 		
 		controlPairs.clear();

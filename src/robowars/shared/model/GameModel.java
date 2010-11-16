@@ -33,6 +33,7 @@ public abstract class GameModel implements Serializable{
 		arenaSize = new Vector<Float>(2);
 		inProgress = false;
 		entities = new ArrayList<GameEntity>();
+		robots = new ArrayList<GameRobot>();
 		minimumPlayers = gameType.getMinimumPlayers();
 		numRobots = 0;
 
@@ -123,6 +124,8 @@ public abstract class GameModel implements Serializable{
 
 	public abstract boolean checkGameOver();
 
+	// TODO: These methods should probably accept an existing GameRobot as
+	//       RobotProxy's now persistently store a GameRobot object
 
 	public void addRobot(String identifier) {
 		//In the constructor of GameRobot, two parameters id and robotid, what's the difference?
@@ -139,6 +142,19 @@ public abstract class GameModel implements Serializable{
 			}
 		entities.add(newRobot);
 		robots.add(newRobot);
+	}
+	
+	/**
+	 * Removes a GameRobot from the list of robots in play for this game.
+	 * @param identifier	The string identifier of the robot to remove
+	 */
+	public void removeRobot(String identifier) {
+		for(int i = 0; i < robots.size(); i++) {
+			if(robots.get(i).getRobotId().equals(identifier)) {
+				robots.remove(i);
+				return;
+			}
+		}
 	}
 
 	private byte[] serializeState() {

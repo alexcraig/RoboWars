@@ -4,7 +4,7 @@ public enum GameType {
 	TANK_SIMULATION, LIGHTCYCLES, FREETEST;
 	
 	public static GameType getDefault() {
-		return LIGHTCYCLES;
+		return FREETEST;
 	}
 	
 	/**

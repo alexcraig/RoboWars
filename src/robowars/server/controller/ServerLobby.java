@@ -129,7 +129,14 @@ public class ServerLobby {
 			}
 			listeners.remove(userProxy);
 			
-			// TODO: If user is currently playing, terminate the game
+			// Check if a game is running, and terminate the game
+			// if one of the active players has left
+			if(currentGame != null) {
+				if(currentGame.isPlayer(userProxy)) {
+					log.info("Active player left a game, triggering termination.");
+					currentGame.triggerTermination();
+				}
+			}
 		}
 	}
 	
@@ -163,7 +170,14 @@ public class ServerLobby {
 				listener.robotStateChanged(new LobbyRobotEvent(this, ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED, robot));
 			}
 			
-			// TODO: Stop game in progress if robot was in use
+			// Check if a game is running, and terminate the game
+			// if one of the active players has left
+			if(currentGame != null) {
+				if(currentGame.isActiveRobot(robot)) {
+					log.info("Active robot left a game, triggering termination.");
+					currentGame.triggerTermination();
+				}
+			}
 		}
 	}
 	
@@ -349,7 +363,18 @@ public class ServerLobby {
 	 * leaves the server.
 	 */
 	public synchronized void endCurrentGame() {
-		currentGame = null; // TODO: More complete termination
+		if(currentGame == null) {
+			log.error("No running game to terminate.");
+			return;
+		}
+		
+		if(!currentGame.isTerminating()) {
+			log.info("EndCurrentGame() called while GameController thread is still running.");
+			currentGame.triggerTermination();
+			return;
+		}
+		
+		currentGame = null;
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
 		}

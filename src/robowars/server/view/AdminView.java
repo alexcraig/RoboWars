@@ -176,9 +176,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 			addLineToMainChat("Game type changed to: " + event.getGameType().toString());
 			setGameTypeLabel(event.getGameType());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
-			addLineToMainChat("--- New game has been launched ---");
+			// addLineToMainChat("--- New game has been launched ---");
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_OVER) {
-			addLineToMainChat("--- Game in progress terminated ---");
+			// addLineToMainChat("--- Game in progress terminated ---");
 		}
 		
 	}
