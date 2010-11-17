@@ -2,50 +2,53 @@ package robowars.robot;
 
 import java.io.*;
 
+import robowars.shared.model.RobotCommand;
+import robowars.shared.model.CommandType;
 import lejos.nxt.comm.*;
 
 public class RobotCommandController extends Thread{
 	private RobotMovement move;
 	private ObjectOutputStream dataOut;
-	private DataInputStream dataIn;
+	private ObjectInputStream dataIn;
 	
 	public RobotCommandController(){
 		 NXTConnection connection = USB.waitForConnection();
 		 try {
 			dataOut=new ObjectOutputStream(connection.openDataOutputStream());
+			dataIn=new ObjectInputStream(connection.openDataInputStream());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 dataIn=connection.openDataInputStream();
 		 move=new RobotMovement();
 	}
 	
 	public void run(){
-		int input;
+		Object input;
 		try {
-			while((input=dataIn.readInt())!=-1){
-				if(input==1){
-					move.moveForward();
+			while((input=dataIn.readObject()) != null){
+				RobotCommand command= (RobotCommand)input;
+				if(command.getType()==CommandType.SET_POSITION){
+					move.setPos(command.getPos());
 				}
-				if(input==2){
-					move.moveBackwards();
-				}
-				if(input==3){
-					move.turnRight();
-				}
-				if(input==4){
+				if(command.getType()==CommandType.TURN_RIGHT_ANGLE_LEFT){
 					move.turnLeft();
 				}
-				if(input==5){
+				if(command.getType()==CommandType.TURN_RIGHT_ANGLE_RIGHT){
+					move.turnRight();
+				}
+				if(command.getType()==CommandType.MOVE_CONTINUOUS){
+					move.moveContinuous(command);
+				}
+				if(command.getType()==CommandType.STOP){
 					move.stop();
 				}
-				if(input==6){move.speedUp();}
-				if(input==7)move.slowDown();
-				if(input==8)System.exit(0);
 				dataOut.writeObject(move.getPosition());
 			}
 		} catch (IOException e) {
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

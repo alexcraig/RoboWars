@@ -1,5 +1,6 @@
 package robowars.robot;
 
+import robowars.shared.model.RobotCommand;
 import lejos.nxt.Motor;
 import lejos.robotics.*;
 import lejos.robotics.navigation.*;
@@ -19,22 +20,22 @@ public class RobotMovement {
 	public void moveForward() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.travel(50);
+		pilot.travel(15);
 	}
 	public void moveBackwards() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.travel(-50);
+		pilot.travel(-15);
 	}
 	public void turnRight() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(10);
+		pilot.rotate(90);
 	}
 	public void turnLeft() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(-10);
+		pilot.rotate(-90);
 	}
 	public void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())pilot.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
@@ -45,5 +46,15 @@ public class RobotMovement {
 	public void stop(){
 		pilot.stop();
 	}
+	public void setPos(Pose newPos){
+		navigator.setPose(newPos);
+	}
 	public Pose getPosition(){return navigator.getPose();}
+
+	public void moveContinuous(RobotCommand command) {
+		while(true){
+			navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
+			moveForward();
+		}
+	}
 }

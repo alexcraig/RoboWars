@@ -56,7 +56,12 @@ public class RobotCommand implements Serializable{
 		this.specialFlags = specialFlags;
 	}
 
-
+	public RobotCommand(Pose newPose){
+		this.newPos=newPose;
+	}
+	public Pose getPos(){
+		return newPos;
+	}
 	public float getThrottle() {
 		return throttle;
 	}
