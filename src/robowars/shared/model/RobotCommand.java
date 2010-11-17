@@ -3,19 +3,24 @@ package robowars.shared.model;
 import java.io.Serializable;
 import java.util.Vector;
 
+import lejos.robotics.Pose;
+
 public class RobotCommand implements Serializable{
 
 	private CommandType type;
 	private float throttle;
 	private float turnBearing;
 	private String specialFlags;
-	private Vector newPos;
+	private Pose newPos;
 
 	public static final float MAX_SPEED = 100;
 
-	public RobotCommand(CommandType type)
-		{
+	public RobotCommand(CommandType type){
 		this.type = type;
+		throttle = 0;
+		turnBearing = 0;
+		newPos = null;
+		specialFlags = null;
 
 		switch(type){
 			case MOVE_CONTINUOUS:
@@ -62,6 +67,21 @@ public class RobotCommand implements Serializable{
 
 	public CommandType getType() {
 		return type;
+	}
+	
+	public String toString() {
+		String returnStr = "[" + type.toString() + "|";
+		returnStr += "t:" + throttle + "|b:" + turnBearing;
+		if(specialFlags != null) {
+			returnStr += "|s:" + specialFlags;
+		}
+		
+		if(newPos != null) {
+			returnStr += "|x:" + newPos.getX() + " y:" + newPos.getY()
+				+ " h:" + newPos.getHeading();
+		} 
+		returnStr += "]";
+		return returnStr;
 	}
 
 }
