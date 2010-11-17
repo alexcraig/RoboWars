@@ -57,7 +57,11 @@ public class RobotCommand implements Serializable{
 	}
 
 	public RobotCommand(Pose newPose){
-		this.newPos=newPose;
+		this.type = CommandType.SET_POSITION;
+		throttle = 0;
+		turnBearing = 0;
+		specialFlags = null;
+		newPos = newPose;
 	}
 	public Pose getPos(){
 		return newPos;

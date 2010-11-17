@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,6 +17,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import lejos.robotics.Pose;
 
 import org.apache.log4j.Logger;
 
@@ -22,6 +28,7 @@ import robowars.server.controller.*;
 import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameListener;
 import robowars.shared.model.GameType;
+import robowars.shared.model.RobotCommand;
 
 /**
  * Provides a GUI for the server administrator to modify configuration options
@@ -32,13 +39,16 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	private static Logger log = Logger.getLogger(UserProxy.class);
 	
 	/** List models for the list of connected robots and users */
-	DefaultListModel robotListModel, userListModel;
+	private DefaultListModel robotListModel, userListModel;
 	
 	/** Area for displaying chat text */
-	JTextArea mainChatArea;
+	private JTextArea mainChatArea;
 	
 	/** JLabel to show the currently selected game type */
 	private JLabel curGameType;
+	
+	/** Reference to the ServerLobby this AdminView is administrating */
+	private ServerLobby lobby;
 	
 	/** 
 	 * Generates a new AdminView frame
@@ -49,6 +59,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 		super(windowTitle);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        
+        this.lobby = lobby;
         
 		// Set look and feel
 		try {
@@ -74,6 +86,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         userListModel = new DefaultListModel();
         JList robotList = new JList(robotListModel);
         JList userList = new JList(userListModel);
+        robotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        new PositionResetListener(robotList);
         
         // Setup the connected robots and user lists
         JPanel connectedListsPanel = new JPanel();
@@ -213,5 +227,66 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	
 	public void gameStateChanged(GameEvent event){
 		
+	}
+	
+	/**
+	 * Control class which manages issuing position reset commands to registered
+	 * robots based on admin input.
+	 */
+	private class PositionResetListener extends MouseAdapter {
+		/** 
+		 * The JList that this list should use to determine clicked indexes.
+		 */
+		private JList robotList;
+		
+		/**
+		 * Generates a new PositionResetListener watching the passed JList
+		 * @param robotList	The list of connected robot identifiers
+		 */
+		public PositionResetListener(JList robotList) {
+			this.robotList = robotList;
+			robotList.addMouseListener(this);
+		}
+		
+		/**
+		 * If a robot in the list of connected robots is double clicked and no
+		 * game is currently in progress that admin is prompted to enter a new
+		 * position and heading for the robot.
+		 */
+		public void mouseClicked(MouseEvent e) {
+			if (e.getClickCount() == 2) {
+				if(lobby.gameInProgress()) {
+					// Ignore attempts to reset position when game is in progress
+					log.info("Attempted position reset during active game.");
+					return;
+				}
+				
+				int index = robotList.locationToIndex(e.getPoint());
+				String robotId = (String)robotList.getModel().getElementAt(index);
+				try {
+					float xPos = Float.parseFloat(JOptionPane.showInputDialog(AdminView.this, 
+							"Please enter new X position coordinate.",
+							robotId + " - Position Reset", JOptionPane.DEFAULT_OPTION));
+					float yPos = Float.parseFloat(JOptionPane.showInputDialog(AdminView.this, 
+							"Please enter new Y position coordinate.",
+							robotId + " - Position Reset", JOptionPane.DEFAULT_OPTION));
+					float heading = Float.parseFloat(JOptionPane.showInputDialog(AdminView.this, 
+							"Please enter new heading.",
+							robotId + " - Position Reset", JOptionPane.DEFAULT_OPTION));
+					
+					Pose newPos = new Pose(xPos, yPos, heading);
+					
+					RobotProxy robot = lobby.getRobotProxy(robotId);
+					if(robot != null) {
+						robot.sendCommand(new RobotCommand(newPos));
+					}
+					  
+				} catch (NumberFormatException ex) {
+					JOptionPane.showMessageDialog(AdminView.this, 
+							"Invalid input, please try again.",
+					robotId + " - Position Reset (FAILED)", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
 	}
 }
