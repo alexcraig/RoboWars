@@ -30,35 +30,39 @@ public class BluetoothServer implements Runnable {
 	}
 
 	@Override
-	public void run() {
-		// TODO: Properly ensure duplicate connections don't occur (check ServerLobby
-		// to see if robot already exists?)
-		
-		ArrayList<String> triedInfoNames = new ArrayList<String>();
-		
-		// Generate NXTComm object to manage Bluetooth connections
-		while(true) {
-			
+	/**
+	 * Continually search for unregistered robots, and generate a RobotProxy
+	 * whenever a previously unseen robot is found.
+	 */
+	public void run() {		
+
+		while(true) {			
 			try {
 				NXTComm nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
 			
 				NXTInfo[] allNxts = nxtComm.search("NXT", NXTCommFactory.BLUETOOTH);
 				
 				for(NXTInfo nxt : allNxts) {
-					if(!triedInfoNames.contains(nxt.name)) {
+					if(!lobby.isRobotRegistered(nxt.name)) {
 						log.info("Discovered NXT: " + nxt.name);
 						new RobotProxy(lobby, nxt);
-						triedInfoNames.add(nxt.name);
 					}
 				}
+				
+				// Arbitrary delay between Bluetooth searches
+				// TODO: Allow Bluetooth searches to be triggered from the admin
+				// 		 panel
+				Thread.sleep(10000);
 				
 			} catch (NXTCommException e) {
 				log.error("Bluetooth device could not be found. Robot registration will not be supported.");
 				return;
+			} catch (InterruptedException e) {
+				log.error("Bluetooth server thread interrupted.");
+				e.printStackTrace();
+				return;
 			}
 			
 		}
-
-		
 	}
 }

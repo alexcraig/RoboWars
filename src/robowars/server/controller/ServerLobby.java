@@ -260,6 +260,16 @@ public class ServerLobby {
 		return selectedGameType;
 	}
 	
+	public synchronized boolean isRobotRegistered(String identifier) {
+		for(RobotProxy robot : robots) {
+			if(robot.getIdentifier().equals(identifier)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * @return	The name of the server
 	 */
