@@ -155,11 +155,17 @@ public class RobotProxy {
 					log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 				} catch (IOException e) {
 					log.error("Error writing command to robot: " + getIdentifier());
+					return;
 				}
 			}
 		} else {
 			log.error("Attempted to send command to robot: " + getIdentifier()
 					+ ", but output stream is null.");
+			return;
+		}
+		
+		if(command.getType() == CommandType.SET_POSITION) {
+			robot.setPose(command.getPos());
 		}
 	}
 	

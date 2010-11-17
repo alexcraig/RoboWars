@@ -260,19 +260,21 @@ public class ServerLobby {
 		return selectedGameType;
 	}
 	
+
 	/**
-	 * @param identifier	A robot identifier (usually fetched from an NXTInfo object)
-	 * @return	True if the specified identifier is already connected to the lobby,
-	 * 			false if not
+	 * Returns a RobotProxy registered to the lobby with the specified identifier
+	 * (if one exists)
+	 * @param identifier	The identifier of the robot to be fetched
+	 * @return	null if no such robot with the specified identifier exists
 	 */
-	public synchronized boolean isRobotRegistered(String identifier) {
+	public synchronized RobotProxy getRobotProxy(String identifier) {
 		for(RobotProxy robot : robots) {
 			if(robot.getIdentifier().equals(identifier)) {
-				return true;
+				return robot;
 			}
 		}
 		
-		return false;
+		return null;
 	}
 	
 	/**

@@ -43,7 +43,7 @@ public class BluetoothServer implements Runnable {
 				NXTInfo[] allNxts = nxtComm.search("NXT", NXTCommFactory.BLUETOOTH);
 				
 				for(NXTInfo nxt : allNxts) {
-					if(!lobby.isRobotRegistered(nxt.name)) {
+					if(lobby.getRobotProxy(nxt.name) == null) {
 						log.info("Discovered NXT: " + nxt.name);
 						new RobotProxy(lobby, nxt);
 					}
