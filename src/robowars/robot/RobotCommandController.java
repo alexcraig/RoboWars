@@ -43,6 +43,9 @@ public class RobotCommandController extends Thread{
 				if(command.getType()==CommandType.STOP){
 					move.stop();
 				}
+				if(command.getType()==CommandType.EXIT){
+					System.exit(0);
+				}
 				dataOut.writeObject(move.getPosition());
 			}
 		} catch (IOException e) {
