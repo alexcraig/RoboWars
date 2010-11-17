@@ -17,6 +17,7 @@ import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
 import lejos.pc.comm.NXTCommFactory;
 import lejos.pc.comm.NXTInfo;
+import lejos.robotics.Pose;
 
 /**
  * Manages communications with a single connected NXT robot.
@@ -74,34 +75,28 @@ public class RobotProxy {
 	 * 					to (usually from a call to search on an NXTComm object)
 	 */
 	public void openConnection(NXTInfo nxtInfo) {
+		// Open a Bluetooth connection to the specified NXT robot, and
+		// open to output stream to write to the robot
 		try {
 			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
 			nxtComm.open(nxtInfo);
+			outputStream = nxtComm.getOutputStream();
 		} catch (NXTCommException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error opening a connection to robot: " + getIdentifier());
+			return;
 		}
 		
-		outputStream = nxtComm.getOutputStream();
-		
+		// Open an input stream from the robot, and generate a new thread
+		// to continually read input
 		try {
 			inputStream = new ObjectInputStream(nxtComm.getInputStream());
-			
-			// Once input stream is open, generate new thread to continually
-			// read input
-			new Thread(new Runnable(){
-
-				@Override
-				public void run() {
-					// TODO: Read incoming Pose information here
-				}
-				
-			}).start();
-			
+			new Thread(new PositionReader()).start();
 		} catch (IOException e) {
 			log.error("Error creating input stream for robot: " + 
 					getIdentifier());
 		}
+		
+		// Register the robot with the server lobby
 		lobby.registerRobot(this);
 	}
 	
@@ -128,6 +123,15 @@ public class RobotProxy {
 	 */
 	public void clearGameController() {
 		controller = null;
+	}
+	
+
+	/**
+	 * @return	The GameController for the currently active game, or
+	 * 			null if no game is active.
+	 */
+	public GameController getGameController() {
+		return controller;
 	}
 	
 	/**
@@ -162,6 +166,55 @@ public class RobotProxy {
 					}
 				} catch (IOException e) {
 					log.error("Could not write to robot output stream.");
+				}
+			}
+		} else {
+			log.error("Attempted to send command to robot: " + getIdentifier()
+					+ ", but output stream is null.");
+		}
+	}
+	
+	/**
+	 * A thread which continually reads the input stream from the robot
+	 * and propagates position updates to the GameRobot and
+	 * GameController.
+	 */
+	private class PositionReader implements Runnable {
+		@Override
+		public void run() {
+			Object readObj = null;
+            
+            try {
+				while ((readObj = inputStream.readObject()) != null) {
+				    
+				    if (readObj instanceof Pose) {
+				    	Pose newPos = (Pose)readObj;
+
+				    	if(controller != null) {
+				    		// If the robot is currently active in a game,
+					    	// send the position update through the game
+				    		// controller...
+				    		controller.updateRobotPosition(RobotProxy.this, newPos);
+				    	} else { 
+				    		// ... otherwise, directly update the game
+				    		// robot instance (position updates to inactive
+				    		// robots do not need to be propagated and do
+				    		// not need to pass through the game controller)
+				    		robot.setPose(newPos);
+				    	}
+				    }
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				log.info("Closing input stream from robot: " + getIdentifier());
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+					log.error("Error closing input stream from robot: " + getIdentifier());
 				}
 			}
 		}

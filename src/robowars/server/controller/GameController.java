@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import lejos.robotics.Pose;
+
 import org.apache.log4j.Logger;
 
 import robowars.shared.model.CommandType;
@@ -312,8 +314,11 @@ public class GameController implements Runnable, GameListener {
 		return null;
 	}
 	
-	public void updateRobotPosition(RobotProxy robot, Vector<Float> position, 
-			Vector<Float> heading) {
+	public void updateRobotPosition(RobotProxy robot, Pose newPos) {
+		log.debug("Got robot position update:\n\tRobot: " + robot.getIdentifier()
+				+ "\n\tX: " + newPos.getX() + "\tY: " + newPos.getY() + "\tHeading: "
+				+ newPos.getHeading());
+		model.updateRobotPosition(robot.getIdentifier(), newPos);
 	}
 	
 	public void gameStateChanged(GameEvent event){
