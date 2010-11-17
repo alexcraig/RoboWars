@@ -17,7 +17,8 @@ public class SystemControl {
 	 * to ensure version mismatches between client and server do not occur, and
 	 * also used in administrator GUI)
 	 */
-	public static final String VERSION_STRING = "RoboWars V0.1";
+	public static final String USER_PROTOCOL_VERSION = "RoboWars V0.1";
+	public static final String ROBOT_PROTOCOL_VERSION = "RoboWars V0.1";
 	
 	public static void main (String args[]){
 		// Use log4j config file "log_config.properties"
@@ -27,7 +28,7 @@ public class SystemControl {
 		ServerLobby lobby = new ServerLobby("RoboWars Test Server", 6, 10);
 		
 		// Generate the administrator GUI
-		new AdminView(VERSION_STRING, lobby);
+		new AdminView(USER_PROTOCOL_VERSION, lobby);
 		
 		// Start a new TCP server listening on port 33330
 		new Thread(new TcpServer(33330, lobby)).start();
