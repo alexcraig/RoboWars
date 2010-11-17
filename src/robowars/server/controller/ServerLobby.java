@@ -260,9 +260,29 @@ public class ServerLobby {
 		return selectedGameType;
 	}
 	
+	/**
+	 * @param identifier	A robot identifier (usually fetched from an NXTInfo object)
+	 * @return	True if the specified identifier is already connected to the lobby,
+	 * 			false if not
+	 */
 	public synchronized boolean isRobotRegistered(String identifier) {
 		for(RobotProxy robot : robots) {
 			if(robot.getIdentifier().equals(identifier)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * @param username	A username to check against
+	 * @return	True if the specified username is already in use by a user
+	 * 			connected to the lobby
+	 */
+	public synchronized boolean isUsernameRegistered(String username) {
+		for(UserProxy user : users) {
+			if(user.getUser().getUsername().equals(username)) {
 				return true;
 			}
 		}

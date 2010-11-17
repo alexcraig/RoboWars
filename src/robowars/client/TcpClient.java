@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import robowars.server.controller.SystemControl;
+
 /**
  * @author Steve Legere
  * @version 5/11/2010
@@ -84,6 +86,10 @@ public class TcpClient extends Thread implements MessageType
 	 */
 	public void handshake()
 	{
+		// Send protocol string
+		sendMessage(SystemControl.USER_PROTOCOL_VERSION);
+		
+		// Send username
 		if (model.getMyUser() != null)
 		{
 			

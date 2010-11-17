@@ -76,19 +76,37 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 
 		try {
 			
-			// Write out the protocol version string
+			// Protocol handshake
 			synchronized(outputStream) {
-				outputStream.println(SystemControl.VERSION_STRING);
+				outputStream.println(SystemControl.USER_PROTOCOL_VERSION);
 			}
 			
-			// Handshake and UDP connection should happen here
-			String name = inputStream.readLine();
+			String protocol= inputStream.readLine();
+			
+			if(!protocol.equals(SystemControl.USER_PROTOCOL_VERSION)) {
+				sendMessage("Error - Protocol Mismatch (try updating your client)");
+				return;
+			} else {
+				sendMessage("Valid Protocol - Enter Username");
+			}
+			
+			// User name selection
+			boolean validName = false;
+			String name = null;
+			
+			while(!validName) {
+				name = inputStream.readLine();
+				if(!lobby.isUsernameRegistered(name)) {
+					validName = true;
+				} else {
+					sendMessage("Selected Username Already In Use - Try Again");
+				}
+			}
+			
+			// Generate user object and add to server lobby
 			user = new User(name);
 			log.debug("Client username: " + user.getUsername());
-			
-			synchronized(outputStream) {
-				outputStream.println(user.getUsername() + " connected to: " + lobby.getServerName());
-			}
+			sendMessage(user.getUsername() + " connected to: " + lobby.getServerName());
 			
 			if (lobby.addUserProxy(this)) {
 				// Read strings from socket until connection is terminated
@@ -99,21 +117,13 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 				}
 				log.info(user.getUsername() + " terminated connection with server.");
 			} else {
-				outputStream.println("[Error - Server Full]");
+				sendMessage("Error - Server Full");
 			}
 			
 		} catch (IOException e) {
 			log.info("Client terminated connection with server.");
 		} finally {
-			lobby.removeUserProxy(this);
-			user = null;
-			try {
-				outputStream.close();
-				inputStream.close();
-				userSocket.close();
-			} catch (IOException e) {
-				log.error("Could not close client socket.");
-			}
+			terminateConnection();
 		}
 		
 	}
@@ -168,6 +178,23 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 */
 	public void clearGameController() {
 		controller = null;
+	}
+	
+	/**
+	 * Terminates the connection with the User.
+	 */
+	private void terminateConnection() {
+		log.info("Terminating connection.");
+
+		lobby.removeUserProxy(this);
+		user = null;
+		try {
+			outputStream.close();
+			inputStream.close();
+			userSocket.close();
+		} catch (IOException e) {
+			log.error("Could not close client socket.");
+		}
 	}
 	
 	/**

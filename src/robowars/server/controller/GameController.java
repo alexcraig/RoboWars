@@ -276,9 +276,11 @@ public class GameController implements Runnable, GameListener {
 		RobotProxy pairedRobot = getPairedRobot(player);
 		if(pairedRobot != null && model != null) {
 			RobotCommand command = null;
+			
+			// TODO: Maybe make getControlType() a method of the model subclasses?
 			if(model instanceof LightCycles) {
 				command = generateCommand(tilt, buttons, ControlType.SNAKE);
-			} else if (model instanceof TankSimulation) {
+			} else if (model instanceof TankSimulation || model instanceof FreeTest) {
 				command = generateCommand(tilt, buttons, ControlType.TANK);
 			} else {
 				log.error("Unrecognized game type, no control type available.");
