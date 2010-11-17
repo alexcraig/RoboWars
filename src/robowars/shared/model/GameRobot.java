@@ -18,7 +18,7 @@ public class GameRobot extends GameEntity{
 	private Point initLocation;
 	private Pose lastPose;
 	private String robotIdentifier;
-	private RobotCommand commandOverride;
+	private RobotCommand command;
 
 	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
 		super(pose, length, width, id);
@@ -27,7 +27,7 @@ public class GameRobot extends GameEntity{
 		this.initLocation=pose.getLocation();
 		this.lastPose = pose;
 		this.robotIdentifier=robotId;
-		commandOverride = null;
+		command = null;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -47,11 +47,11 @@ public class GameRobot extends GameEntity{
 		this.lastPose = pose;
 
 		robotIdentifier = identifier;
-		commandOverride = null;
+		command = null;
 	}
 
 	public RobotCommand getResetPath(GameRobot[] hazzards){
-		return new RobotCommand(CommandType.RETURN_TO_START_POSITION);
+		return new RobotCommand(CommandType.RETURN_TO_START_POSITION, 9);
 	}
 
 	public boolean checkCollision(GameEntity target){
@@ -78,12 +78,12 @@ public class GameRobot extends GameEntity{
 		super.setPose(newPose);
 	}
 	
-	public void setCommandOverride(RobotCommand command){
-		commandOverride = command;
+	public void setCommand(RobotCommand command){
+		command = command;
 	}
 	
-	public RobotCommand getCommandOverride(){
-		return commandOverride;
+	public RobotCommand getCommand(){
+		return command;
 	}
 
 
