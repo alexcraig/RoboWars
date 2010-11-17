@@ -42,7 +42,8 @@ public class BluetoothServer implements Runnable {
 			try {
 				NXTComm nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
 			
-				NXTInfo[] allNxts = nxtComm.search("NXT",NXTCommFactory.BLUETOOTH);
+				NXTInfo[] allNxts = nxtComm.search("NXT", NXTCommFactory.BLUETOOTH);
+				
 				for(NXTInfo nxt : allNxts) {
 					if(!triedInfoNames.contains(nxt.name)) {
 						log.info("Discovered NXT: " + nxt.name);

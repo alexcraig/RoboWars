@@ -68,6 +68,6 @@ public class TestRobotProxy extends RobotProxy {
 	 * Logs commands sent to the robot proxy
 	 */
 	public void sendCommand(RobotCommand command) {
-		log.info(this.getIdentifier() + " Command Sent: " + command.getType());
+		log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 	}
 }

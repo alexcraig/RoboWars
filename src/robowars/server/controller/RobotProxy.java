@@ -3,6 +3,7 @@ package robowars.server.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Vector;
@@ -30,7 +31,7 @@ public class RobotProxy {
 	NXTComm nxtComm;
 	
 	/** Stream for robot output */
-	private OutputStream outputStream;
+	private ObjectOutputStream outputStream;
 	
 	/** Stream for robot input (needs a separate thread to continually read) */
 	private ObjectInputStream inputStream;
@@ -80,7 +81,6 @@ public class RobotProxy {
 		try {
 			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
 			nxtComm.open(nxtInfo);
-			outputStream = nxtComm.getOutputStream();
 		} catch (NXTCommException e) {
 			log.error("Error opening a connection to robot: " + getIdentifier());
 			return;
@@ -89,10 +89,11 @@ public class RobotProxy {
 		// Open an input stream from the robot, and generate a new thread
 		// to continually read input
 		try {
+			outputStream = new ObjectOutputStream(nxtComm.getOutputStream());
 			inputStream = new ObjectInputStream(nxtComm.getInputStream());
 			new Thread(new PositionReader()).start();
 		} catch (IOException e) {
-			log.error("Error creating input stream for robot: " + 
+			log.error("Error creating input/output streams for robot: " + 
 					getIdentifier());
 		}
 		
@@ -150,22 +151,10 @@ public class RobotProxy {
 		if(outputStream != null) {
 			synchronized(outputStream) {
 				try {
-					switch(command.getType()) {
-					case MOVE_CONTINUOUS:
-						outputStream.write(1);
-						outputStream.flush(); break;
-					case TURN_RIGHT_ANGLE_LEFT:
-						outputStream.write(3);
-						outputStream.flush(); break;
-					case TURN_RIGHT_ANGLE_RIGHT:
-						outputStream.write(4);
-						outputStream.flush(); break;
-					case STOP:
-						outputStream.write(2);
-						outputStream.flush(); break;
-					}
+					outputStream.writeObject(command);
+					log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 				} catch (IOException e) {
-					log.error("Could not write to robot output stream.");
+					log.error("Error writing command to robot: " + getIdentifier());
 				}
 			}
 		} else {
