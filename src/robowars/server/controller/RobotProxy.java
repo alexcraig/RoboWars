@@ -57,7 +57,7 @@ public class RobotProxy {
 		
 		// Use test sizes for now, actual dimensions should probably be sent
 		// by the robot
-		robot = new GameRobot(50, 50, nxtInfo.name);
+		robot = (new GameRobot(50, 50, nxtInfo.name));
 		
 		controller = null;
 		nxtComm = null;
@@ -130,7 +130,7 @@ public class RobotProxy {
 	 * name or the MAC address of the robot.
 	 */
 	public String getIdentifier() {
-		return robot.getRobotId();
+		return getRobot().getRobotId();
 	}
 	
 	/**
@@ -142,6 +142,7 @@ public class RobotProxy {
 			synchronized(outputStream) {
 				try {
 					outputStream.writeObject(command);
+					getRobot().setLastCommand(command);
 					log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 				} catch (IOException e) {
 					log.error("Error writing command to robot: " + getIdentifier());
@@ -155,10 +156,18 @@ public class RobotProxy {
 		}
 		
 		if(command.getType() == CommandType.SET_POSITION) {
-			robot.setPose(command.getPos());
+			getRobot().setPose(command.getPos());
 		}
 	}
-	
+
+	/**
+	 * @return The GameRobot object representing the robot that the proxy
+	 * is managing communication with.
+	 */
+	public GameRobot getRobot() {
+		return robot;
+	}
+
 	/**
 	 * A thread which continually reads the input stream from the robot
 	 * and propagates position updates to the GameRobot and
@@ -185,7 +194,7 @@ public class RobotProxy {
 				    		// robot instance (position updates to inactive
 				    		// robots do not need to be propagated and do
 				    		// not need to pass through the game controller)
-				    		robot.setPose(newPos);
+				    		getRobot().setPose(newPos);
 				    	}
 				    }
 				}

@@ -18,7 +18,10 @@ public class GameRobot extends GameEntity{
 	private Point initLocation;
 	private Pose lastPose;
 	private String robotIdentifier;
-	private RobotCommand commandOverride;
+	private RobotCommand command;
+	
+	/** The last RobotCommand that was succesfully transmitted to the robot */
+	private RobotCommand lastCommand;
 
 	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
 		super(pose, length, width, id);
@@ -27,7 +30,8 @@ public class GameRobot extends GameEntity{
 		this.initLocation=pose.getLocation();
 		this.lastPose = pose;
 		this.robotIdentifier=robotId;
-		commandOverride = null;
+		command = null;
+		setLastCommand(null);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -47,11 +51,11 @@ public class GameRobot extends GameEntity{
 		this.lastPose = pose;
 
 		robotIdentifier = identifier;
-		commandOverride = null;
+		command = null;
 	}
 
 	public RobotCommand getResetPath(GameRobot[] hazzards){
-		return new RobotCommand(CommandType.RETURN_TO_START_POSITION);
+		return new RobotCommand(CommandType.RETURN_TO_START_POSITION, 9);
 	}
 
 	public boolean checkCollision(GameEntity target){
@@ -78,17 +82,40 @@ public class GameRobot extends GameEntity{
 		super.setPose(newPose);
 	}
 	
-	public void setCommandOverride(RobotCommand command){
-		commandOverride = command;
+	public void setCommand(RobotCommand command){
+		command = command;
 	}
 	
-	public RobotCommand getCommandOverride(){
-		return commandOverride;
+	public RobotCommand getCommand(){
+		return command;
 	}
 
 
 	public void decreaseHealth(int change){health-=change;}
 	public String getRobotId(){return robotIdentifier;}
+
+	/**
+	 * Sets the last command sent to the robot. This should only be called after
+	 * it has been verified that the command was written to an output stream
+	 * successfully.
+	 * 
+	 * @param lastCommand	The last command successfully sent to the robot.
+	 */
+	public void setLastCommand(RobotCommand lastCommand) {
+		synchronized(this.lastCommand) {
+			this.lastCommand = lastCommand;
+		}
+	}
+
+	/**
+	 * @return	The last command that was successfully sent to the robot (or null
+	 * 			if no commands have been sent)
+	 */
+	public RobotCommand getLastCommand() {
+		synchronized(this.lastCommand) {
+			return lastCommand;
+		}
+	}
 }
 
 

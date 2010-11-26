@@ -23,4 +23,8 @@ public class FreeTest extends GameModel{
 	public boolean checkGameOver(){
 		return  false;
 	}
+	
+	public boolean isValidCommand(RobotCommand command){
+		return true;
+	}
 }

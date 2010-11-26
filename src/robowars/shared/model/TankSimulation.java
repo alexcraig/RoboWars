@@ -32,10 +32,11 @@ public class TankSimulation extends GameModel {
 
 	public void processCommand(RobotCommand command) {
 		super.processCommand(command);
-
-
 	}
 
+	public boolean isValidCommand(RobotCommand command){
+		return true;
+	}
 	private void generateProjectile(GameRobot robot) {
 		entities.add(new Projectile(robot.getPose(),1,1,1,0));
 	}

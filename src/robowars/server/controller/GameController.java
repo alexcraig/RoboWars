@@ -146,6 +146,7 @@ public class GameController implements Runnable, GameListener {
 		long gameStartTime = System.currentTimeMillis();
 		long lastUpdateTime = gameStartTime;
 		long timeElapsed = 0;
+		model.startGame();
 		
 		while(!terminateFlag) {
 			timeElapsed = System.currentTimeMillis() - lastUpdateTime;
@@ -292,6 +293,14 @@ public class GameController implements Runnable, GameListener {
 		}
 	}
 	
+	
+	private RobotCommand comparePriority(RobotCommand commandFromUser, RobotCommand commandFromModel){
+		if(commandFromUser.getPriority() >= commandFromModel.getPriority())
+			return commandFromUser;
+		else
+			return commandFromModel;
+	}
+	
 	/**
 	 * Generates a RobotCommand based on the passed tilt, buttons pressed and
 	 * control scheme.
@@ -304,13 +313,13 @@ public class GameController implements Runnable, GameListener {
 		// TODO: Ignore control type for now
 		// Using W A S D commands for testing
 		if(buttons.contains("w")) {
-			return new RobotCommand(CommandType.MOVE_CONTINUOUS);	
+			return new RobotCommand(CommandType.MOVE_CONTINUOUS,1);	
 		} else if (buttons.contains("a")) {
-			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT);
+			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,1);
 		} else if (buttons.contains("d")) {
-			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT);
+			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,1);
 		} else if (buttons.contains("s")) {
-			return new RobotCommand(CommandType.STOP);
+			return new RobotCommand(CommandType.STOP,1);
 		}
 		
 		return null;

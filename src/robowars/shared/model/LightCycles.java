@@ -36,6 +36,16 @@ public class LightCycles extends GameModel {
 		super.initVariables();
 	}
 
+	public boolean startGame(){
+		super.startGame();
+		if(inProgress){
+			for (GameRobot r : robots){
+				r.setCommand(new RobotCommand(CommandType.MOVE_CONTINUOUS,0));
+			}
+			return inProgress;
+		}
+		return inProgress;
+	}
 	public void updateGameState(long timeElapsed) {
 
 		for(Obstacle w1 : wallsOne){
@@ -106,13 +116,13 @@ public class LightCycles extends GameModel {
 		for(GameEntity e : entities){
 			if (e instanceof Obstacle){
 				if(robots.get(0).checkCollision(e)){
-					robots.get(0).setCommandOverride(new RobotCommand(CommandType.STOP));
+					robots.get(0).setCommand(new RobotCommand(CommandType.STOP,2));
 					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_1_WINS));
 					inProgress = false;
 					return true;
 				}
 				if(robots.get(1).checkCollision(e)){
-					robots.get(1).setCommandOverride(new RobotCommand(CommandType.STOP));
+					robots.get(1).setCommand(new RobotCommand(CommandType.STOP,2));
 					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_2_WINS));
 					inProgress = false;
 					return true;
@@ -125,5 +135,14 @@ public class LightCycles extends GameModel {
 	public void processCommand(RobotCommand command) {
 		super.processCommand(command);
 	}
-
+	
+	public boolean isValidCommand(RobotCommand command){
+		if (command.getType() == CommandType.MOVE_CONTINUOUS ||
+				command.getType() == CommandType.TURN_RIGHT_ANGLE_LEFT ||
+				command.getType() == CommandType.TURN_RIGHT_ANGLE_RIGHT) {
+			return true;
+		}else{
+			return false;
+		}
+	}
 }

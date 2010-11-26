@@ -12,15 +12,19 @@ public class RobotCommand implements Serializable{
 	private float turnBearing;
 	private String specialFlags;
 	private Pose newPos;
+	
+	/** The priority of this command. The higher the value, the higher the priority. */
+	private int priority;
 
 	public static final float MAX_SPEED = 100;
 
-	public RobotCommand(CommandType type){
+	public RobotCommand(CommandType type, int priority){
 		this.type = type;
 		throttle = 0;
 		turnBearing = 0;
 		newPos = null;
 		specialFlags = null;
+		this.priority = priority;
 
 		switch(type){
 			case MOVE_CONTINUOUS:
@@ -49,19 +53,22 @@ public class RobotCommand implements Serializable{
 		}
 	}
 
-	public RobotCommand(float throttle, float turnBearing, String specialFlags)
+	public RobotCommand(float throttle, float turnBearing, 
+			String specialFlags, int priority)
 	{
 		this.throttle = throttle;
 		this.turnBearing = turnBearing;
 		this.specialFlags = specialFlags;
+		this.priority = priority;
 	}
 
-	public RobotCommand(Pose newPose){
+	public RobotCommand(Pose newPose, int priority){
 		this.type = CommandType.SET_POSITION;
 		throttle = 0;
 		turnBearing = 0;
 		specialFlags = null;
 		newPos = newPose;
+		this.priority = priority;
 	}
 	public Pose getPos(){
 		return newPos;
@@ -77,7 +84,9 @@ public class RobotCommand implements Serializable{
 	public CommandType getType() {
 		return type;
 	}
-	
+	public int getPriority() {
+		return priority;
+	}
 	public String toString() {
 		String returnStr = "[" + type.toString() + "|";
 		returnStr += "t:" + throttle + "|b:" + turnBearing;

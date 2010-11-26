@@ -80,7 +80,7 @@ public abstract class GameModel implements Serializable{
 	public RobotCommand getCurrentRobotCommand(String identifier) {
 		for(GameRobot r : robots){
 			if(r.getRobotId() == identifier){
-				return r.getCommandOverride();
+				return r.getCommand();
 			}
 		}
 			return null;
@@ -100,23 +100,7 @@ public abstract class GameModel implements Serializable{
 			return;
 	}
 
-	public boolean isValidCommand(RobotCommand command){
-		// TODO: This should be implemented through overriding the method
-		// in the subclasses for the individual game modes
-		if (gameType == GameType.LIGHTCYCLES){
-			if (command.getType() == CommandType.MOVE_CONTINUOUS ||
-					command.getType() == CommandType.TURN_RIGHT_ANGLE_LEFT ||
-					command.getType() == CommandType.TURN_RIGHT_ANGLE_RIGHT) {
-				return true;
-			}else{
-				return false;
-			}
-		}else if (gameType == GameType.TANK_SIMULATION){
-			return true; //Any command restrictions in TankSimulation?
-		}else{
-			return true;
-		}
-	}
+	public abstract boolean isValidCommand(RobotCommand command);
 
 	public ControlType getControlType(){
 		return controlType;
