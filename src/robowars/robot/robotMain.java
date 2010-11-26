@@ -1,12 +1,10 @@
 package robowars.robot;
-import java.io.*;
-
 
 public class robotMain {
 
 	
 	public static void main (String args[]){
-		RobotCommandController controller=new RobotCommandController();
+		RobotCommandController controller=new RobotCommandController(new RobotMovement());
 		controller.start();
 	}
 }

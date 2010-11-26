@@ -1,26 +1,23 @@
 package robowars.robot;
 
+
+
 import java.io.*;
 
-import robowars.shared.model.RobotCommand;
 import robowars.shared.model.CommandType;
+import robowars.shared.model.RobotCommand;
 import lejos.nxt.comm.*;
 
 public class RobotCommandController extends Thread{
 	private RobotMovement move;
-	private ObjectOutputStream dataOut;
-	private ObjectInputStream dataIn;
+	private LejosOutputStream dataOut;
+	private LejosInputStream dataIn;
 	
-	public RobotCommandController(){
+	public RobotCommandController(RobotMovement move){
 		 NXTConnection connection = USB.waitForConnection();
-		 try {
-			dataOut=new ObjectOutputStream(connection.openDataOutputStream());
-			dataIn=new ObjectInputStream(connection.openDataInputStream());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 move=new RobotMovement();
+		 dataOut=new LejosOutputStream(connection.openDataOutputStream());
+		 dataIn=new LejosInputStream(connection.openDataInputStream());
+		 this.move=move;
 	}
 	
 	public void run(){
@@ -49,9 +46,6 @@ public class RobotCommandController extends Thread{
 				dataOut.writeObject(move.getPosition());
 			}
 		} catch (IOException e) {
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 	}
 }

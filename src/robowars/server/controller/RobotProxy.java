@@ -1,15 +1,12 @@
 package robowars.server.controller;
 
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import robowars.robot.LejosInputStream;
+import robowars.robot.LejosOutputStream;
 import robowars.shared.model.CommandType;
 import robowars.shared.model.GameRobot;
 import robowars.shared.model.RobotCommand;
@@ -31,10 +28,10 @@ public class RobotProxy {
 	NXTComm nxtComm;
 	
 	/** Stream for robot output */
-	private ObjectOutputStream outputStream;
+	private LejosOutputStream outputStream;
 	
 	/** Stream for robot input (needs a separate thread to continually read) */
-	private ObjectInputStream inputStream;
+	private LejosInputStream inputStream;
 	
 	/** The server lobby that the robot should register with. */
 	private ServerLobby lobby;
@@ -86,16 +83,9 @@ public class RobotProxy {
 			return;
 		}
 		
-		// Open an input stream from the robot, and generate a new thread
-		// to continually read input
-		try {
-			outputStream = new ObjectOutputStream(nxtComm.getOutputStream());
-			inputStream = new ObjectInputStream(nxtComm.getInputStream());
-			new Thread(new PositionReader()).start();
-		} catch (IOException e) {
-			log.error("Error creating input/output streams for robot: " + 
-					getIdentifier());
-		}
+		outputStream = new LejosOutputStream(nxtComm.getOutputStream());
+		inputStream = new LejosInputStream(nxtComm.getInputStream());
+		new Thread(new PositionReader()).start();
 		
 		// Register the robot with the server lobby
 		lobby.registerRobot(this);
@@ -202,9 +192,7 @@ public class RobotProxy {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} finally {
+			}  finally {
 				log.info("Closing input stream from robot: " + getIdentifier());
 				try {
 					inputStream.close();

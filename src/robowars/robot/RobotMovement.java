@@ -1,5 +1,6 @@
 package robowars.robot;
 
+
 import robowars.shared.model.RobotCommand;
 import lejos.nxt.Motor;
 import lejos.robotics.*;
@@ -10,7 +11,7 @@ public class RobotMovement {
 	private SimpleNavigator navigator;
 	private final static int MINDSTORM_WIDTH=15;
 	private final static int WHEEL_HEIGHT=3;
-	private final static int SPEED=10;
+	private final static int SPEED=100;
 	public RobotMovement(){
 		pilot=new TachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
 		pilot.setSpeed(SPEED);
@@ -52,8 +53,8 @@ public class RobotMovement {
 	public Pose getPosition(){return navigator.getPose();}
 
 	public void moveContinuous(RobotCommand command) {
+		navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
 		while(true){
-			navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
 			moveForward();
 		}
 	}

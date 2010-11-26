@@ -2,21 +2,26 @@ package robowars.robot;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+
+import robowars.shared.model.CommandType;
+import robowars.shared.model.RobotCommand;
 
 
 public class Listener implements KeyListener{
-	private OutputStream dataOut;
+	private LejosOutputStream dataOut;
 	public Listener(OutputStream dataOut){
-		this.dataOut=dataOut;
+		this.dataOut=new LejosOutputStream(dataOut);
 	}
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if(arg0.getKeyCode()==KeyEvent.VK_UP){
 			try {
 				System.out.println("Up");
-				dataOut.write(1);
+				dataOut.writeObject(new RobotCommand(CommandType.MOVE_CONTINUOUS));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -26,7 +31,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_DOWN){
 			try {
 				System.out.println("Down");
-				dataOut.write(2);
+				dataOut.writeObject(new RobotCommand(CommandType.MOVE_CONTINUOUS));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -36,7 +41,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_LEFT){
 			try {
 				System.out.println("Left");
-				dataOut.write(3);
+				dataOut.writeObject(new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -46,7 +51,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_RIGHT){
 			try {
 				System.out.println("Right");
-				dataOut.write(4);
+				dataOut.writeObject(new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -56,27 +61,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_S){
 			try {
 				System.out.println("Stop");
-				dataOut.write(5);
-				dataOut.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(arg0.getKeyCode()==KeyEvent.VK_F){
-			try {
-				System.out.println("faster");
-				dataOut.write(6);
-				dataOut.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(arg0.getKeyCode()==KeyEvent.VK_D){
-			try {
-				System.out.println("Slower");
-				dataOut.write(7);
+				dataOut.writeObject(new RobotCommand(CommandType.STOP));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -86,8 +71,9 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_X){
 			try {
 				System.out.println("Exit");
-				dataOut.write(8);
+				dataOut.writeObject(new RobotCommand(CommandType.EXIT));
 				dataOut.flush();
+				dataOut.close();
 				System.exit(0);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
