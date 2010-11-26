@@ -24,19 +24,19 @@ public class LejosInputStream {
 			s=s.substring(1,s.length());
 			String type=s.substring(0,s.indexOf('|'));
 			if(type.equals("MOVE_CONTINUOUS")){
-				return new RobotCommand(CommandType.MOVE_CONTINUOUS);
+				return new RobotCommand(CommandType.MOVE_CONTINUOUS,99);
 			}
 			else if(type.equals("TURN_RIGHT_ANGLE_RIGHT")){
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT);
+				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,99);
 			}
 			else if(type.equals("TURN_RIGHT_ANGLE_LEFT")){
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT);
+				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,99);
 			}
 			else if(type.equals("STOP")){
-				return new RobotCommand(CommandType.STOP);
+				return new RobotCommand(CommandType.STOP,99);
 			}
 			else if(type.equals("EXIT")){
-				return new RobotCommand(CommandType.EXIT);
+				return new RobotCommand(CommandType.EXIT,99);
 			}
 		}
 		//Pose
