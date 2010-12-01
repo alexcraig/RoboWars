@@ -56,6 +56,12 @@ public class LejosInputStream {
 			h=h.substring(2);
 			return new Pose(Float.parseFloat(x),Float.parseFloat(y),Float.parseFloat(h));
 		}
+		else if((char) input=='3'){
+			String s="";
+			while((input=in.read())!=-1&&input!=0){
+				s+=(char)input;
+			}
+		}
 		return new Object();
 	}
 	public void close() throws IOException{in.close();}

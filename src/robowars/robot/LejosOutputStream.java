@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import lejos.robotics.Pose;
 import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 
 public class LejosOutputStream {
 	private OutputStream out;
@@ -22,6 +23,11 @@ public class LejosOutputStream {
 			s+="x:"+p.getX();
 			s+="|y:"+p.getY();
 			s+="|h:"+p.getHeading()+"]";
+		}
+		else if(o instanceof RobotMap){
+			RobotMap m=(RobotMap)o;
+			s="3";
+			s+=m.toString();
 		}
 		else return;
 		byte[] bytes=getBytes(s);
