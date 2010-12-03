@@ -32,9 +32,9 @@ public class RobotMap {
 	public String toString(){
 		String s="[";
 		for(int i=0; i<points.size(); i++){
-			s+=points.toString()+"|";
+			s+=points.get(i).toString()+",";
 		}
-		s=s.substring(0, s.lastIndexOf('|'));
+		s=s.substring(0, s.lastIndexOf(','));
 		s+="]";
 		return s;
 	}

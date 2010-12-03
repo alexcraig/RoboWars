@@ -1,11 +1,14 @@
 package robowars.robot;
 
 import java.io.*;
+import java.util.Vector;
 
 import lejos.robotics.Pose;
 
 import robowars.shared.model.CommandType;
+import robowars.shared.model.MapPoint;
 import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 
 public class LejosInputStream {
 	private InputStream in;
@@ -61,8 +64,46 @@ public class LejosInputStream {
 			while((input=in.read())!=-1&&input!=0){
 				s+=(char)input;
 			}
+			s=s.substring(1);
+			s=s.substring(0, s.length()-1);
+			Vector<MapPoint> points=getPoints(s,',');
+			return new RobotMap(points);
 		}
 		return new Object();
 	}
+
+
 	public void close() throws IOException{in.close();}
+	private MapPoint buildPoint(String s){
+		String x=s.substring(0,s.indexOf("|"));
+		s=s.substring(s.indexOf("|")+1);
+		String y=s.substring(0,s.indexOf("|"));
+		s=s.substring(s.indexOf("|")+1);
+		String r=s.substring(0,s.indexOf("|"));
+		s=s.substring(s.indexOf("|")+1);
+		String g=s.substring(0,s.indexOf("|"));
+		s=s.substring(s.indexOf("|")+1);
+		String b=s;
+		x=x.substring(2);
+		y=y.substring(2);
+		r=r.substring(2);
+		g=g.substring(2);
+		b=b.substring(2);
+		return new MapPoint(Integer.parseInt(x),Integer.parseInt(y),Integer.parseInt(r),Integer.parseInt(g),Integer.parseInt(b));
+		
+	}
+	private Vector<MapPoint> getPoints(String s, char splitter) {
+		Vector<MapPoint> v=new Vector<MapPoint>();
+		while(s.indexOf(splitter)!=-1){
+			String point="";
+			point=s.substring(0, s.indexOf(splitter));
+			point=point.substring(1,point.length()-1);
+			v.add(buildPoint(point));
+			s=s.substring(s.indexOf(splitter)+1);
+		}
+		String point=s;
+		point=point.substring(1,point.length()-1);
+		v.add(buildPoint(point));
+		return v;
+	}
 }

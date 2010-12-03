@@ -25,9 +25,8 @@ public class LejosOutputStream {
 			s+="|h:"+p.getHeading()+"]";
 		}
 		else if(o instanceof RobotMap){
-			RobotMap m=(RobotMap)o;
 			s="3";
-			s+=m.toString();
+			s+=((RobotMap)o).toString();
 		}
 		else return;
 		byte[] bytes=getBytes(s);
