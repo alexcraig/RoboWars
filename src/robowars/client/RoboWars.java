@@ -3,27 +3,37 @@ package robowars.client;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.openintents.sensorsimulator.hardware.SensorManagerSimulator;
+
 import android.app.Activity;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
-public class RoboWars extends Activity implements Observer
+public class RoboWars extends Activity implements SensorListener, Observer
 {
 	/* Views invoked by the application. */
-	TextView chat, users;
-	EditText entry, server, port, user;
-	ScrollView chatScrollView, userScrollView;
+	private TextView chat, users;
+	private EditText entry, server, port, user;
 	
-	LobbyModel model;		// General application model.
-	TcpClient tcp;			// TCP controller.
+	private LobbyModel model;		// General application model.
+	private TcpClient tcp;			// TCP controller.
 	
-	String userlist;		// Users currently in the lobby.
+	private String userlist;		// Users currently in the lobby.
+	
+	private SensorManagerSimulator mSensorManager;
+    
+    TextView mTextViewAcc;
+    TextView mTextViewMag;
+    TextView mTextViewOri;
+	
+	private static final int MAX_LINES = 12;
 	
     /**
      * Creates a tab view.
@@ -59,6 +69,7 @@ public class RoboWars extends Activity implements Observer
     	/* Instantiate the model and add the view as an observer. */
     	model = new LobbyModel();
     	model.addObserver(this);
+    	model.setVersion(getString(R.string.version));
     	
     	/* Reference to the application's widgets. */
     	chat 			= (TextView) findViewById(R.id.chat);
@@ -67,7 +78,15 @@ public class RoboWars extends Activity implements Observer
     	server 			= (EditText) findViewById(R.id.server);
     	port 			= (EditText) findViewById(R.id.port);
     	user			= (EditText) findViewById(R.id.username);
-    	chatScrollView 	= (ScrollView) findViewById(R.id.chatScrollView);
+    	
+    	/* The x,y,z coordinates of the orientation of the phone. */
+    	mTextViewAcc = (TextView) findViewById(R.id.textAcc);
+        mTextViewMag = (TextView) findViewById(R.id.textMag);
+        mTextViewOri = (TextView) findViewById(R.id.textOri);
+        
+        /* Connect to the simulator. */
+        mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
+        mSensorManager.connectSimulator();
     	
     	/* Allow scrolling of the chat and user list. */
     	chat.setMovementMethod(new ScrollingMovementMethod());
@@ -86,7 +105,7 @@ public class RoboWars extends Activity implements Observer
     	this.runOnUiThread(new Runnable(){
     		public void run(){
     			chat.append(msg + "\n");
-    			chatScrollView.scrollTo(0, chat.getHeight());
+    			if (chat.getLineCount() > MAX_LINES) chat.scrollBy(0, chat.getLineHeight());
             }
         });
     }
@@ -172,6 +191,46 @@ public class RoboWars extends Activity implements Observer
     {
     	tcp.sendMessage("c:");
     }
+    
+    @Override
+	protected void onResume() {
+		super.onResume();
+		mSensorManager.registerListener(this, SensorManager.SENSOR_ACCELEROMETER
+				| SensorManager.SENSOR_MAGNETIC_FIELD
+				| SensorManager.SENSOR_ORIENTATION,
+				SensorManager.SENSOR_DELAY_FASTEST);
+	}
+
+	@Override
+	protected void onStop() {
+		mSensorManager.unregisterListener(this);
+		super.onStop();
+	}
+
+	public void onAccuracyChanged(int sensor, int accuracy) { }
+
+	public void onSensorChanged(int sensor, float[] values) {
+		switch(sensor) {
+		case SensorManager.SENSOR_ACCELEROMETER:
+			mTextViewAcc.setText("Accelerometer: " 
+					+ values[0] + ", " 
+					+ values[1] + ", "
+					+ values[2]);
+			break;
+		case SensorManager.SENSOR_MAGNETIC_FIELD:
+			mTextViewMag.setText("Compass: " 
+					+ values[0] + ", " 
+					+ values[1] + ", "
+					+ values[2]);
+			break;
+		case SensorManager.SENSOR_ORIENTATION:
+			mTextViewOri.setText("Orientation: " 
+					+ values[0] + ", " 
+					+ values[1] + ", "
+					+ values[2]);
+			break;
+		}
+	}
 
 	/**
 	 * Updates based on changes to the model.

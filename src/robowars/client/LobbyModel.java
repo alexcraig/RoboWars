@@ -5,6 +5,7 @@ import java.util.Observable;
 public class LobbyModel extends Observable
 {	
 	private User myUser;
+	private String version;
 	
 	private String chatBuffer;
 	private boolean newChatMessage;
@@ -45,6 +46,16 @@ public class LobbyModel extends Observable
 	 * @return
 	 */
 	public boolean usersUpdated() { return usersUpdated; }
+	
+	/**
+	 * Get the game version.
+	 */
+	public String getVersion() { return version; }
+	
+	/**
+	 * Set the game version.
+	 */
+	public void setVersion(String version) { this.version = version; }
 	
 	/**
 	 * Gets the last message sent over the network.
@@ -107,5 +118,5 @@ public class LobbyModel extends Observable
 			setChanged();
 			notifyObservers();
 		}
-	}	
+	}
 }

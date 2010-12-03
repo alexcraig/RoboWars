@@ -17,9 +17,9 @@ import java.net.UnknownHostException;
  */
 public class TcpClient extends Thread
 {
-	public static final int ERROR	= 0;
-	public static final int CHAT	= 1;
-	public static final int EVENT	= 2;
+	private static final int ERROR	= 0;
+	private static final int CHAT	= 1;
+	private static final int EVENT	= 2;
 	
 	private LobbyModel model;
 	
@@ -98,8 +98,10 @@ public class TcpClient extends Thread
 	 */
 	private boolean handshake()
 	{
+		String version = model.getVersion();
 		User user = model.getMyUser();
 		if (user != null) {
+			sendMessage(version);
 			sendMessage(user.getName());
 			return true;
 		}
