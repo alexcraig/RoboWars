@@ -27,8 +27,10 @@ public abstract class GameEntity implements Serializable{
 		this.id=id;
 	}
 	public boolean checkCollision(GameEntity target){
-		if((pose.getX())-width<=target.getPose().getX()&&(pose.getX())+width>=target.getPose().getX()&&
-			(pose.getY())-getLength()<=target.getPose().getY()&&(pose.getY())+getLength()>=target.getPose().getY())return true;
+		if((pose.getX())-width<=target.getPose().getX()&&
+			(pose.getX())+width>=target.getPose().getX()&&
+			(pose.getY())-getLength()<=target.getPose().getY()&&
+			(pose.getY())+getLength()>=target.getPose().getY())return true;
 		else return false;
 	}
 	public void setPose(Pose pose){

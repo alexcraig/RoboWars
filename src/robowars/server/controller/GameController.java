@@ -72,7 +72,7 @@ public class GameController implements Runnable, GameListener {
 			robot.setGameController(this);
 		}
 		
-		model.addRobot(robot.getIdentifier());
+		model.addRobot(robot.getRobot());
 		log.debug("Added control pair: " + player.getUser().getUsername() + " <-> " 
 				+ robot.getIdentifier());
 	}
@@ -330,6 +330,10 @@ public class GameController implements Runnable, GameListener {
 				+ "\n\tX: " + newPos.getX() + "\tY: " + newPos.getY() + "\tHeading: "
 				+ newPos.getHeading());
 		model.updateRobotPosition(robot.getIdentifier(), newPos);
+	}
+	
+	public GameModel getGameModel(){
+		return model;
 	}
 	
 	public void gameStateChanged(GameEvent event){

@@ -20,7 +20,7 @@ public class GameRobot extends GameEntity{
 	private String robotIdentifier;
 	private RobotCommand command;
 	
-	/** The last RobotCommand that was succesfully transmitted to the robot */
+	/** The last RobotCommand that was successfully transmitted to the robot */
 	private RobotCommand lastCommand;
 
 	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
@@ -83,7 +83,7 @@ public class GameRobot extends GameEntity{
 	}
 	
 	public void setCommand(RobotCommand command){
-		command = command;
+		this.command = command;
 	}
 	
 	public RobotCommand getCommand(){

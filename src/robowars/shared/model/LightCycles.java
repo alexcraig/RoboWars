@@ -79,9 +79,8 @@ public class LightCycles extends GameModel {
 		}
 
 		if(checkGameOver()){
-			listener.gameStateChanged(new GameEvent(this, GameEvent.GAME_OVER));
+			notifyListeners(GameEvent.GAME_OVER);
 		}
-
 
 	}
 
@@ -117,13 +116,13 @@ public class LightCycles extends GameModel {
 			if (e instanceof Obstacle){
 				if(robots.get(0).checkCollision(e)){
 					robots.get(0).setCommand(new RobotCommand(CommandType.STOP,2));
-					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_1_WINS));
+					notifyListeners(GameEvent.PLAYER_1_WINS);
 					inProgress = false;
 					return true;
 				}
 				if(robots.get(1).checkCollision(e)){
 					robots.get(1).setCommand(new RobotCommand(CommandType.STOP,2));
-					listener.gameStateChanged(new GameEvent(this, GameEvent.PLAYER_2_WINS));
+					notifyListeners(GameEvent.PLAYER_2_WINS);
 					inProgress = false;
 					return true;
 				}

@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import robowars.server.controller.*;
 import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameListener;
+import robowars.shared.model.GameModel;
 import robowars.shared.model.GameType;
 import robowars.shared.model.RobotCommand;
 
@@ -191,6 +192,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 			setGameTypeLabel(event.getGameType());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
 			// addLineToMainChat("--- New game has been launched ---");
+			ServerLobby source = (ServerLobby) event.getSource();
+			Admin2DGameView view = new Admin2DGameView((int) GameModel.DEFAULT_ARENA_SIZE, source.getCurrentGame().getGameModel());
+			source.getCurrentGame().getGameModel().addListener(view);
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_OVER) {
 			// addLineToMainChat("--- Game in progress terminated ---");
 		}

@@ -17,7 +17,9 @@ public class FreeTest extends GameModel{
 	
 	public void updateGameState(long timeElapsed){
 		if(robots.get(0).checkCollision(theWall))
-			listener.gameStateChanged(new GameEvent(this, GameEvent.COLLISION_DETECTED));
+			for (GameListener l : listeners) {
+				l.gameStateChanged(new GameEvent(this, GameEvent.COLLISION_DETECTED));
+			}
 	}
 	
 	public boolean checkGameOver(){

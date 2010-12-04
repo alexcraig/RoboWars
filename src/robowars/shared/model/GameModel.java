@@ -10,14 +10,14 @@ public abstract class GameModel implements Serializable{
 	protected GameType gameType;
 	protected ControlType controlType;
 	protected int minimumPlayers;
-	protected Vector<Float> arenaSize;
+	protected float arenaSize;
 	protected boolean inProgress;
 	protected ArrayList<GameEntity> entities;
 	protected ArrayList<GameRobot> robots;
 	protected int numRobots;
-	protected GameListener listener;
+	protected transient ArrayList<GameListener> listeners;
 
-	public static final float DEFAULT_ARENA_SIZE = 100;
+	public static final float DEFAULT_ARENA_SIZE = 500;
 
 	public static GameModel generateGameModel(GameType gameType){
 		if(gameType == GameType.LIGHTCYCLES)
@@ -30,21 +30,24 @@ public abstract class GameModel implements Serializable{
 	}
 
 	public void initVariables() {
-		arenaSize = new Vector<Float>(2);
+		arenaSize = DEFAULT_ARENA_SIZE;
 		inProgress = false;
 		entities = new ArrayList<GameEntity>();
 		robots = new ArrayList<GameRobot>();
 		minimumPlayers = gameType.getMinimumPlayers();
 		numRobots = 0;
-
-		arenaSize.add(DEFAULT_ARENA_SIZE);//x
-		arenaSize.add(DEFAULT_ARENA_SIZE);//y
 	}
 
 	public void addListener(GameListener listener){
-		this.listener = listener;
+		this.listeners.add(listener);
 	}
 
+	public void notifyListeners(int eventID){
+		for (GameListener l : listeners) {
+			l.gameStateChanged(new GameEvent(this, eventID));
+		}
+	}
+	
 	public boolean startGame() {
 
 		for(int i = 0; i < minimumPlayers; i++){
@@ -74,6 +77,7 @@ public abstract class GameModel implements Serializable{
 			return false;//error, robot with specified identifier doesn't exist.
 
 		robot.setPose(pose);
+		notifyListeners(GameEvent.ROBOT_MOVED);
 		return true;
 	}
 
@@ -94,6 +98,10 @@ public abstract class GameModel implements Serializable{
 			}
 		return null;
 	}
+	
+	public ArrayList<GameRobot> getGameRobotList(){
+		return robots;
+	}
 
 	public void processCommand(RobotCommand command) {
 		if(isValidCommand(command))
@@ -105,25 +113,14 @@ public abstract class GameModel implements Serializable{
 	public ControlType getControlType(){
 		return controlType;
 	}
+	
+	public float getArenaSize(){
+		return arenaSize;
+	}
 
 	public abstract boolean checkGameOver();
 
-	// TODO: These methods should probably accept an existing GameRobot as
-	//       RobotProxy's now persistently store a GameRobot object
-
-	public void addRobot(String identifier) {
-		//In the constructor of GameRobot, two parameters id and robotid, what's the difference?
-		//GameRobot newRobot = new GameRobot(new Vector<Float>(),new Vector<Float>(),1,1,0,1,identifier);
-		GameRobot newRobot;
-		switch(numRobots){
-			case 0:
-				newRobot = new GameRobot(1,1,identifier);break;
-			case 1:
-				Pose p = new Pose(DEFAULT_ARENA_SIZE,DEFAULT_ARENA_SIZE,180);
-				newRobot = new GameRobot(p,1,1,0,1,identifier);break;
-			default:
-				newRobot = new GameRobot(1,1,identifier);break;
-			}
+	public void addRobot(GameRobot newRobot) {
 		entities.add(newRobot);
 		robots.add(newRobot);
 	}
