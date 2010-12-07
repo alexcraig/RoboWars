@@ -37,7 +37,7 @@ import robowars.shared.model.RobotCommand;
  */
 public class AdminView extends JFrame implements GameListener, ServerLobbyListener {
 	/** The logger used by this class */
-	private static Logger log = Logger.getLogger(UserProxy.class);
+	private static Logger log = Logger.getLogger(AdminView.class);
 	
 	/** List models for the list of connected robots and users */
 	private DefaultListModel robotListModel, userListModel;

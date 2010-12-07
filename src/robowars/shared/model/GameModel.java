@@ -31,6 +31,7 @@ public abstract class GameModel implements Serializable{
 
 	public void initVariables() {
 		arenaSize = DEFAULT_ARENA_SIZE;
+		listeners = new ArrayList<GameListener>();
 		inProgress = false;
 		entities = new ArrayList<GameEntity>();
 		robots = new ArrayList<GameRobot>();

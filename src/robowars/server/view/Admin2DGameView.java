@@ -9,6 +9,9 @@ import robowars.shared.model.Obstacle;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+
+import org.apache.log4j.Logger;
+
 import java.awt.Canvas;
 import java.awt.Graphics2D;
 import java.awt.Dimension;
@@ -16,6 +19,8 @@ import java.awt.Color;
 import java.awt.image.BufferStrategy;
 
 public class Admin2DGameView extends JFrame implements GameListener{
+	/** The logger used by this class */
+	private static Logger log = Logger.getLogger(Admin2DGameView.class);
 
 	private Canvas canvas;
 	private GameModel model;
@@ -43,23 +48,27 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		this.canvas = new Canvas();
 		this.getContentPane().add(canvas);
 		canvas.setBackground(Color.BLACK);
-		buffedG2D = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
-
-		
-		drawState();
 		
 		this.pack();
         this.setResizable(false);
 		this.setVisible(true);
+		
+		// Note: Buffers must be created AFTER the canvas is visible (otherwise an
+		// IllegalStateException will be thrown)
+		canvas.createBufferStrategy(2);
+		buffedG2D = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
+		drawState();
 	}
 	
 	private void drawState(){
+		buffedG2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		drawPlayers(buffedG2D);
 		drawWalls(buffedG2D);
-		
+		canvas.getBufferStrategy().show();
+		buffedG2D = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
 	}
 	
-	private void drawPlayers(Graphics2D g2d){
+	private void drawPlayers(Graphics2D g2d) {
 		g2d.setColor(Color.BLUE);
 		for(GameRobot r : model.getGameRobotList()){
 			g2d.drawRect((int) r.getPose().getX(), (int) r.getPose().getY(), (int) r.getWidth(), (int) r.getLength());
