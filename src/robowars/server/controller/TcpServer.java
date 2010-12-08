@@ -67,4 +67,11 @@ public class TcpServer implements Runnable {
 			new Thread(newProxy).start();
 		}
 	}
+	
+	/**
+	 * @return	The media streamer managing camera selection and video streaming.
+	 */
+	public MediaStreamer getMediaStreamer() {
+		return mediaStreamer;
+	}
 }

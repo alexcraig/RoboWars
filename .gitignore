@@ -11,10 +11,12 @@
 ###################
 *.com
 *.class
-*.dll
 *.exe
 *.o
-*.so
+
+# Allow compiled sources for native video library
+# *.dll 
+# *.so
 
 # Packages #
 ############

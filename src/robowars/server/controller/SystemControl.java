@@ -27,14 +27,15 @@ public class SystemControl {
 		// Generate the server lobby to manage user and robot connections
 		ServerLobby lobby = new ServerLobby("RoboWars Test Server", 6, 10);
 		
-		// Generate the administrator GUI
-		new AdminView(USER_PROTOCOL_VERSION, lobby);
-		
 		// Start a new TCP server listening on port 33330
-		new Thread(new TcpServer(33330, lobby)).start();
+		TcpServer tcpServer = new TcpServer(33330, lobby);
+		new Thread(tcpServer).start();
 		
 		// Start the NXT Bluetooth discovery server
 		new Thread(new BluetoothServer(lobby)).start();
+		
+		// Generate the administrator GUI
+		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer());
 		
 		// TESTING
 		new TestRobotProxy(lobby, "Robot1");

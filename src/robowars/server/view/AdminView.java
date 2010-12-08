@@ -22,6 +22,8 @@ import javax.swing.event.ListSelectionListener;
 
 import lejos.robotics.Pose;
 
+import net.sf.fmj.ui.application.PlayerPanel;
+
 import org.apache.log4j.Logger;
 
 import robowars.server.controller.*;
@@ -48,6 +50,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	/** JLabel to show the currently selected game type */
 	private JLabel curGameType;
 	
+	/** The MediaStreamer managing camera selection and settings for the AdminView */
+	private MediaStreamer mediaSource;
+	
 	/** Reference to the ServerLobby this AdminView is administrating */
 	private ServerLobby lobby;
 	
@@ -55,13 +60,15 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	 * Generates a new AdminView frame
 	 * @param frameTitle	The title of the frame
 	 * @param lobby			The ServerLobby that this view should listen for events from
+	 * @param mediaSource	The MediaStreamer managing camera selection and settings for the AdminView
 	 **/
-	public AdminView(String windowTitle, ServerLobby lobby) {
+	public AdminView(String windowTitle, ServerLobby lobby, MediaStreamer mediaSource) {
 		super(windowTitle);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         
         this.lobby = lobby;
+        this.mediaSource = mediaSource;
         
 		// Set look and feel
 		try {
