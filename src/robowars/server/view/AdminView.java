@@ -7,12 +7,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.media.CannotRealizeException;
+import javax.media.Controller;
+import javax.media.Manager;
+import javax.media.NoPlayerException;
+import javax.media.Player;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.UIManager;
 
 import java.awt.*;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -132,6 +138,35 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         curGameType = new JLabel();
         setGameTypeLabel(lobby.getCurrentGameType());
 		this.getContentPane().add(curGameType, BorderLayout.SOUTH);
+		
+		// CAMERA TESTING
+		if(mediaSource.getActiveCamera() != null) {
+			try {
+				log.debug("Attempting to start streaming of: " 
+						+ mediaSource.getActiveCamera().getCameraName() 
+						+ " - " + mediaSource.getActiveCamera().getMediaLocator());
+				Player player = Manager.createPlayer(mediaSource.getActiveCamera().getMediaLocator());
+				
+				player.realize(); // Note: Call does not block
+				while(player.getState() != Controller.Realized) {
+					// Do nothing / wait for realization
+					try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
+				}
+	
+				JPanel videoPanel = new JPanel();
+				videoPanel.setPreferredSize(new Dimension(640, 480));
+				videoPanel.add(player.getVisualComponent());
+				this.getContentPane().add(videoPanel, BorderLayout.CENTER);
+				player.start(); // Note: Call does not block
+				
+			} catch (NoPlayerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
         // Set view to listen on the provided ServerLobby
         lobby.addLobbyStateListener(this);

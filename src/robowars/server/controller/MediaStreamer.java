@@ -10,6 +10,10 @@ import javax.media.Format;
 
 import org.apache.log4j.Logger;
 
+import com.lti.civil.CaptureException;
+import com.lti.civil.CaptureSystem;
+import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
+
 import net.sf.fmj.*;
 import net.sf.fmj.media.RegistryDefaults;
 import net.sf.fmj.media.cdp.GlobalCaptureDevicePlugger;
@@ -40,8 +44,30 @@ public class MediaStreamer {
 
 	public MediaStreamer() 
 	{
+		RegistryDefaults.registerAll(RegistryDefaults.FMJ);
 		cameras = new ArrayList<CameraController>();
 		generateCameraList();
+		ltiCivilTest();
+	}
+	
+	/**
+	 * Testing function for using the LTI-Civil library (lower level than FMJ)
+	 * This may be neccesary to set 
+	 */
+	public void ltiCivilTest() {
+		NativeCaptureSystemFactory captureFactory = new NativeCaptureSystemFactory();
+		try {
+			CaptureSystem captureSystem = captureFactory.createCaptureSystem();
+			List<com.lti.civil.CaptureDeviceInfo> devices = captureSystem.getCaptureDeviceInfoList();
+			
+			for(com.lti.civil.CaptureDeviceInfo device : devices) {
+				log.info("LTI-Civil found device: " + device.getDescription() + " - " + device.getDeviceID());
+
+			}
+		} catch (CaptureException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -64,9 +90,20 @@ public class MediaStreamer {
 					log.info("\"" + info.getName() + "\" supports format: " + f.toString());
 				}
 				
-				cameras.add(new CameraController(info));
+				CameraController newCam = new CameraController(info);
+				cameras.add(newCam);
+				
+				selectedCamera = newCam; // TODO: Set through UI, this is just for testing
 			}
 		}
 
+	}
+	
+	/**
+	 * @return	The currently selected CameraController (or null if no
+	 * 			camera has been selected)
+	 */
+	public CameraController getActiveCamera() {
+		return selectedCamera;
 	}
 }

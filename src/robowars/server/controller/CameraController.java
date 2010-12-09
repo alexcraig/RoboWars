@@ -31,4 +31,12 @@ public class CameraController {
 	public String getCameraName() {
 		return deviceInfo.getName();
 	}
+	
+	/**
+	 * @return	A MediaLocator object specifying where the video source for this
+	 * 			camera can be read.
+	 */
+	public MediaLocator getMediaLocator() {
+		return deviceInfo.getLocator();
+	}
 }
