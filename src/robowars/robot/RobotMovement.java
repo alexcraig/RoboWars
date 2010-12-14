@@ -1,5 +1,10 @@
 package robowars.robot;
 
+/** 
+ * RoboMovement.java
+ * Thread safe controller for the mindstorm robot
+ * @author mwright
+ */
 
 import robowars.shared.model.RobotCommand;
 import lejos.nxt.Motor;
@@ -18,41 +23,41 @@ public class RobotMovement {
 		navigator=new SimpleNavigator(pilot);
 	}
 	
-	public void moveForward() {
+	public synchronized void moveForward() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
 		pilot.travel(15);
 	}
-	public void moveBackwards() {
+	public synchronized void moveBackwards() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
 		pilot.travel(-15);
 	}
-	public void turnRight() {
+	public synchronized void turnRight() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
 		pilot.rotate(90);
 	}
-	public void turnLeft() {
+	public synchronized void turnLeft() {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
 		pilot.rotate(-90);
 	}
-	public void speedUp(){
+	public synchronized void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())pilot.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
 	}
-	public void slowDown(){
+	public synchronized void slowDown(){
 		if(pilot.getMoveSpeed()>1)pilot.setMoveSpeed((pilot.getMoveSpeed()/(float)1.1));
 	}
-	public void stop(){
+	public synchronized void stop(){
 		pilot.stop();
 	}
-	public void setPos(Pose newPos){
+	public synchronized void setPos(Pose newPos){
 		navigator.setPose(newPos);
 	}
 	public Pose getPosition(){return navigator.getPose();}
 
-	public void moveContinuous(RobotCommand command) {
+	public synchronized void moveContinuous(RobotCommand command) {
 		navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
 		while(true){
 			moveForward();

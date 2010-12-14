@@ -2,6 +2,9 @@ package robowars.shared.model;
 
 public class MapPoint {
 	private int x,y,r,g,b;
+	public MapPoint(){
+		this(-1,-1,-1,-1,-1);
+	}
 	public MapPoint(int x, int y, int r, int g, int b) {
 		this.x=x;
 		this.y=y;

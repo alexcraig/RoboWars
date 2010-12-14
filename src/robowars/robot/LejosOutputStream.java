@@ -1,5 +1,12 @@
 package robowars.robot;
 
+/**
+ * LejosOutputStream.java
+ * This Class is used to send objects from either the client or the mindstorm
+ * it overcomes the problems with the Lejos library where objects cannot be properly
+ * output
+ * @author mwright
+ */
 import java.io.IOException;
 import java.io.OutputStream;
 import lejos.robotics.Pose;
@@ -11,6 +18,15 @@ public class LejosOutputStream {
 	public LejosOutputStream(OutputStream out){
 		this.out=out;
 	}
+	/**
+	 * This is the function to actually send the object it takes 4 steps
+	 * 1. A string is created with the correct object tag
+	 * 2. The .toSting function of the object is called and added to the string
+	 * 3. the string is turned into a byte array
+	 * 4. the bytes are output followed by a null terminator
+	 * @param o
+	 * @throws IOException
+	 */
 	public void writeObject(Object o) throws IOException{
 		String s=null;
 		if(o instanceof RobotCommand){
@@ -36,6 +52,11 @@ public class LejosOutputStream {
 			}
 		}
 	}
+	/**
+	 * Converts the input string into a byte array so we can transfer them
+	 * @param inputText
+	 * @return Array of Bytes
+	 */
 	private byte[] getBytes(String inputText){
 	    	//Debug Point
 	        byte[] nameBytes = new byte[inputText.length()+1];

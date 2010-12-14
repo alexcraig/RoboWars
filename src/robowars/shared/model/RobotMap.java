@@ -17,14 +17,14 @@ public class RobotMap {
 			MapPoint point=points.get(i);
 			if(point.getR()==r&&point.getG()==g&&point.getB()==b)return point;
 		}
-		return new MapPoint(-1,-1,-1,-1,-1);
+		return new MapPoint();
 	}
 	public MapPoint getPoint(int x, int y){
 		for(int i=0; i<points.size(); i++){
 			MapPoint point=points.get(i);
 			if(point.getX()==x&&point.getY()==y)return point;
 		}
-		return new MapPoint(-1,-1,-1,-1,-1);
+		return new MapPoint();
 	}
 	public void addPoint(MapPoint p){
 		points.add(p);
