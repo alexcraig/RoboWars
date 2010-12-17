@@ -39,4 +39,11 @@ public class CameraController {
 	public MediaLocator getMediaLocator() {
 		return deviceInfo.getLocator();
 	}
+	
+	/**
+	 * @return	A string representation of the camera controller.
+	 */
+	public String toString() {
+		return deviceInfo.getName();
+	}
 }

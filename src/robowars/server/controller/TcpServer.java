@@ -1,10 +1,15 @@
 package robowars.server.controller;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
 import org.apache.log4j.Logger;
+
+import robowars.server.view.AdminView;
 
 /**
  * Listens for incoming TCP connections to a specified port, and generates a new
@@ -23,6 +28,9 @@ public class TcpServer implements Runnable {
 	
 	/** The media streamer that should serve video to users connecting to the server */
 	private MediaStreamer mediaStreamer;
+	
+	/** The socket used to listen for incoming TCP/IP connections */
+	private ServerSocket serverSocket;
 
 	/**
 	 * Generates a new instance of TcpServer
@@ -31,30 +39,38 @@ public class TcpServer implements Runnable {
 	 */
 	public TcpServer(int port, ServerLobby lobby) {
 		listenPort = port;
+		
+		try {
+			serverSocket = new ServerSocket(listenPort); // Setup listening port
+		} catch (BindException e) {
+			log.error("ServerSocket already open on port: " + listenPort + ", terminating.");
+			JOptionPane.showMessageDialog(null, 
+					"Specified listening port already in use.\nPlease ensure that an instance " +
+					"of RoboWars is not already running.",
+					"Initialization Error - Terminating Application", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		} catch (IOException e) {
+			log.error("Unrecognized exception opening server socket, terminating.");
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		log.info("Succesfully opened listen socket on port " + listenPort);
+		
 		this.lobby = lobby;
 		mediaStreamer = new MediaStreamer();
 	}
 
 	/**
-	 * Opens a listening socket on the port specified at construction, and generates
-	 * a new UserProxy for each incoming connection
+	 * Listens for incoming TCP/IP connections on the server socket, and generates
+	 * a new UserProxy for each incoming connection.
 	 */
 	public void run() {
-		
-		ServerSocket socket = null;
-		
-		try {
-			socket = new ServerSocket(listenPort); // Setup listening port
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		log.info("Succesfully opened listen socket on port " + listenPort);
-
 		while (true) { // Run forever, accepting and servicing connections
 			
 			Socket clientSocket = null;
 			try {
-				clientSocket = socket.accept(); // Get client connection
+				clientSocket = serverSocket.accept(); // Get client connection
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
