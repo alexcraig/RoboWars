@@ -13,11 +13,14 @@ import javax.media.Manager;
 import javax.media.NoPlayerException;
 import javax.media.Player;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 
@@ -63,15 +66,19 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		mediaSrc = mediaSource;
 		this.addWindowListener(this);
 		
-		JPanel cameraOptionPanel = new JPanel();
-		cameraOptionPanel.setBorder(BorderFactory.createTitledBorder("Camera Settings"));
-		this.getContentPane().add(cameraOptionPanel, BorderLayout.SOUTH);
+		JPanel sidePanel = new JPanel();
+		sidePanel.setLayout(new BorderLayout());
+		this.getContentPane().add(sidePanel, BorderLayout.EAST);
+		
+		// Source Selection Panel
+		JPanel selectionPanel = new JPanel();
+		selectionPanel.setBorder(BorderFactory.createTitledBorder("Source Selection"));
+		sidePanel.add(selectionPanel, BorderLayout.NORTH);
 		
 		availableCams = new DefaultComboBoxModel();
 		availableCams.addElement(NO_CAMERA);
 		availableCams.setSelectedItem(NO_CAMERA);
 		camSelectBox = new JComboBox(availableCams);
-		cameraOptionPanel.add(camSelectBox);
 		
 		JButton detectDevices = new JButton("Detect Devices");
 		detectDevices.addActionListener(new ActionListener() {
@@ -80,11 +87,54 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 				updateDeviceList();
 			}
 		});
-		cameraOptionPanel.add(detectDevices);
+		selectionPanel.add(detectDevices);
+		selectionPanel.add(camSelectBox);
 		
-		updateDeviceList();
+		// Position Settings panel
+		JPanel positionPanel = new JPanel();
+		positionPanel.setBorder(BorderFactory.createTitledBorder("Camera Settings"));
+		positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.Y_AXIS));
+		sidePanel.add(positionPanel, BorderLayout.CENTER);
+		
+		JPanel xCoord = new JPanel();
+		xCoord.add(new JLabel("X Position: "));
+		xCoord.add(new JTextField(10));
+		positionPanel.add(xCoord);
+		
+		JPanel yCoord = new JPanel();
+		yCoord.add(new JLabel("Y Position: "));
+		yCoord.add(new JTextField(10));
+		positionPanel.add(yCoord);
+		
+		JPanel zCoord = new JPanel();
+		zCoord.add(new JLabel("Z Position: "));
+		zCoord.add(new JTextField(10));
+		positionPanel.add(zCoord);
+		
+		JPanel xHeading = new JPanel();
+		xHeading.add(new JLabel("X Heading: "));
+		xHeading.add(new JTextField(10));
+		positionPanel.add(xHeading);
+		
+		JPanel yHeading = new JPanel();
+		yHeading.add(new JLabel("Y Heading: "));
+		yHeading.add(new JTextField(10));
+		positionPanel.add(yHeading);
+		
+		JPanel zHeading = new JPanel();
+		zHeading.add(new JLabel("Z Heading: "));
+		zHeading.add(new JTextField(10));
+		positionPanel.add(zHeading);
+		
+		JPanel fieldOfView = new JPanel();
+		fieldOfView.add(new JLabel("Field of View: "));
+		fieldOfView.add(new JTextField(10));
+		positionPanel.add(fieldOfView);
+		
 		
 		// CAMERA TESTING
+		updateDeviceList();
+		
 		if(mediaSource.getActiveCamera() != null) {
 			try {
 				log.debug("Attempting to start streaming of: " 
