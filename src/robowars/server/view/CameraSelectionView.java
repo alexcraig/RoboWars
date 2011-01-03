@@ -167,8 +167,6 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		
 		this.pack();
         this.setResizable(false);
-		this.setVisible(true);
-		
 	}
 	
 	/**
@@ -195,16 +193,17 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	/** Disable local display of the video stream on window close */
 	public void windowClosing(WindowEvent e) {
 		log.info("windowClosing");
-		
-		// Note: Call to stop() will leave the player in the "Prefetched" state
-		player.stop();
+		if(player != null) {
+			// Note: Call to stop() will leave the player in the "Prefetched" state
+			player.stop();
+		}
 	}
 	
 	@Override
 	/** Activate local display of the video stream on window activation */
 	public void windowActivated(WindowEvent e) {
 		log.info("windowActivated");
-		if(player.getState() == Controller.Prefetched) {
+		if(player != null && player.getState() == Controller.Prefetched) {
 			player.start();
 		}
 	}	

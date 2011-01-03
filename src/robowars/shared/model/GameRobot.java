@@ -22,6 +22,9 @@ public class GameRobot extends GameEntity{
 	
 	/** The last RobotCommand that was successfully transmitted to the robot */
 	private RobotCommand lastCommand;
+	
+	/** Lock object to ensure mutual exclusion when accessing the last valid command */
+	private final Object lastCommandLock = new Object();
 
 	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
 		super(pose, length, width, id);
@@ -102,7 +105,7 @@ public class GameRobot extends GameEntity{
 	 * @param lastCommand	The last command successfully sent to the robot.
 	 */
 	public void setLastCommand(RobotCommand lastCommand) {
-		synchronized(this.lastCommand) {
+		synchronized(lastCommandLock) {
 			this.lastCommand = lastCommand;
 		}
 	}
@@ -112,7 +115,7 @@ public class GameRobot extends GameEntity{
 	 * 			if no commands have been sent)
 	 */
 	public RobotCommand getLastCommand() {
-		synchronized(this.lastCommand) {
+		synchronized(lastCommandLock) {
 			return lastCommand;
 		}
 	}

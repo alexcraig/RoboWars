@@ -251,23 +251,24 @@ public class GameController implements Runnable, GameListener {
 	 * Takes user input from a UserProxy and issues a corresponding RobotCommand
 	 * to their paired robot (if any).
 	 * @param player	The player proxy that received the input
-	 * @param tilt	The tilt of the client's gyroscope (3D Vector)
+	 * @param orientation	The orientation of the client's device 
+	 * 						3D Vector - <Azimuth, Pitch, Roll>
 	 * @param buttons	A string of all buttons pressed by the client
 	 */
-	public void processInput(UserProxy player, Vector<Float> tilt, String buttons) {
+	public void processInput(UserProxy player, Vector<Float> orientation, String buttons) {
 		if(model == null) {
 			log.error("Input ignored - no game model loaded.");
 			return;
 		}
 		
-		if(player == null || (tilt != null && tilt.size() != 3)) {
-			log.error("Input ignored - null played proxy or invalid tilt vector specified.");
+		if(player == null || (orientation != null && orientation.size() != 3)) {
+			log.error("Input ignored - null played proxy or invalid orientation vector specified.");
 			return;
 		}
 		
-		if(tilt != null) {
-			log.info("Got command from " + player.getUser().getUsername() +": Tilt: <" 
-					+ tilt.get(0) + "," + tilt.get(1) + "," + tilt.get(2) + ">  Buttons: <" 
+		if(orientation != null) {
+			log.info("Got command from " + player.getUser().getUsername() +": orientation: <" 
+					+ orientation.get(0) + "," + orientation.get(1) + "," + orientation.get(2) + ">  Buttons: <" 
 					+ buttons + ">");
 		} else {
 			log.info("Got command from " + player.getUser().getUsername() +": Buttons: <" 
@@ -278,14 +279,7 @@ public class GameController implements Runnable, GameListener {
 		if(pairedRobot != null && model != null) {
 			RobotCommand command = null;
 			
-			// TODO: Maybe make getControlType() a method of the model subclasses?
-			if(model instanceof LightCycles) {
-				command = generateCommand(tilt, buttons, ControlType.SNAKE);
-			} else if (model instanceof TankSimulation || model instanceof FreeTest) {
-				command = generateCommand(tilt, buttons, ControlType.TANK);
-			} else {
-				log.error("Unrecognized game type, no control type available.");
-			}
+			command = generateCommand(orientation, buttons, model.getControlType());
 			
 			if(command != null && model.isValidCommand(command)) {
 				pairedRobot.sendCommand(command);
@@ -302,24 +296,34 @@ public class GameController implements Runnable, GameListener {
 	}
 	
 	/**
-	 * Generates a RobotCommand based on the passed tilt, buttons pressed and
+	 * Generates a RobotCommand based on the passed orientation, buttons pressed and
 	 * control scheme.
-	 * @param tilt	The tilt of the client's gyroscope (3D Vector)
+	 * @param orientation	The orientation of the client's gyroscope (3D Vector)
 	 * @param buttons	The buttons pressed by the client
-	 * @param controlType	The control scheme to use for generating commands
+	 * @param controlType	The orientation of the client's device 
+	 * 						3D Vector - <Azimuth, Pitch, Roll>
 	 * @return	A valid RobotCommand, or null if no command should be issued.
 	 */
-	private RobotCommand generateCommand(Vector<Float> tilt, String buttons, ControlType controlType) {
-		// TODO: Ignore control type for now
-		// Using W A S D commands for testing
-		if(buttons.contains("w")) {
-			return new RobotCommand(CommandType.MOVE_CONTINUOUS,1);	
-		} else if (buttons.contains("a")) {
-			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,1);
-		} else if (buttons.contains("d")) {
-			return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,1);
-		} else if (buttons.contains("s")) {
-			return new RobotCommand(CommandType.STOP,1);
+	private RobotCommand generateCommand(Vector<Float> orientation, String buttons, 
+			ControlType controlType) {
+		
+		switch(controlType) {
+		case TANK:
+			// TODO: Handle this control mode properly
+			// break;
+		case SNAKE:
+			if(buttons.contains("w")) {
+				return new RobotCommand(CommandType.MOVE_CONTINUOUS,1);	
+			} else if (buttons.contains("a")) {
+				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,1);
+			} else if (buttons.contains("d")) {
+				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,1);
+			} else if (buttons.contains("s")) {
+				return new RobotCommand(CommandType.STOP,1);
+			}
+			break;
+		default: 
+			break;
 		}
 		
 		return null;

@@ -29,4 +29,8 @@ public class FreeTest extends GameModel{
 	public boolean isValidCommand(RobotCommand command){
 		return true;
 	}
+	
+	public ControlType getControlType() {
+		return ControlType.TANK;
+	}
 }

@@ -144,4 +144,8 @@ public class LightCycles extends GameModel {
 			return false;
 		}
 	}
+	
+	public ControlType getControlType() {
+		return ControlType.SNAKE;
+	}
 }

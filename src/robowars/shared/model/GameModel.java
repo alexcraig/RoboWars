@@ -8,7 +8,6 @@ import lejos.robotics.Pose;
 public abstract class GameModel implements Serializable{
 
 	protected GameType gameType;
-	protected ControlType controlType;
 	protected int minimumPlayers;
 	protected float arenaSize;
 	protected boolean inProgress;
@@ -111,9 +110,7 @@ public abstract class GameModel implements Serializable{
 
 	public abstract boolean isValidCommand(RobotCommand command);
 
-	public ControlType getControlType(){
-		return controlType;
-	}
+	public abstract ControlType getControlType();
 	
 	public float getArenaSize(){
 		return arenaSize;

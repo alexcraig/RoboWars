@@ -298,36 +298,38 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		// Ignore commands from unpaired players
 		if(controller == null) { return; }
 		
-		// Rough check of tilt validity (use regex instead?)
+		// Rough check of orientation validity (use regex instead?)
 		if(!command.startsWith("<") || !command.contains(">")) {
-			log.info("No tilt information provided with gameplay command.");
+			log.info("No orientation information provided with gameplay command.");
 			controller.processInput(this, null, command);
 			return;
 		}
 		
 		// Assume valid input at this point
-		Vector<Float> tilt = new Vector<Float>();
+		Vector<Float> orientation = new Vector<Float>();
 		
 		try {
-			// Get X tilt
-			Float tiltX = Float.parseFloat(command.substring(1, command.indexOf(",")));
+			// Get azimuth
+			Float azimuth = Float.parseFloat(command.substring(1, command.indexOf(",")));
 			command = command.substring(command.indexOf(",") + 1);
 			
-			// Get Y tilt
-			Float tiltY = Float.parseFloat(command.substring(0, command.indexOf(",")));
+			// Get pitch
+			Float pitch = Float.parseFloat(command.substring(0, command.indexOf(",")));
 			command = command.substring(command.indexOf(",") + 1);
 
-			// Get Z tilt
-			Float tiltZ = Float.parseFloat(command.substring(0, command.indexOf(">")));
+			// Get roll
+			Float roll = Float.parseFloat(command.substring(0, command.indexOf(">")));
 			command = command.substring(command.indexOf(">") + 1);
 
-			// Read tilt floats into a vector
-			tilt.addElement(tiltX);
-			tilt.addElement(tiltY);
-			tilt.addElement(tiltZ);
+			// Read orientation floats into a vector
+			orientation.addElement(azimuth);
+			orientation.addElement(pitch);
+			orientation.addElement(roll);
+			
+			controller.processInput(this, orientation, command);
 			
 		} catch (Exception e) {
-			log.error("Invalid gameplay command format (tilt vector format invalid).");
+			log.error("Invalid gameplay command format (orientation vector format invalid).");
 			log.error("Invalid gameplay command format (gameplay command format invalid).");
 			return;
 		}
