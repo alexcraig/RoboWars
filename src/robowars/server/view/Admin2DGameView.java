@@ -31,20 +31,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
 	//NOTE: Currently the view and the model itself only supports square arenas.
 	public Admin2DGameView(int size, GameModel model){
 		super("Admin Game View");
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        
-        try {
-		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e) {
-		   try {
-		        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-		    }
-		    catch (Exception e2) {
-		        System.err.println("Unable to load default look and feel.");
-		        System.exit(1); // Might not want to exit
-		    }
-		}
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
 		this.model = model;
 		this.size = size;

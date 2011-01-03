@@ -1,16 +1,13 @@
 package robowars.test;
 
-import org.apache.log4j.Logger;
-
-import lejos.nxt.Motor;
 import lejos.pc.comm.NXTInfo;
-import lejos.robotics.Pose;
-import lejos.robotics.TachoMotor;
 import lejos.robotics.navigation.SimpleNavigator;
 import lejos.robotics.navigation.TachoPilot;
+
+import org.apache.log4j.Logger;
+
 import robowars.server.controller.RobotProxy;
 import robowars.server.controller.ServerLobby;
-import robowars.shared.model.CommandType;
 import robowars.shared.model.RobotCommand;
 
 /**

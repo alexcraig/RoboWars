@@ -11,6 +11,8 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import robowars.server.controller.SystemControl;
+
 /**
  * A command line configurable TCP connection simulator.
  */
@@ -77,6 +79,11 @@ public class ClientSimulator {
 							sb.append(incomingMessage);
 							logOut.println(sb.toString());
 							System.out.println(sb.toString());
+							
+							// Addition - Automatic response to protocol string
+							if(incomingMessage.equals(SystemControl.USER_PROTOCOL_VERSION)) {
+								logAndSend(SystemControl.USER_PROTOCOL_VERSION);
+							}
 						}
 					} catch (IOException e) {
 						System.out.println("Lost connection with server, terminating listen thread.");
