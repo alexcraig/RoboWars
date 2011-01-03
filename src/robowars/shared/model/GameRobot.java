@@ -57,7 +57,9 @@ public class GameRobot extends GameEntity{
 	}
 
 	public RobotCommand getResetPath(GameRobot[] hazzards){
-		return new RobotCommand(CommandType.RETURN_TO_START_POSITION, 9);
+		// TODO: This should probably generate a serious of "move to coordinate"
+		// commands (to ensure robots do not hit each other)
+		return RobotCommand.returnToStart();
 	}
 
 	public boolean checkCollision(GameEntity target){

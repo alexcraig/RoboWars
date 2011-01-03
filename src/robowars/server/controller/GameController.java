@@ -313,13 +313,13 @@ public class GameController implements Runnable, GameListener {
 			// break;
 		case SNAKE:
 			if(buttons.contains("w")) {
-				return new RobotCommand(CommandType.MOVE_CONTINUOUS,1);	
+				return RobotCommand.moveContinuous(RobotCommand.MAX_SPEED);
 			} else if (buttons.contains("a")) {
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,1);
+				return RobotCommand.turnAngleLeft(45);
 			} else if (buttons.contains("d")) {
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,1);
+				return RobotCommand.turnAngleRight(45);
 			} else if (buttons.contains("s")) {
-				return new RobotCommand(CommandType.STOP,1);
+				return RobotCommand.stop();
 			}
 			break;
 		default: 

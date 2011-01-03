@@ -5,80 +5,148 @@ import java.util.Vector;
 
 import lejos.robotics.Pose;
 
+/**
+ * Represents a command that should be passed to a remote robot. Several
+ * command types are available with different parameters.
+ */
 public class RobotCommand implements Serializable{
+	public static final int DEFAULT_PRIORITY = 1;
 
+	/** The type of the command */
 	private CommandType type;
-	private float throttle;
-	private float turnBearing;
+	
+	/** The moveSpeed setting for the command */
+	private float moveSpeed;
+	
+	/** 
+	 * The turning parameter for the command. This will be either a number
+	 * of degrees or a turn rate depending on the type of command.
+	 */
+	private float turnParam;
+	
+	/** Special flags to include (used for sounds / lights) */
 	private String specialFlags;
+	
+	/** 
+	 * A position and heading (used for position override commands and move to
+	 * position commands) 
+	 * */
 	private Pose newPos;
 	
 	/** The priority of this command. The higher the value, the higher the priority. */
 	private int priority;
 
-	public static final float MAX_SPEED = 100;
+	/** The maximum value that should be sent in the moveSpeed parameter */
+	public static final float MAX_SPEED = 5; // This will need to be tweaked for the real hardware
 
-	public RobotCommand(CommandType type, int priority){
+	/**
+	 * Generates a new RobotCommand
+	 * @param type	The type of the command
+	 * @param moveSpeed	The moveSpeed setting for the command
+	 * @param turnParam	The turning parameter for the command.
+	 * @param specialFlags	Special flags to include (used for sounds / lights)
+	 * @param newPos	A position and heading
+	 * @param priority	The priority of this command. The higher the value, the higher the priority.
+	 */
+	private RobotCommand(CommandType type, float moveSpeed, float turnParam,
+			String specialFlags, Pose newPos, int priority) {
 		this.type = type;
-		throttle = 0;
-		turnBearing = 0;
-		newPos = null;
-		specialFlags = null;
-		this.priority = priority;
-
-		switch(type){
-			case MOVE_CONTINUOUS:
-				throttle = MAX_SPEED;
-				turnBearing = 0; break;
-
-			case TURN_RIGHT_ANGLE_LEFT:
-				throttle = 0;
-				turnBearing = 90; break;
-
-			case TURN_RIGHT_ANGLE_RIGHT:
-				throttle = 0;
-				turnBearing = -90; break;
-
-			case STOP:
-				throttle = 0;
-				turnBearing = 0; break;
-
-			case RETURN_TO_START_POSITION: break;
-
-			case MOVE_COORDINATE: break;
-
-			case MOVE_DEGREE_TURN: break;
-
-			case FIRE_PROJECTILE: specialFlags = "Fire"; break;
-		}
-	}
-
-	public RobotCommand(float throttle, float turnBearing, 
-			String specialFlags, int priority)
-	{
-		this.throttle = throttle;
-		this.turnBearing = turnBearing;
+		
+		if(moveSpeed > MAX_SPEED)
+			moveSpeed = MAX_SPEED;
+		this.moveSpeed = moveSpeed;
+		
+		this.turnParam = turnParam;
+		this.newPos = newPos;
 		this.specialFlags = specialFlags;
 		this.priority = priority;
 	}
-
-	public RobotCommand(Pose newPose, int priority){
-		this.type = CommandType.SET_POSITION;
-		throttle = 0;
-		turnBearing = 0;
-		specialFlags = null;
-		newPos = newPose;
+	
+	/**
+	 * Generates a MOVE_CONTINUOUS robot command
+	 * @param moveSpeed	The moveSpeed for the command
+	 * @return	A MOVE_CONTINUOUS robot command
+	 */
+	public static RobotCommand moveContinuous(float moveSpeed) {
+		return new RobotCommand(CommandType.MOVE_CONTINUOUS, moveSpeed, 
+				0, null, null, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a SET_POSITION robot command
+	 * @param newPos	The new position for the robot (overrides any existing data)
+	 * @return A SET_POSITION robot command
+	 */
+	public static RobotCommand setPosition(Pose newPos) {
+		return new RobotCommand(CommandType.SET_POSITION, 0, 
+				0, null, newPos, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a STOP robot command
+	 * @return A STOP robot command
+	 */
+	public static RobotCommand stop() {
+		return new RobotCommand(CommandType.STOP, 0, 
+				0, null, null, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a TURN_ANGLE_LEFT command
+	 * @param degrees	The number of degrees to turn left (stopped, on the spot rotation)
+	 * @return A TURN_ANGLE_LEFT command
+	 */
+	public static RobotCommand turnAngleLeft(int degrees) {
+		return new RobotCommand(CommandType.TURN_ANGLE_LEFT, 0, 
+				degrees, null, null, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a TURN_ANGLE_RIGHT command
+	 * @param degrees	The number of degrees to turn right (stopped, on the spot rotation)
+	 * @return A TURN_ANGLE_RIGHT command
+	 */
+	public static RobotCommand turnAngleRight(int degrees) {
+		return new RobotCommand(CommandType.TURN_ANGLE_RIGHT, 0, 
+				degrees, null, null, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a ROLLING_TURN command
+	 * @param moveSpeed	The forward movement speed
+	 * @param turnRate	The turn rate (from -200 to 200, positive values for left turns)
+	 * @return
+	 */
+	public static RobotCommand rollingTurn(int moveSpeed, int turnRate) {
+		if(turnRate < -200) turnRate = -200;
+		if(turnRate > 200) turnRate = 200;
+		
+		return new RobotCommand(CommandType.ROLLING_TURN, moveSpeed, 
+				turnRate, null, null, DEFAULT_PRIORITY);
+	}
+	
+	/**
+	 * Generates a RETURN_TO_START_POSITION robot command
+	 * @return A RETURN_TO_START_POSITION robot command
+	 */
+	public static RobotCommand returnToStart() {
+		return new RobotCommand(CommandType.RETURN_TO_START_POSITION, 0, 
+				0, null, null, DEFAULT_PRIORITY);
+	}
+	
+	public void setPriority(int priority) {
 		this.priority = priority;
 	}
+
 	public Pose getPos(){
 		return newPos;
 	}
 	public float getThrottle() {
-		return throttle;
+		return moveSpeed;
 	}
 
 	public float getTurnBearing() {
-		return turnBearing;
+		return turnParam;
 	}
 
 	public CommandType getType() {
@@ -87,9 +155,10 @@ public class RobotCommand implements Serializable{
 	public int getPriority() {
 		return priority;
 	}
+	
 	public String toString() {
 		String returnStr = "[" + type.toString() + "|";
-		returnStr += "t:" + throttle + "|b:" + turnBearing;
+		returnStr += "t:" + moveSpeed + "|b:" + turnParam;
 		if(specialFlags != null) {
 			returnStr += "|s:" + specialFlags;
 		}

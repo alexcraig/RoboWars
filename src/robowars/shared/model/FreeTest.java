@@ -23,7 +23,7 @@ public class FreeTest extends GameModel{
 	}
 	
 	public boolean checkGameOver(){
-		return robots.get(0).checkCollision(theWall);
+		return false;
 	}
 	
 	public boolean isValidCommand(RobotCommand command){

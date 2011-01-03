@@ -100,13 +100,14 @@ public class TestRobotProxy extends RobotProxy {
 			navigator.setPose(command.getPos());
 			break;
 		case MOVE_CONTINUOUS:
+			navigator.setMoveSpeed(command.getThrottle());
 			navigator.forward();
 			break;
-		case TURN_RIGHT_ANGLE_LEFT:
-			navigator.rotate(90);
+		case TURN_ANGLE_LEFT:
+			navigator.rotate(command.getTurnBearing());
 			break;
-		case TURN_RIGHT_ANGLE_RIGHT:
-			navigator.rotate(-90);
+		case TURN_ANGLE_RIGHT:
+			navigator.rotate(-command.getTurnBearing());
 			break;
 		case STOP:
 			navigator.stop();

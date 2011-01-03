@@ -45,10 +45,10 @@ public class LejosInputStream {
 			if(type.equals("MOVE_CONTINUOUS")){
 				return new RobotCommand(CommandType.MOVE_CONTINUOUS,99);
 			}
-			else if(type.equals("TURN_RIGHT_ANGLE_RIGHT")){
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,99);
+			else if(type.equals("TURN_ANGLE_RIGHT")){
+				return new RobotCommand(CommandType.TURN_ANGLE_RIGHT,99);
 			}
-			else if(type.equals("TURN_RIGHT_ANGLE_LEFT")){
+			else if(type.equals("TURN_ANGLE_LEFT")){
 				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,99);
 			}
 			else if(type.equals("STOP")){
