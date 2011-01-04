@@ -55,7 +55,7 @@ public class SystemControl {
 		
 		// TESTING
 		new TestRobotProxy(lobby, "Robot1");
-		new TestRobotProxy(lobby, "Robot2");
+		// new TestRobotProxy(lobby, "Robot2");
 	}
 	
 }

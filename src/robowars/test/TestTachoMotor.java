@@ -18,6 +18,9 @@ public class TestTachoMotor implements TachoMotor {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(TestTachoMotor.class);
 	
+	/** The name of the motor (for logging purposes) */
+	private String name;
+	
 	/** Constants for motor rotation direction */
 	public static final int MOVE_FORWARD = 0;
 	public static final int MOVE_BACKWARD = 1;
@@ -41,10 +44,11 @@ public class TestTachoMotor implements TachoMotor {
 	private boolean rotateToTarget;
 	
 	/** The degree value to rotate to (if rotateToTarget is set) */
-	private int rotateTarget;
+	private long rotateTarget;
 	
 	/** Generates a new TestTachoMotor */
-	public TestTachoMotor() {
+	public TestTachoMotor(String name) {
+		this.name = name;
 		speed = 0;
 		tachoDegrees = 0;
 		rotateTarget = 0;
@@ -59,7 +63,10 @@ public class TestTachoMotor implements TachoMotor {
 	 * for both motors used with a single pilot). The simulated speed of the motor
 	 * will depend on the frequency at which this function is called.
 	 */
-	public void updateTachoValue() {
+	public synchronized void updateTachoValue() {
+		// log.info(name + " updating: " + moveDirection + " | " + tachoDegrees + " | " + speed
+		// 		+ " | " + isMoving + " | " + rotateToTarget + " | " + rotateTarget);
+		
 		if(isMoving) {
 			switch(moveDirection) {
 			case MOVE_FORWARD:
@@ -75,17 +82,20 @@ public class TestTachoMotor implements TachoMotor {
 			if(rotateToTarget) {
 				if(moveDirection == MOVE_FORWARD
 						&& tachoDegrees >= rotateTarget) {
-					tachoDegrees = rotateTarget;
+					tachoDegrees = (int)rotateTarget;
 					isMoving = false;
 					rotateToTarget = false;
 				} else if(moveDirection == MOVE_BACKWARD
 						&& tachoDegrees <= rotateTarget) {
-					tachoDegrees = rotateTarget;
+					tachoDegrees = (int)rotateTarget;
 					isMoving = false;
 					rotateToTarget = false;
 				}
 			}
 		}
+		
+		// log.info(name + " updated: " + moveDirection + " | " + tachoDegrees + " | " + speed
+		// 		+ " | " + isMoving + " | " + rotateToTarget + " | " + rotateTarget);
 	}
 	
 	/** See documentation for lejos.robotics TachoMotor for usage of below functions */
@@ -100,12 +110,14 @@ public class TestTachoMotor implements TachoMotor {
 	}
 
 	@Override
-	public void rotate(int degrees) {
+	public synchronized void rotate(int degrees) {
 		rotate(degrees, true);
 	}
 
 	@Override
-	public void rotate(int degrees, boolean immediateReturn) {
+	public  synchronized void rotate(int degrees, boolean immediateReturn) {
+		// log.info(name + " rotate(" + degrees + "," + immediateReturn);
+		
 		if(degrees == 0) return;
 		
 		if(degrees > 0) {
@@ -116,7 +128,7 @@ public class TestTachoMotor implements TachoMotor {
 		
 		isMoving = true;
 		rotateToTarget = true;
-		rotateTarget = tachoDegrees + degrees;
+		rotateTarget = (long)tachoDegrees + (long)degrees;
 		
 		if(!immediateReturn) {
 			while(rotateToTarget);
@@ -124,18 +136,19 @@ public class TestTachoMotor implements TachoMotor {
 	}
 
 	@Override
-	public void rotateTo(int degrees) {
+	public synchronized void rotateTo(int degrees) {
 		rotateTo(degrees, true);
 	}
 
 	@Override
-	public void rotateTo(int degrees, boolean immediateReturn) {
+	public synchronized void rotateTo(int degrees, boolean immediateReturn) {
 		rotate(degrees - tachoDegrees, immediateReturn);
 	}
 
 	@Override
-	public void setSpeed(int speed) {
-		this.speed = speed;
+	public synchronized void setSpeed(int speed) {
+		// log.info("Speed set to: " + Math.abs(speed) + " (param: " + speed + ")");
+		this.speed = Math.abs(speed);
 	}
 
 	@Override
@@ -144,11 +157,12 @@ public class TestTachoMotor implements TachoMotor {
 
 	@Override
 	public int getRotationSpeed() {
-		return 0;
+		return speed;
 	}
 
 	@Override
-	public int getTachoCount() {
+	public synchronized int getTachoCount() {
+		// log.info(name + " - Tach: " + tachoDegrees);
 		return tachoDegrees;
 	}
 
@@ -158,30 +172,34 @@ public class TestTachoMotor implements TachoMotor {
 	}
 
 	@Override
-	public void backward() {
+	public synchronized void backward() {
+		// log.info("Backward");
 		isMoving = true;
+		rotateToTarget = false;
 		moveDirection = MOVE_BACKWARD;
 	}
 
 	@Override
-	public void flt() {
+	public synchronized void flt() {
 		isMoving = false;
-
+		rotateToTarget = false;
 	}
 
 	@Override
-	public void forward() {
+	public synchronized void forward() {
+		// log.info("Forward");
 		isMoving = true;
+		rotateToTarget = false;
 		moveDirection = MOVE_FORWARD;
 	}
 
 	@Override
-	public boolean isMoving() {
+	public synchronized boolean isMoving() {
 		return isMoving;
 	}
 
 	@Override
-	public void stop() {
+	public synchronized void stop() {
 		isMoving = false;
 		rotateToTarget = false;
 	}

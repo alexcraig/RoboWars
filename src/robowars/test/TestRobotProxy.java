@@ -40,8 +40,8 @@ public class TestRobotProxy extends RobotProxy {
 	public TestRobotProxy(ServerLobby lobby, String identifier) {
 		super(lobby, new NXTInfo(0, identifier, "dummy:address"));
 		
-		testMotorA = new TestTachoMotor();
-		testMotorB = new TestTachoMotor();
+		testMotorA = new TestTachoMotor("MotorA");
+		testMotorB = new TestTachoMotor("MotorB");
 		pilot = new TachoPilot(TEST_WHEEL_DIAMETER, TEST_TRACK_WIDTH, 
 				testMotorA, testMotorB);
 		navigator = new SimpleNavigator(pilot);
@@ -55,7 +55,6 @@ public class TestRobotProxy extends RobotProxy {
 					// Update the motors and navigator
 					testMotorA.updateTachoValue();
 					testMotorB.updateTachoValue();
-					navigator.updatePose();
 					
 					// Report the new position to the game controller (if it exists)
 					if(getGameController() != null) {
