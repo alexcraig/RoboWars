@@ -29,6 +29,10 @@ public class GameController implements Runnable, GameListener {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(GameController.class);
 	
+	/** Scaling factors for client orientation input */
+	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED / 180;
+	public static final float ROLL_SCALING_FACTOR = 200 / 90;
+	
 	/** A list of all control pairs registered with this game */
 	private List<ControlPair> controlPairs;
 	
@@ -309,15 +313,33 @@ public class GameController implements Runnable, GameListener {
 		
 		switch(controlType) {
 		case TANK:
-			// TODO: Handle this control mode properly
-			// break;
+			// Assume that button input always overrides tilt controls
+			if(buttons.contains("w")) {
+				return RobotCommand.moveContinuous(RobotCommand.MAX_SPEED);
+			} else if (buttons.contains("a")) {
+				return RobotCommand.rollingTurn(RobotCommand.MAX_SPEED, 200);
+			} else if (buttons.contains("d")) {
+				return RobotCommand.rollingTurn(RobotCommand.MAX_SPEED, -200);
+			} else if (buttons.contains("s")) {
+				return RobotCommand.stop();
+			}
+			
+			// Scale vector input
+			// Pitch should range from -RobotCommand.MAX_SPEED to RobotCommand.MAX_SPEED
+			// Roll should range from -200 to 200
+			// TODO: This scaling should be done on the client side to ensure
+			//		 that input is consistent across different hardware
+			float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
+			int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
+			return RobotCommand.rollingTurn(moveSpeed, turnRate);
+			
 		case SNAKE:
 			if(buttons.contains("w")) {
 				return RobotCommand.moveContinuous(RobotCommand.MAX_SPEED);
 			} else if (buttons.contains("a")) {
-				return RobotCommand.turnAngleLeft(45);
+				return RobotCommand.turnAngleLeft(90);
 			} else if (buttons.contains("d")) {
-				return RobotCommand.turnAngleRight(45);
+				return RobotCommand.turnAngleRight(90);
 			} else if (buttons.contains("s")) {
 				return RobotCommand.stop();
 			}

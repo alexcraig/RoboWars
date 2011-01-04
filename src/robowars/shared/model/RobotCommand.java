@@ -115,9 +115,9 @@ public class RobotCommand implements Serializable{
 	 * Generates a ROLLING_TURN command
 	 * @param moveSpeed	The forward movement speed
 	 * @param turnRate	The turn rate (from -200 to 200, positive values for left turns)
-	 * @return
+	 * @return A ROLLING_TURN command
 	 */
-	public static RobotCommand rollingTurn(int moveSpeed, int turnRate) {
+	public static RobotCommand rollingTurn(float moveSpeed, int turnRate) {
 		if(turnRate < -200) turnRate = -200;
 		if(turnRate > 200) turnRate = 200;
 		
@@ -158,9 +158,9 @@ public class RobotCommand implements Serializable{
 	
 	public String toString() {
 		String returnStr = "[" + type.toString() + "|";
-		returnStr += "t:" + moveSpeed + "|b:" + turnParam;
+		returnStr += "speed:" + moveSpeed + "|turn:" + turnParam;
 		if(specialFlags != null) {
-			returnStr += "|s:" + specialFlags;
+			returnStr += "|flags:" + specialFlags;
 		}
 		
 		if(newPos != null) {

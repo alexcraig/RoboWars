@@ -312,15 +312,18 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			// Get azimuth
 			Float azimuth = Float.parseFloat(command.substring(1, command.indexOf(",")));
 			command = command.substring(command.indexOf(",") + 1);
+			log.info("Got AZIMUTH: " + azimuth);
 			
 			// Get pitch
 			Float pitch = Float.parseFloat(command.substring(0, command.indexOf(",")));
 			command = command.substring(command.indexOf(",") + 1);
-
+			log.info("Got PITCH: " + pitch);
+			
 			// Get roll
 			Float roll = Float.parseFloat(command.substring(0, command.indexOf(">")));
 			command = command.substring(command.indexOf(">") + 1);
-
+			log.info("Got ROLL: " + roll);
+			
 			// Read orientation floats into a vector
 			orientation.addElement(azimuth);
 			orientation.addElement(pitch);
@@ -328,8 +331,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 			controller.processInput(this, orientation, command);
 			
-		} catch (Exception e) {
-			log.error("Invalid gameplay command format (orientation vector format invalid).");
+		} catch (NumberFormatException e) {
 			log.error("Invalid gameplay command format (gameplay command format invalid).");
 			return;
 		}
