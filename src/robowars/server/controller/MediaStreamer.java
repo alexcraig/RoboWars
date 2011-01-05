@@ -42,6 +42,9 @@ public class MediaStreamer {
 	 */
 	private CameraController selectedCamera;
 
+	/**
+	 * Generates a new MediaStreamer
+	 */
 	public MediaStreamer() 
 	{
 		RegistryDefaults.registerAll(RegistryDefaults.FMJ);
@@ -78,9 +81,14 @@ public class MediaStreamer {
 	 * TODO:	Keep coordinate information for devices which have been
 	 * 			previously configured
 	 */
-	public void updateDeviceList() {		
-		cameras.clear();
+	public void updateDeviceList() {
+		// Store the old list of cameras, and generate a new list to store
+		// cameras detected during this update
+		List<CameraController> oldCameras = cameras;
+		cameras = new ArrayList<CameraController>();
 
+		// Iterate through all detected cameras, and generate a new camera controller
+		// for those which did not exist in the previous camera list
 		Vector<CaptureDeviceInfo> webcamListing = CaptureDeviceManager.getDeviceList(null);
 		for(CaptureDeviceInfo info : webcamListing) {
 			if(info.getLocator().toString().startsWith("civil")) {
@@ -89,15 +97,28 @@ public class MediaStreamer {
 					log.info("\"" + info.getName() + "\" supports format: " + f.toString());
 				}
 				
-				CameraController newCam = new CameraController(info);
-				cameras.add(newCam);
+				boolean foundExisting = false;
+				for(CameraController c : oldCameras) {
+					if(c.getMediaLocator() == info.getLocator()) {
+						cameras.add(c);
+						foundExisting = true;
+						break;
+					}
+				}
+				
+				if(!foundExisting) {
+					CameraController newCam = new CameraController(info);
+					cameras.add(newCam);
+				}
 				
 				// ------------- TESTING -----------------
-				selectedCamera = newCam; // TODO: Set through UI, this is just for testing
+				selectedCamera = cameras.get(0); // TODO: Set through UI, this is just for testing
 				// ------------- TESTING -----------------
 			}
 		}
-
+		
+		oldCameras.clear();
+		oldCameras = null;
 	}
 	
 	/**

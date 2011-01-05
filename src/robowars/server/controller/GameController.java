@@ -203,6 +203,7 @@ public class GameController implements Runnable, GameListener {
 	public synchronized boolean isTerminating() {
 		return terminateFlag;
 	}
+	
 	/** 
 	 * Signals the lobby to remove references to the current game, and clears
 	 * all references to user and robot proxies.
@@ -215,7 +216,6 @@ public class GameController implements Runnable, GameListener {
 			pair.getRobotProxy().clearGameController();
 			model.removeRobot(pair.getRobotProxy().getIdentifier());
 		}
-		
 		controlPairs.clear();
 		controlPairs = null;
 		spectators.clear();
@@ -260,6 +260,7 @@ public class GameController implements Runnable, GameListener {
 	 * @param buttons	A string of all buttons pressed by the client
 	 */
 	public void processInput(UserProxy player, Vector<Float> orientation, String buttons) {
+		// Ensure user input is valid and log the input
 		if(model == null) {
 			log.error("Input ignored - no game model loaded.");
 			return;
@@ -279,6 +280,8 @@ public class GameController implements Runnable, GameListener {
 					+ buttons + ">");
 		}
 		
+		// If a game is in session and a robot is currently paired to the player
+		// supplying input, generate a command and send it to the paired robot
 		RobotProxy pairedRobot = getPairedRobot(player);
 		if(pairedRobot != null && model != null) {
 			RobotCommand command = null;
@@ -291,8 +294,13 @@ public class GameController implements Runnable, GameListener {
 		}
 	}
 	
-	
-	private RobotCommand comparePriority(RobotCommand commandFromUser, RobotCommand commandFromModel){
+	/**
+	 * Compares two RobotCommands and returns the command with the higher priority
+	 * @param commandFromUser	The first command to be compared
+	 * @param commandFromModel	The second command to be compared
+	 * @return	The command with the higher priority
+	 */
+	private RobotCommand comparePriority(RobotCommand commandFromUser, RobotCommand commandFromModel) {
 		if(commandFromUser.getPriority() >= commandFromModel.getPriority())
 			return commandFromUser;
 		else
@@ -351,11 +359,17 @@ public class GameController implements Runnable, GameListener {
 		return null;
 	}
 	
-	public void updateRobotPosition(RobotProxy robot, Pose newPos) {
+	/**
+	 * Updates the position of a robot. This method should be called by a
+	 * RobotProxy whenever it receives new position data from the remote robot.
+	 * @param robot	The proxy providing the position data
+	 * @param newPose	The new pose of the robot (position and heading)
+	 */
+	public void updateRobotPosition(RobotProxy robot, Pose newPose) {
 		log.debug("Got robot position update:\n\tRobot: " + robot.getIdentifier()
-				+ "\n\tX: " + newPos.getX() + "\tY: " + newPos.getY() + "\tHeading: "
-				+ newPos.getHeading());
-		model.updateRobotPosition(robot.getIdentifier(), newPos);
+				+ "\n\tX: " + newPose.getX() + "\tY: " + newPose.getY() + "\tHeading: "
+				+ newPose.getHeading());
+		model.updateRobotPosition(robot.getIdentifier(), newPose);
 	}
 	
 	public GameModel getGameModel(){
