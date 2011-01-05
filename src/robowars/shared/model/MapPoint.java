@@ -12,7 +12,6 @@ public class MapPoint {
 		this.g=g;
 		this.b=b;
 	}
-
 	public int getR() {
 		return r;
 	}

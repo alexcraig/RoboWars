@@ -1,25 +1,40 @@
 package robowars.robot;
-import lejos.robotics.Colors.Color;
+
+import java.io.IOException;
+
+import robowars.shared.model.RobotMap;
 
 import lejos.nxt.ColorLightSensor;
 import lejos.nxt.SensorPort;
-public class ColorSensor {
-	static ColorLightSensor sensor;
-	public static void main (String args[]){
+public class ColorSensor extends Thread{
+	private ColorLightSensor sensor;
+	private RobotMap map;
+	private LejosOutputStream output;
+	private RobotMovement move;
+	public ColorSensor(LejosOutputStream output, RobotMap map, RobotMovement move){
 		sensor=new ColorLightSensor(SensorPort.S1, ColorLightSensor.TYPE_COLORFULL);
-		for(int i=0; i<100; i++){
-			sensor.setFloodlight(true);
-			if(i%2==0)sensor.setFloodlight(Color.RED);
-			if(i%3==0)sensor.setFloodlight(Color.BLUE);
-			if(i%5==0)sensor.setFloodlight(Color.WHITE);
+		this.map=map;
+		this.output=output;
+		this.move=move;
+	}
+	public void run(){
+		while(true){
+			int[] reading=sensor.getColor();
+			//map logic
+			//if logic==true
 			try {
-				Thread.sleep(50);
+				output.writeObject(move.getPosition());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			sensor.setFloodlight(false);
 		}
-		sensor.setFloodlight(false);
 	}
 }
+

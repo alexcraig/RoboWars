@@ -13,11 +13,32 @@ public class RobotCommandController extends Thread{
 	private LejosOutputStream dataOut;
 	private LejosInputStream dataIn;
 	
-	public RobotCommandController(RobotMovement move){
+	public RobotCommandController(RobotMovement movement){
 		 NXTConnection connection = USB.waitForConnection();
 		 dataOut=new LejosOutputStream(connection.openDataOutputStream());
 		 dataIn=new LejosInputStream(connection.openDataInputStream());
-		 this.move=move;
+		 this.move=movement;
+		 new Thread(new Runnable(){
+			@Override
+			public void run() {
+				while(true){
+					if(move!=null){
+						try {
+							dataOut.writeObject(move.getPosition());
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					try {
+						sleep(20);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			} 
+		 }).start();
 	}
 	
 	public void run(){

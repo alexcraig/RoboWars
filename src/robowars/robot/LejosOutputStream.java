@@ -27,7 +27,7 @@ public class LejosOutputStream {
 	 * @param o
 	 * @throws IOException
 	 */
-	public void writeObject(Object o) throws IOException{
+	public synchronized void writeObject(Object o) throws IOException{
 		String s=null;
 		if(o instanceof RobotCommand){
 			s="1";

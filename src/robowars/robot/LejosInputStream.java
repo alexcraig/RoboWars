@@ -29,7 +29,7 @@ public class LejosInputStream {
 	 * @return received object
 	 * @throws IOException
 	 */
-	public Object readObject() throws IOException{
+	public synchronized Object readObject() throws IOException{
 		int input=in.read();
 		
 		//if robotCommand
