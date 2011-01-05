@@ -1,6 +1,10 @@
 package robowars.shared.model;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
+import robowars.robot.*;
 public class RobotMap {
 	private Vector<MapPoint> points;
 	public RobotMap(){
@@ -8,6 +12,24 @@ public class RobotMap {
 	}
 	public RobotMap(Vector<MapPoint> points){
 		this.points=points;
+	}
+	public RobotMap(String config){
+		LejosInputStream stream;
+		RobotMap temp = null;
+		try {
+			stream = new  LejosInputStream(new FileInputStream(config));
+			temp=(RobotMap)stream.readObject();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0; i<temp.getPoints().size(); i++){
+			addPoint(temp.getPoints().get(i));
+		}
+		
 	}
 	public Vector<MapPoint> getPoints(){
 		return points;

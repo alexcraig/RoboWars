@@ -14,8 +14,8 @@ import lejos.robotics.navigation.*;
 public class RobotMovement {
 	private TachoPilot pilot;
 	private SimpleNavigator navigator;
-	private final static int MINDSTORM_WIDTH=15;
-	private final static int WHEEL_HEIGHT=3;
+	private final static int MINDSTORM_WIDTH=110;
+	private final static int WHEEL_HEIGHT=43;
 	private final static int SPEED=100;
 	
 	public RobotMovement(){
@@ -34,15 +34,15 @@ public class RobotMovement {
 		if(pilot.isMoving())pilot.stop();
 		pilot.travel(-15);
 	}
-	public synchronized void turnRight() {
+	public synchronized void turnRight(float f) {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(90);
+		pilot.rotate(f);
 	}
-	public synchronized void turnLeft() {
+	public synchronized void turnLeft(float f) {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(-90);
+		pilot.rotate(-f);
 	}
 	public synchronized void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())pilot.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
@@ -60,8 +60,6 @@ public class RobotMovement {
 
 	public synchronized void moveContinuous(RobotCommand command) {
 		navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
-		while(true){
-			moveForward();
-		}
+		pilot.forward();
 	}
 }
