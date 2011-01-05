@@ -49,7 +49,9 @@ public class BluetoothServer implements Runnable {
 					}
 				}
 				
-				// Arbitrary delay between Bluetooth searches
+				// Arbitrary delay between Bluetooth searches to prevent a robot
+				// from being detected twice before it is registered to the lobby
+				
 				// TODO: Allow Bluetooth searches to be triggered from the admin
 				// 		 panel
 				Thread.sleep(10000);

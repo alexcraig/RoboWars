@@ -1,11 +1,11 @@
 package robowars.test;
 
-import java.util.Random;
+import lejos.pc.comm.NXTInfo;
+import lejos.robotics.navigation.SimpleNavigator;
+import lejos.robotics.navigation.TachoPilot;
 
 import org.apache.log4j.Logger;
 
-import lejos.pc.comm.NXTInfo;
-import lejos.robotics.Pose;
 import robowars.server.controller.RobotProxy;
 import robowars.server.controller.ServerLobby;
 import robowars.shared.model.RobotCommand;
@@ -15,8 +15,22 @@ import robowars.shared.model.RobotCommand;
  * disabled (used for testing purposes).
  */
 public class TestRobotProxy extends RobotProxy {
+	public static final float TEST_WHEEL_DIAMETER = 20;
+	public static final float TEST_TRACK_WIDTH = 60;
+	public static final int MOTOR_UPDATE_MILLIS = 250;
+	
+	
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(TestRobotProxy.class);
+	
+	/** Pilot to simulate robot movement */
+	private TachoPilot pilot;
+	
+	/** Navigator to track robot position */
+	private SimpleNavigator navigator;
+	
+	/** Simulated motors */
+	private TestTachoMotor testMotorA, testMotorB;
 	
 	/**
 	 * Generates a new TestRobotProxy with a dummy name and protocol
@@ -25,7 +39,43 @@ public class TestRobotProxy extends RobotProxy {
 	 */
 	public TestRobotProxy(ServerLobby lobby, String identifier) {
 		super(lobby, new NXTInfo(0, identifier, "dummy:address"));
+		
+		testMotorA = new TestTachoMotor("MotorA");
+		testMotorB = new TestTachoMotor("MotorB");
+		pilot = new TachoPilot(TEST_WHEEL_DIAMETER, TEST_TRACK_WIDTH, 
+				testMotorA, testMotorB);
+		navigator = new SimpleNavigator(pilot);
+		
+		// Generate a new thread to continually update the tachometer count
+		// on each of the simulated motors.
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					// Update the motors and navigator
+					testMotorA.updateTachoValue();
+					testMotorB.updateTachoValue();
+					
+					// Report the new position to the game controller (if it exists)
+					if(getGameController() != null) {
+						getGameController().updateRobotPosition(TestRobotProxy.this, 
+								navigator.getPose());
+					}
+					
+					try {
+						Thread.sleep(MOTOR_UPDATE_MILLIS);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+		
+		navigator.setMoveSpeed(5);
+		navigator.setTurnSpeed(90);
+		
 		log.info("Generated test robot with identifier: " + identifier);
+		
 	}
 	
 	/**
@@ -34,33 +84,6 @@ public class TestRobotProxy extends RobotProxy {
 	 */
 	public void openConnection(NXTInfo nxtInfo) {
 		log.info("Registering test robot proxy: " + getIdentifier());
-		
-		// Start a testing thread which generates random position updates
-		// and passes them to the GameController
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while(true) {
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-					Random rand = new Random();
-					Pose newPos = new Pose(rand.nextFloat() * 100, rand.nextFloat() * 100, 
-							rand.nextFloat() * 360);
-					
-					if(getGameController() != null) {
-						getGameController().updateRobotPosition(TestRobotProxy.this, 
-								newPos);
-					}
-				}
-				
-			}
-		}).start();
-		
 		getServerLobby().registerRobot(this);
 	}
 
@@ -70,5 +93,28 @@ public class TestRobotProxy extends RobotProxy {
 	public void sendCommand(RobotCommand command) {
 		getRobot().setLastCommand(command);
 		log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
+		
+		switch(command.getType()) {
+		case SET_POSITION:
+			navigator.setPose(command.getPos());
+			break;
+		case MOVE_CONTINUOUS:
+			navigator.setMoveSpeed(command.getThrottle());
+			navigator.forward();
+			break;
+		case TURN_ANGLE_LEFT:
+			navigator.rotate(command.getTurnBearing());
+			break;
+		case TURN_ANGLE_RIGHT:
+			navigator.rotate(-command.getTurnBearing());
+			break;
+		case ROLLING_TURN:
+			navigator.setMoveSpeed(command.getThrottle());
+			navigator.steer((int)command.getTurnBearing());
+			break;
+		case STOP:
+			navigator.stop();
+			break;
+		}
 	}
 }

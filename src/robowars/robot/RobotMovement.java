@@ -17,6 +17,7 @@ public class RobotMovement {
 	private final static int MINDSTORM_WIDTH=110;
 	private final static int WHEEL_HEIGHT=43;
 	private final static int SPEED=100;
+	
 	public RobotMovement(){
 		pilot=new TachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
 		pilot.setSpeed(SPEED);

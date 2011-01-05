@@ -40,6 +40,10 @@ public class TankSimulation extends GameModel {
 	private void generateProjectile(GameRobot robot) {
 		entities.add(new Projectile(robot.getPose(),1,1,1,0));
 	}
+	
+	public ControlType getControlType() {
+		return ControlType.TANK;
+	}
 
 }
 

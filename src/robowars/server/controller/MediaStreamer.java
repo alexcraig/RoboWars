@@ -46,13 +46,13 @@ public class MediaStreamer {
 	{
 		RegistryDefaults.registerAll(RegistryDefaults.FMJ);
 		cameras = new ArrayList<CameraController>();
-		generateCameraList();
-		ltiCivilTest();
+		GlobalCaptureDevicePlugger.addCaptureDevices();
 	}
 	
 	/**
 	 * Testing function for using the LTI-Civil library (lower level than FMJ)
-	 * This may be neccesary to set 
+	 * Usage of the lower level library may be necessary to set video capture
+	 * parameters (resolution, frame rate, etc.)
 	 */
 	public void ltiCivilTest() {
 		NativeCaptureSystemFactory captureFactory = new NativeCaptureSystemFactory();
@@ -74,12 +74,11 @@ public class MediaStreamer {
 	 * Clears the existing camera controller list and re-detects connected
 	 * capture devices. Note that the coordinate information for existing
 	 * cameras will be lost.
+	 * 
+	 * TODO:	Keep coordinate information for devices which have been
+	 * 			previously configured
 	 */
-	public void generateCameraList() {
-		// This may only need to be called once at initialization, might
-		// want to test moving it to SystemControl
-		GlobalCaptureDevicePlugger.addCaptureDevices();
-		
+	public void updateDeviceList() {		
 		cameras.clear();
 
 		Vector<CaptureDeviceInfo> webcamListing = CaptureDeviceManager.getDeviceList(null);
@@ -93,7 +92,9 @@ public class MediaStreamer {
 				CameraController newCam = new CameraController(info);
 				cameras.add(newCam);
 				
+				// ------------- TESTING -----------------
 				selectedCamera = newCam; // TODO: Set through UI, this is just for testing
+				// ------------- TESTING -----------------
 			}
 		}
 
@@ -105,5 +106,12 @@ public class MediaStreamer {
 	 */
 	public CameraController getActiveCamera() {
 		return selectedCamera;
+	}
+	
+	/**
+	 * @return	The list of all CameraControllers dedected by the MediaStreamer
+	 */
+	public List<CameraController> getAvailableCameras() {
+		return cameras;
 	}
 }

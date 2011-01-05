@@ -22,6 +22,9 @@ public class GameRobot extends GameEntity{
 	
 	/** The last RobotCommand that was successfully transmitted to the robot */
 	private RobotCommand lastCommand;
+	
+	/** Lock object to ensure mutual exclusion when accessing the last valid command */
+	private final Object lastCommandLock = new Object();
 
 	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
 		super(pose, length, width, id);
@@ -32,7 +35,6 @@ public class GameRobot extends GameEntity{
 		this.robotIdentifier=robotId;
 		command = null;
 		setLastCommand(null);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -55,15 +57,26 @@ public class GameRobot extends GameEntity{
 	}
 
 	public RobotCommand getResetPath(GameRobot[] hazzards){
-		return new RobotCommand(CommandType.RETURN_TO_START_POSITION, 9);
+		// TODO: This should probably generate a serious of "move to coordinate"
+		// commands (to ensure robots do not hit each other)
+		return RobotCommand.returnToStart();
 	}
 
 	public boolean checkCollision(GameEntity target){
-		float closestX=clamp(this.getPose().getX(), target.getPose().getX()-target.getLength(), target.getPose().getX()+target.getLength());
-		float closestY=clamp(this.getPose().getY(), target.getPose().getY()-target.getWidth(), target.getPose().getY()+target.getWidth());
-		float distanceX=closestX-this.getPose().getX();
-		float distanceY=closestY-this.getPose().getY();
-		if(((distanceX*distanceX)+(distanceY*distanceY))<=this.getWidth()*this.getWidth())return true;
+		// TODO: This appears to be circle on rectangle collision detection, but
+		// robots are currently represented as rectangles. Also note that this 
+		// will not support any collisions where the rectangles are rotated.
+		
+		float closestX = clamp(this.getPose().getX(), 
+				target.getPose().getX()-target.getLength(), target.getPose().getX()+target.getLength());
+		float closestY = clamp(this.getPose().getY(), 
+				target.getPose().getY()-target.getWidth(), target.getPose().getY()+target.getWidth());
+		float distanceX = Math.abs(closestX - this.getPose().getX());
+		float distanceY = Math.abs(closestY - this.getPose().getY());
+		
+		if(((distanceX*distanceX)+(distanceY*distanceY))<=this.getWidth()*this.getWidth()) {
+			return true;
+		}
 		return false;
 	}
 
@@ -102,7 +115,7 @@ public class GameRobot extends GameEntity{
 	 * @param lastCommand	The last command successfully sent to the robot.
 	 */
 	public void setLastCommand(RobotCommand lastCommand) {
-		synchronized(this.lastCommand) {
+		synchronized(lastCommandLock) {
 			this.lastCommand = lastCommand;
 		}
 	}
@@ -112,7 +125,7 @@ public class GameRobot extends GameEntity{
 	 * 			if no commands have been sent)
 	 */
 	public RobotCommand getLastCommand() {
-		synchronized(this.lastCommand) {
+		synchronized(lastCommandLock) {
 			return lastCommand;
 		}
 	}

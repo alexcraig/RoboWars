@@ -137,11 +137,15 @@ public class LightCycles extends GameModel {
 	
 	public boolean isValidCommand(RobotCommand command){
 		if (command.getType() == CommandType.MOVE_CONTINUOUS ||
-				command.getType() == CommandType.TURN_RIGHT_ANGLE_LEFT ||
-				command.getType() == CommandType.TURN_RIGHT_ANGLE_RIGHT) {
+				command.getType() == CommandType.TURN_ANGLE_LEFT ||
+				command.getType() == CommandType.TURN_ANGLE_RIGHT) {
 			return true;
 		}else{
 			return false;
 		}
+	}
+	
+	public ControlType getControlType() {
+		return ControlType.SNAKE;
 	}
 }

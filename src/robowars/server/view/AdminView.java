@@ -56,46 +56,92 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	/** JLabel to show the currently selected game type */
 	private JLabel curGameType;
 	
-	/** The MediaStreamer managing camera selection and settings for the AdminView */
-	private MediaStreamer mediaSource;
-	
-	/** Reference to the ServerLobby this AdminView is administrating */
+	/** Reference to the ServerLobby this AdminView should manage */
 	private ServerLobby lobby;
+	
+	/** Reference to the frame used for camera selection */
+	private JFrame cameraSelect;
 	
 	/** 
 	 * Generates a new AdminView frame
 	 * @param frameTitle	The title of the frame
 	 * @param lobby			The ServerLobby that this view should listen for events from
-	 * @param mediaSource	The MediaStreamer managing camera selection and settings for the AdminView
+	 * @param mediaSource	The MediaStreamer managing camera selection and settings
 	 **/
 	public AdminView(String windowTitle, ServerLobby lobby, MediaStreamer mediaSource) {
 		super(windowTitle);
+		
+		// TODO:	Should have a window listener that cleanly terminates active
+		// 			connections on window close.
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        
         setLayout(new BorderLayout());
-        
         this.lobby = lobby;
-        this.mediaSource = mediaSource;
-        
-		// Set look and feel
-		try {
-		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e) {
-		   try {
-		        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-		    }
-		    catch (Exception e2) {
-		        System.err.println("Unable to load default look and feel.");
-		        System.exit(1); // Might not want to exit
-		    }
-		}
 
-		// Setup Menus
+		// Setup menus
+        initMenus();
+        
+        // Setup main content area
+        initContentArea();
+        
+        // Initialize the camera selection frame
+        cameraSelect = new CameraSelectionView("Camera Options - " + windowTitle, 
+        		mediaSource);
+
+        // Set view to listen on the provided ServerLobby
+        lobby.addLobbyStateListener(this);
+        
+        this.pack();
+        this.setResizable(false);
+		this.setVisible(true);
+	}
+	
+
+	/**
+	 * Initializes the menu bar for the frame.
+	 */
+	private void initMenus() {
 		JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
-        initFileMenu();
         
-        // Setup user and player lists
+		// File
+		JMenu fileMenu = new JMenu("File");
+        fileMenu.setMnemonic(KeyEvent.VK_F);
+        this.getJMenuBar().add(fileMenu);
+        
+		// File -> Quit
+        JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_Q);
+        quit.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                        AdminView.this.dispose();
+                        System.exit(0);
+                }
+        });
+        fileMenu.add(quit);
+        
+        // Settings 
+        JMenu settingsMenu = new JMenu("Settings");
+        settingsMenu.setMnemonic(KeyEvent.VK_S);
+        this.getJMenuBar().add(settingsMenu);
+        
+        // Settings -> Camera Options
+        JMenuItem cameraOptions = new JMenuItem("Camera Options", KeyEvent.VK_C);
+        cameraOptions.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                	cameraSelect.setVisible(true);
+                }
+        });
+        settingsMenu.add(cameraOptions);
+	}
+	
+	/**
+	 * Initializes the main content area of the frame (player and robot
+	 * lists, as well as the chat area and status label)
+	 */
+	private void initContentArea() {
+		// Setup user and player lists
         robotListModel = new DefaultListModel();
         userListModel = new DefaultListModel();
         JList robotList = new JList(robotListModel);
@@ -109,19 +155,13 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         this.getContentPane().add(connectedListsPanel, BorderLayout.EAST);
         
         JPanel userListPanel = new JPanel();
-        userListPanel.setLayout(new BorderLayout());
-        JLabel userLabel = new JLabel("Users");
-        userLabel.setPreferredSize(new Dimension(100, 15));
-        userListPanel.add(userLabel, BorderLayout.NORTH);
-        userListPanel.add(new JScrollPane(userList), BorderLayout.SOUTH);
+        userListPanel.setBorder(BorderFactory.createTitledBorder("Connected Users"));
+        userListPanel.add(new JScrollPane(userList));
         connectedListsPanel.add(userListPanel, BorderLayout.NORTH);
         
         JPanel robotListPanel = new JPanel();
-        robotListPanel.setLayout(new BorderLayout());
-        JLabel robotLabel = new JLabel("Robots");
-        robotLabel.setPreferredSize(new Dimension(100, 15));
-        robotListPanel.add(robotLabel, BorderLayout.NORTH);
-        robotListPanel.add(new JScrollPane(robotList), BorderLayout.SOUTH);
+        robotListPanel.setBorder(BorderFactory.createTitledBorder("Connected Robots"));
+        robotListPanel.add(new JScrollPane(robotList));
         connectedListsPanel.add(robotListPanel, BorderLayout.SOUTH);
         
         // Setup the main chat area
@@ -138,65 +178,6 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         curGameType = new JLabel();
         setGameTypeLabel(lobby.getCurrentGameType());
 		this.getContentPane().add(curGameType, BorderLayout.SOUTH);
-		
-		// CAMERA TESTING
-		if(mediaSource.getActiveCamera() != null) {
-			try {
-				log.debug("Attempting to start streaming of: " 
-						+ mediaSource.getActiveCamera().getCameraName() 
-						+ " - " + mediaSource.getActiveCamera().getMediaLocator());
-				Player player = Manager.createPlayer(mediaSource.getActiveCamera().getMediaLocator());
-				
-				player.realize(); // Note: Call does not block
-				while(player.getState() != Controller.Realized) {
-					// Do nothing / wait for realization
-					try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
-				}
-	
-				JPanel videoPanel = new JPanel();
-				videoPanel.setPreferredSize(new Dimension(640, 480));
-				videoPanel.add(player.getVisualComponent());
-				this.getContentPane().add(videoPanel, BorderLayout.CENTER);
-				player.start(); // Note: Call does not block
-				
-			} catch (NoPlayerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-        // Set view to listen on the provided ServerLobby
-        lobby.addLobbyStateListener(this);
-        
-        this.pack();
-        this.setResizable(false);
-		this.setVisible(true);
-	}
-	
-
-	/**
-	 * Initializes the "File" menu and adds it to the main menu bar.
-	 */
-	private void initFileMenu() {
-		// Add the "File" menu
-		JMenu fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        this.getJMenuBar().add(fileMenu);
-        
-		// Quit Menu Option
-        JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_Q);
-        quit.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                        AdminView.this.dispose();
-                        System.exit(0);
-                }
-        });
-        fileMenu.add(quit);
-
 	}
 
 	@Override
@@ -270,10 +251,8 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	public void lobbyChatMessage(LobbyChatEvent event) {
 		 addLineToMainChat(event.getMessage());
 	}
-	
-	public void gameStateChanged(GameEvent event){
-		
-	}
+	@Override
+	public void gameStateChanged(GameEvent event){}
 	
 	/**
 	 * Control class which manages issuing position reset commands to registered

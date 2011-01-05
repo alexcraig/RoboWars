@@ -1,5 +1,7 @@
 package robowars.server.controller;
 
+import javax.swing.UIManager;
+
 import org.apache.log4j.PropertyConfigurator;
 
 import robowars.server.view.AdminView;
@@ -23,6 +25,20 @@ public class SystemControl {
 	public static void main (String args[]){
 		// Use log4j config file "log_config.properties"
 		PropertyConfigurator.configure("config/log_config.properties");
+		
+		// Set Swing look and feel
+		try {
+		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e) {
+		   try {
+		        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+		    }
+		    catch (Exception e2) {
+		        System.err.println("Unable to load default look and feel.");
+		        System.exit(1); // Might not want to exit
+		    }
+		}
 
 		// Generate the server lobby to manage user and robot connections
 		ServerLobby lobby = new ServerLobby("RoboWars Test Server", 6, 10);
@@ -39,7 +55,7 @@ public class SystemControl {
 		
 		// TESTING
 		new TestRobotProxy(lobby, "Robot1");
-		new TestRobotProxy(lobby, "Robot2");
+		// new TestRobotProxy(lobby, "Robot2");
 	}
 	
 }

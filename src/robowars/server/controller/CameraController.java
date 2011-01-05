@@ -8,7 +8,8 @@ import javax.media.MediaLocator;
  * stores information on the location and field of view of the connected
  * camera (which is required for rendering calculations).
  */
-public class CameraController {	
+public class CameraController {
+	
 	/**
 	 * Stores details on the camera controlled by this controller, such as its
 	 * name, supported formats, and location for the media source.
@@ -38,5 +39,12 @@ public class CameraController {
 	 */
 	public MediaLocator getMediaLocator() {
 		return deviceInfo.getLocator();
+	}
+	
+	/**
+	 * @return	A string representation of the camera controller.
+	 */
+	public String toString() {
+		return deviceInfo.getName();
 	}
 }
