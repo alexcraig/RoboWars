@@ -43,19 +43,25 @@ public class LejosInputStream {
 			s=s.substring(1,s.length());
 			String type=s.substring(0,s.indexOf('|'));
 			if(type.equals("MOVE_CONTINUOUS")){
-				return new RobotCommand(CommandType.MOVE_CONTINUOUS,99);
+				s=s.substring(s.indexOf("speed"));
+				s=s.substring(s.indexOf(":")+1,s.indexOf('|'));
+				return RobotCommand.moveContinuous(Float.parseFloat(s));
 			}
 			else if(type.equals("TURN_ANGLE_RIGHT")){
-				return new RobotCommand(CommandType.TURN_ANGLE_RIGHT,99);
+				s=s.substring(s.indexOf("turn"));
+				s=s.substring(s.indexOf(":")+1,s.indexOf(']'));
+				return RobotCommand.turnAngleRight(Integer.parseInt(s));
 			}
 			else if(type.equals("TURN_ANGLE_LEFT")){
-				return new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,99);
+				s=s.substring(s.indexOf("turn"));
+				s=s.substring(s.indexOf(":")+1,s.indexOf(']'));
+				return RobotCommand.turnAngleLeft(Integer.parseInt(s));
 			}
 			else if(type.equals("STOP")){
-				return new RobotCommand(CommandType.STOP,99);
+				return RobotCommand.stop();
 			}
 			else if(type.equals("EXIT")){
-				return new RobotCommand(CommandType.EXIT,99);
+				return RobotCommand.exit();
 			}
 		}
 		//Pose
