@@ -337,9 +337,11 @@ public class GameController implements Runnable, GameListener {
 			// Roll should range from -200 to 200
 			// TODO: This scaling should be done on the client side to ensure
 			//		 that input is consistent across different hardware
-			float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
-			int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
-			return RobotCommand.rollingTurn(moveSpeed, turnRate);
+			if(orientation != null) {
+				float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
+				int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
+				return RobotCommand.rollingTurn(moveSpeed, turnRate);
+			}
 			
 		case SNAKE:
 			if(buttons.contains("w")) {
