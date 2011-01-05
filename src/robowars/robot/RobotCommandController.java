@@ -50,10 +50,10 @@ public class RobotCommandController extends Thread{
 					move.setPos(command.getPos());
 				}
 				if(command.getType()==CommandType.TURN_ANGLE_LEFT){
-					move.turnLeft();
+					move.turnLeft(command.getTurnBearing());
 				}
 				if(command.getType()==CommandType.TURN_ANGLE_RIGHT){
-					move.turnRight();
+					move.turnRight(command.getTurnBearing());
 				}
 				if(command.getType()==CommandType.MOVE_CONTINUOUS){
 					move.moveContinuous(command);

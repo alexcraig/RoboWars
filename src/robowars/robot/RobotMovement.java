@@ -34,15 +34,15 @@ public class RobotMovement {
 		if(pilot.isMoving())pilot.stop();
 		pilot.travel(-15);
 	}
-	public synchronized void turnRight() {
+	public synchronized void turnRight(float f) {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(90);
+		pilot.rotate(f);
 	}
-	public synchronized void turnLeft() {
+	public synchronized void turnLeft(float f) {
 		// TODO Auto-generated method stub
 		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(-90);
+		pilot.rotate(-f);
 	}
 	public synchronized void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())pilot.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));

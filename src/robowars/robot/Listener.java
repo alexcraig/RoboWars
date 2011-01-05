@@ -21,17 +21,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_UP){
 			try {
 				System.out.println("Up");
-				dataOut.writeObject(new RobotCommand(CommandType.MOVE_CONTINUOUS,99));
-				dataOut.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(arg0.getKeyCode()==KeyEvent.VK_DOWN){
-			try {
-				System.out.println("Down");
-				dataOut.writeObject(new RobotCommand(CommandType.MOVE_CONTINUOUS,99));
+				dataOut.writeObject(RobotCommand.moveContinuous(100));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -41,7 +31,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_LEFT){
 			try {
 				System.out.println("Left");
-				dataOut.writeObject(new RobotCommand(CommandType.TURN_RIGHT_ANGLE_LEFT,99));
+				dataOut.writeObject(RobotCommand.turnAngleLeft(90));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -51,7 +41,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_RIGHT){
 			try {
 				System.out.println("Right");
-				dataOut.writeObject(new RobotCommand(CommandType.TURN_RIGHT_ANGLE_RIGHT,99));
+				dataOut.writeObject(RobotCommand.turnAngleRight(90));
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -61,7 +51,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_S){
 			try {
 				System.out.println("Stop");
-				dataOut.writeObject(new RobotCommand(CommandType.STOP,99));
+				dataOut.writeObject(RobotCommand.stop());
 				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -71,7 +61,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_X){
 			try {
 				System.out.println("Exit");
-				dataOut.writeObject(new RobotCommand(CommandType.EXIT,99));
+				dataOut.writeObject(RobotCommand.exit());
 				dataOut.flush();
 				dataOut.close();
 				System.exit(0);
