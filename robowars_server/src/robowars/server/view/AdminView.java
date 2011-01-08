@@ -303,7 +303,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 					
 					RobotProxy robot = lobby.getRobotProxy(robotId);
 					if(robot != null) {
-						robot.sendCommand(new RobotCommand(newPos, 10));
+						robot.sendCommand(RobotCommand.setPosition(newPos));
 					}
 					  
 				} catch (NumberFormatException ex) {

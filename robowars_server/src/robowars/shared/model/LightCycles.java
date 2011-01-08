@@ -40,7 +40,7 @@ public class LightCycles extends GameModel {
 		super.startGame();
 		if(inProgress){
 			for (GameRobot r : robots){
-				r.setCommand(new RobotCommand(CommandType.MOVE_CONTINUOUS,0));
+				r.setCommand(RobotCommand.moveContinuous(RobotCommand.MAX_SPEED));
 			}
 			return inProgress;
 		}
@@ -114,14 +114,14 @@ public class LightCycles extends GameModel {
 	public boolean checkGameOver() {
 		for(GameEntity e : entities){
 			if (e instanceof Obstacle){
-				if(robots.get(0).checkCollision(e)){
-					robots.get(0).setCommand(new RobotCommand(CommandType.STOP,2));
+				if(robots.get(0).checkCollision(e)) {
+					robots.get(0).setCommand(RobotCommand.stop());
 					notifyListeners(GameEvent.PLAYER_1_WINS);
 					inProgress = false;
 					return true;
 				}
 				if(robots.get(1).checkCollision(e)){
-					robots.get(1).setCommand(new RobotCommand(CommandType.STOP,2));
+					robots.get(1).setCommand(RobotCommand.stop());
 					notifyListeners(GameEvent.PLAYER_2_WINS);
 					inProgress = false;
 					return true;

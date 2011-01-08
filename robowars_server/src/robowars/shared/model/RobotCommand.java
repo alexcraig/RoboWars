@@ -84,11 +84,12 @@ public class RobotCommand implements Serializable{
 	
 	/**
 	 * Generates a STOP robot command
+	 * NOTE: Stop commands default to a priority of DEFAULT + 1
 	 * @return A STOP robot command
 	 */
 	public static RobotCommand stop() {
 		return new RobotCommand(CommandType.STOP, 0, 
-				0, null, null, DEFAULT_PRIORITY);
+				0, null, null, DEFAULT_PRIORITY + 1);
 	}
 	
 	/**

@@ -29,8 +29,9 @@ public class LightCyclesTest {
 	
 	@Test
 	public void testGameModel(){
-		model.addRobot(new String("Robot1"));
-		model.addRobot(new String("Robot2"));
+		// TODO: Do something with these arbitrary sizes
+		model.addRobot(new GameRobot(25, 25, "Robot1"));
+		model.addRobot(new GameRobot(25, 25, "Robot2"));
 		model.startGame();
 		testCreatedRobots();
 		for(int i = 0; i <= 51; i++){
@@ -49,10 +50,10 @@ public class LightCyclesTest {
 				robots.add((GameRobot) e);
 		}
 			assertEquals(2, num);
-			assertTrue(robots.get(0).getX() == 0);
-			assertTrue(robots.get(0).getY() == 0);
-			assertTrue(robots.get(0).getX() == model.DEFAULT_ARENA_SIZE);
-			assertTrue(robots.get(0).getY() == model.DEFAULT_ARENA_SIZE);
+			assertTrue(robots.get(0).getPose().getX() == 0);
+			assertTrue(robots.get(0).getPose().getY() == 0);
+			assertTrue(robots.get(0).getPose().getX() == model.DEFAULT_ARENA_SIZE);
+			assertTrue(robots.get(0).getPose().getY() == model.DEFAULT_ARENA_SIZE);
 			
 	}
 	
