@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="docs"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
@@ -26,7 +25,6 @@
 	<classpathentry kind="lib" path="lib/jspeex.jar"/>
 	<classpathentry kind="lib" path="lib/lti-civil-no_s_w_t.jar"/>
 	<classpathentry kind="lib" path="lib/mp3spi1.9.4.jar"/>
-	<classpathentry kind="lib" path="lib/sensorsimulator-lib.jar"/>
 	<classpathentry kind="lib" path="lib/theora-java.jar"/>
 	<classpathentry kind="lib" path="lib/tritonus_share.jar"/>
 	<classpathentry kind="lib" path="lib/vorbisspi1.0.2.jar"/>
