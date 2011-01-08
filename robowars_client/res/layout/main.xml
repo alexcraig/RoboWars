@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TabHost
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/tabHost"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <TabWidget
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:id="@android:id/tabs"/>
+    
+    <FrameLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:id="@android:id/tabcontent">
+	    
+	    <RelativeLayout
+	    	android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:id="@+id/tab1"
+		    android:orientation="vertical"
+		    android:paddingTop="60px">
+		    
+		    <TextView
+		    	android:id="@+id/textAcc"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:text="Accelerometer: x,y,z"
+		    	android:lines="1"/>
+		    	
+		    <TextView
+		    	android:id="@+id/textMag"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_below="@id/textAcc"
+		    	android:text="Compass: x,y,z"
+		    	android:lines="1"/>
+		    	
+		    <TextView
+		    	android:id="@+id/textOri"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_below="@id/textMag"
+		    	android:text="Orientation: x,y,z"
+		    	android:lines="1"/>
+		    			    
+		</RelativeLayout>
+	    	
+    
+	    <TableLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:id="@+id/tab2"
+		    android:orientation="vertical"
+		    android:paddingTop="60px">
+			    <TableRow>
+				    <TextView
+				    	android:layout_column="1"
+				        android:id="@+id/chat"
+				        android:layout_width="300px"
+				        android:layout_height="wrap_content"
+				        android:text=""
+				        android:scrollbars="vertical"
+				        android:lines="12"
+				        android:scrollbarAlwaysDrawVerticalTrack="true"/>
+				    <TextView
+				    	android:layout_column="2"
+				        android:id="@+id/users"
+				        android:layout_width="200px"
+				        android:layout_height="wrap_content"
+				        android:text=""
+				        android:lines="12"
+				        android:scrollbars="vertical"
+				        android:scrollbarAlwaysDrawVerticalTrack="true"/>
+			    </TableRow>
+			    <TableRow>
+				    <EditText
+				    	android:layout_column="1"
+				        android:id="@+id/entry"
+				        android:layout_width="350px"
+				        android:layout_height="wrap_content"
+				        android:background="@android:drawable/editbox_background"
+				        android:layout_below="@id/chat"/>
+				    <Button
+				    	android:layout_column="2"
+				        android:id="@+id/send"
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content"
+				        android:layout_below="@id/chat"
+				        android:layout_toRightOf="@id/entry"
+				        android:layout_alignParentRight="true"
+				        android:layout_marginLeft="10dip"
+				        android:onClick="buttonClicked"
+				        android:text="Send" />
+		        </TableRow>
+		</TableLayout>
+    
+		<RelativeLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:id="@+id/tab3"
+		    android:orientation="vertical"
+		    android:paddingTop="60px">
+	    <TextView
+	        android:id="@+id/userText"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Username: "/>
+	    <EditText
+	        android:id="@+id/username"
+	        android:layout_width="200px"
+	        android:layout_height="wrap_content"
+	        android:background="@android:drawable/editbox_background"
+	        android:layout_toRightOf="@id/userText"
+	        android:maxLines="1"/>
+	    <TextView
+	        android:id="@+id/gap1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="30px"
+	        android:layout_below="@id/userText"
+	        android:text=""/>
+	    <TextView
+	        android:id="@+id/serverText"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@id/gap1"
+	        android:text="Server: "/>
+	    <EditText
+	        android:id="@+id/server"
+	        android:layout_width="150px"
+	        android:layout_height="wrap_content"
+	        android:background="@android:drawable/editbox_background"
+	        android:layout_below="@id/gap1"
+	        android:layout_alignLeft="@id/username"
+	        android:digits="1234567890."
+	        android:maxLines="1"
+	        android:maxLength="15"/>
+	    <EditText
+	        android:id="@+id/port"
+	        android:layout_width="100px"
+	        android:layout_height="wrap_content"
+	        android:background="@android:drawable/editbox_background"
+	        android:layout_toRightOf="@id/server"
+	        android:layout_alignTop="@id/server"
+	        android:maxLines="1"/>
+        <Button
+	        android:id="@+id/connect"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@id/server"
+	        android:layout_alignParentLeft="true"
+	        android:layout_marginLeft="10dip"
+	        android:onClick="buttonClicked"
+	        android:text="Connect" />
+		</RelativeLayout>
+	</FrameLayout>
+</TabHost>
