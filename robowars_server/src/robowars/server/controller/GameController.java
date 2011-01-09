@@ -212,6 +212,9 @@ public class GameController implements Runnable, GameListener {
 		log.info("Game terminating.");
 		
 		for(ControlPair pair : controlPairs) {
+			// TODO: Commands to reset position should be dispatched here
+			pair.getRobotProxy().sendCommand(RobotCommand.stop());
+			
 			pair.getUserProxy().clearGameController();
 			pair.getRobotProxy().clearGameController();
 			model.removeRobot(pair.getRobotProxy().getIdentifier());

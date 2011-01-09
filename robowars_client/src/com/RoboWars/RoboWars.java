@@ -6,6 +6,7 @@ import java.util.Observer;
 import org.openintents.sensorsimulator.hardware.SensorManagerSimulator;
 
 import android.app.Activity;
+import android.content.Context;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -27,7 +28,7 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	
 	private String userlist;		// Users currently in the lobby.
 	
-	private SensorManagerSimulator mSensorManager;
+	private SensorManager mSensorManager;
     
     TextView mTextViewAcc;
     TextView mTextViewMag;
@@ -84,9 +85,15 @@ public class RoboWars extends Activity implements SensorListener, Observer
         mTextViewMag = (TextView) findViewById(R.id.textMag);
         mTextViewOri = (TextView) findViewById(R.id.textOri);
         
-        /* Connect to the simulator. */
-        mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
-        mSensorManager.connectSimulator();
+        /* Setup the sensor manager. */
+        
+        // Use these lines for the simulator
+        // mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
+        // mSensorManager.connectSimulator();
+        
+        // Use this line for actual hardware
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
     	
     	/* Allow scrolling of the chat and user list. */
     	chat.setMovementMethod(new ScrollingMovementMethod());
@@ -195,10 +202,8 @@ public class RoboWars extends Activity implements SensorListener, Observer
     @Override
 	protected void onResume() {
 		super.onResume();
-		mSensorManager.registerListener(this, SensorManager.SENSOR_ACCELEROMETER
-				| SensorManager.SENSOR_MAGNETIC_FIELD
-				| SensorManager.SENSOR_ORIENTATION,
-				SensorManager.SENSOR_DELAY_FASTEST);
+		mSensorManager.registerListener(this, SensorManager.SENSOR_ORIENTATION);
+				
 	}
 
 	@Override
@@ -210,24 +215,22 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	public void onAccuracyChanged(int sensor, int accuracy) { }
 
 	public void onSensorChanged(int sensor, float[] values) {
+		
 		switch(sensor) {
-		case SensorManager.SENSOR_ACCELEROMETER:
-			mTextViewAcc.setText("Accelerometer: " 
-					+ values[0] + ", " 
-					+ values[1] + ", "
-					+ values[2]);
-			break;
-		case SensorManager.SENSOR_MAGNETIC_FIELD:
-			mTextViewMag.setText("Compass: " 
-					+ values[0] + ", " 
-					+ values[1] + ", "
-					+ values[2]);
-			break;
 		case SensorManager.SENSOR_ORIENTATION:
 			mTextViewOri.setText("Orientation: " 
 					+ values[0] + ", " 
 					+ values[1] + ", "
 					+ values[2]);
+			
+			if(tcp != null) {
+				tcp.sendMessage("c:<" 
+						+ values[0] + "," 
+						+ values[1] + ","
+						+ values[2] + ">");
+			}
+			break;
+		default:
 			break;
 		}
 	}
