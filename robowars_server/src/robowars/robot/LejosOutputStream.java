@@ -45,12 +45,15 @@ public class LejosOutputStream {
 			s+=((RobotMap)o).toString();
 		}
 		else return;
+		
+		//System.out.println("WRITING TO NXT: " + s);
 		byte[] bytes=getBytes(s);
 		if(bytes!=null){
 			for(int i=0; i<bytes.length-1; i++){
 					out.write((int)bytes[i]);
 			}
 		}
+		out.flush();
 	}
 	/**
 	 * Converts the input string into a byte array so we can transfer them
