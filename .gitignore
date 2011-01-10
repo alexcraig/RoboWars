@@ -1,7 +1,10 @@
 # --- Custom ignore rules ---
 
-# Ignore bin folder (prevents compiled source from generated clutter in repository)
+# Ignore bin folders (prevents compiled source from generated clutter in repository)
 /bin
+/robowars_server/bin
+/robowars_client/bin
+
 # Ignore log folders
 /logs
 /robowars_server/logs

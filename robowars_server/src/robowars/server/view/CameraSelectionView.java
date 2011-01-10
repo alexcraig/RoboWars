@@ -54,6 +54,9 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	
 	/** A list of available cameras to be displayed in the combo box */
 	private DefaultComboBoxModel availableCams;
+	
+	/** Text fields to display / input settings for the currently selected camera */
+	private JTextField xPos, yPos, zPos, hOrientation, vOrientation, fov;
 
 	/**
 	 * Generates a new CameraSelectionView, which defaults to hidden.
@@ -96,46 +99,49 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.Y_AXIS));
 		sidePanel.add(positionPanel, BorderLayout.CENTER);
 		
-		JPanel xCoord = new JPanel();
-		xCoord.add(new JLabel("X Position: "));
-		xCoord.add(new JTextField(10));
-		positionPanel.add(xCoord);
+		JPanel xPosPanel = new JPanel();
+		xPosPanel.add(new JLabel("X Position: "));
+		xPos = new JTextField(10);
+		xPosPanel.add(xPos);
+		positionPanel.add(xPosPanel);
 		
-		JPanel yCoord = new JPanel();
-		yCoord.add(new JLabel("Y Position: "));
-		yCoord.add(new JTextField(10));
-		positionPanel.add(yCoord);
+		JPanel yPosPanel = new JPanel();
+		yPosPanel.add(new JLabel("Y Position: "));
+		yPos = new JTextField(10);
+		yPosPanel.add(yPos);
+		positionPanel.add(yPosPanel);
 		
-		JPanel zCoord = new JPanel();
-		zCoord.add(new JLabel("Z Position: "));
-		zCoord.add(new JTextField(10));
-		positionPanel.add(zCoord);
+		JPanel zPosPanel = new JPanel();
+		zPosPanel.add(new JLabel("Z Position: "));
+		zPos = new JTextField(10);
+		zPosPanel.add(zPos);
+		positionPanel.add(zPosPanel);
 		
-		JPanel xHeading = new JPanel();
-		xHeading.add(new JLabel("X Heading: "));
-		xHeading.add(new JTextField(10));
-		positionPanel.add(xHeading);
+		JPanel hOrientationPanel = new JPanel();
+		hOrientationPanel.add(new JLabel("Horizontal Orientation: "));
+		hOrientation = new JTextField(10);
+		hOrientationPanel.add(hOrientation);
+		positionPanel.add(hOrientationPanel);
 		
-		JPanel yHeading = new JPanel();
-		yHeading.add(new JLabel("Y Heading: "));
-		yHeading.add(new JTextField(10));
-		positionPanel.add(yHeading);
+		JPanel vOrientationPanel = new JPanel();
+		vOrientationPanel.add(new JLabel("Vertical Orientation: "));
+		vOrientation = new JTextField(10);
+		vOrientationPanel.add(vOrientation);
+		positionPanel.add(vOrientationPanel);
 		
-		JPanel zHeading = new JPanel();
-		zHeading.add(new JLabel("Z Heading: "));
-		zHeading.add(new JTextField(10));
-		positionPanel.add(zHeading);
+		JPanel fieldOfViewPanel = new JPanel();
+		fieldOfViewPanel.add(new JLabel("Field of View: "));
+		fov = new JTextField(10);
+		fieldOfViewPanel.add(fov);
+		positionPanel.add(fieldOfViewPanel);
 		
-		JPanel fieldOfView = new JPanel();
-		fieldOfView.add(new JLabel("Field of View: "));
-		fieldOfView.add(new JTextField(10));
-		positionPanel.add(fieldOfView);
-		
+		// Default input fields to disabled until an active camera is found
+		setFieldsEnabled(false);
 		
 		// CAMERA TESTING
 		updateDeviceList();
 		
-		if(mediaSource.getActiveCamera() != null) {
+		if(mediaSrc.getActiveCamera() != null) {
 			try {
 				log.debug("Attempting to start streaming of: " 
 						+ mediaSrc.getActiveCamera().getCameraName() 
@@ -154,7 +160,6 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 				videoPanel.add(player.getVisualComponent());
 				this.getContentPane().add(videoPanel, BorderLayout.CENTER);
 				player.start(); // Note: Call does not block
-				
 				
 			} catch (NoPlayerException e) {
 				// TODO Auto-generated catch block
@@ -206,7 +211,20 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		if(player != null && player.getState() == Controller.Prefetched) {
 			player.start();
 		}
-	}	
+	}
+	
+	/**
+	 * Enables or disables all the input fields for camera settings.
+	 * @param enabled	True if the fields should be enabled, false if not
+	 */
+	private void setFieldsEnabled(boolean enabled) {
+		xPos.setEnabled(enabled);
+		yPos.setEnabled(enabled);
+		zPos.setEnabled(enabled);
+		hOrientation.setEnabled(enabled);
+		vOrientation.setEnabled(enabled);
+		fov.setEnabled(enabled);
+	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {}
