@@ -30,8 +30,8 @@ public class GameController implements Runnable, GameListener {
 	private static Logger log = Logger.getLogger(GameController.class);
 	
 	/** Scaling factors for client orientation input */
-	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED / 180;
-	public static final float ROLL_SCALING_FACTOR = 200 / 90;
+	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED / (float)180.0;
+	public static final float ROLL_SCALING_FACTOR = (float)200 / (float)90;
 	
 	/** A list of all control pairs registered with this game */
 	private List<ControlPair> controlPairs;

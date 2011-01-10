@@ -3,7 +3,9 @@
 # Ignore bin folder (prevents compiled source from generated clutter in repository)
 /bin
 # Ignore log folders
+/logs
 /robowars_server/logs
+/robowars_client/logs
 
 # --- Standard Ignore Rules ---
 
