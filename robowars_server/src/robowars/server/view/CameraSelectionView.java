@@ -142,6 +142,9 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		updateDeviceList();
 		
 		if(mediaSrc.getActiveCamera() != null) {
+			updateSettingsFields();
+			setFieldsEnabled(true);
+			
 			try {
 				log.debug("Attempting to start streaming of: " 
 						+ mediaSrc.getActiveCamera().getCameraName() 
@@ -224,6 +227,22 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		hOrientation.setEnabled(enabled);
 		vOrientation.setEnabled(enabled);
 		fov.setEnabled(enabled);
+	}
+	
+	/**
+	 * Sets the value of all setting input fields to the current settings
+	 * of the active camera (if one is selected).
+	 */
+	private void updateSettingsFields() {
+		if(mediaSrc.getActiveCamera() != null) {
+			xPos.setText(Float.toString(mediaSrc.getActiveCamera().getxPos()));
+			yPos.setText(Float.toString(mediaSrc.getActiveCamera().getyPos()));
+			zPos.setText(Float.toString(mediaSrc.getActiveCamera().getzPos()));
+			hOrientation.setText(Float.toString(mediaSrc.getActiveCamera().getHorOrientation()));
+			vOrientation.setText(Float.toString(mediaSrc.getActiveCamera().getVerOrientation()));
+			fov.setText(Float.toString(mediaSrc.getActiveCamera().getFov()));
+		}
+		
 	}
 
 	@Override
