@@ -39,6 +39,7 @@ public class LejosInputStream {
 			//read in object until finished
 			while((input=in.read())!=-1&&(char)input!=']'){
 				s+=(char)input;
+				if((char)input==']')break;
 			}
 			//System.out.println("READ COMMAND FROM NXT: " + s);
 			
@@ -52,13 +53,20 @@ public class LejosInputStream {
 			}
 			else if(type.equals("TURN_ANGLE_RIGHT")){
 				s=s.substring(s.indexOf("turn"));
-				s=s.substring(s.indexOf(":")+1,s.indexOf(']'));
-				return RobotCommand.turnAngleRight(Integer.parseInt(s));
+				s=s.substring(s.indexOf(":")+1,s.length());
+				return RobotCommand.turnAngleRight((int)Float.parseFloat(s));
 			}
 			else if(type.equals("TURN_ANGLE_LEFT")){
 				s=s.substring(s.indexOf("turn"));
-				s=s.substring(s.indexOf(":")+1,s.indexOf(']'));
-				return RobotCommand.turnAngleLeft(Integer.parseInt(s));
+				s=s.substring(s.indexOf(":")+1,s.length());
+				return RobotCommand.turnAngleLeft((int)Float.parseFloat(s));
+			}
+			else if (type.equals("ROLLING_TURN")){
+				String speed=s.substring(s.indexOf("speed"));
+				String turn=s.substring(s.indexOf("turn"));
+				speed=speed.substring(speed.indexOf(':')+1,speed.indexOf('|'));
+				turn=turn.substring(turn.indexOf(':')+1,turn.length());
+				return RobotCommand.rollingTurn((int)Float.parseFloat(speed), (int)Float.parseFloat(turn));
 			}
 			else if(type.equals("STOP")){
 				return RobotCommand.stop();
@@ -96,6 +104,7 @@ public class LejosInputStream {
 			String s="";
 			while((input=in.read())!=-1&&input!=0){
 				s+=(char)input;
+				if((char)input==']')break;
 			}
 			s=s.substring(1);
 			s=s.substring(0, s.length()-1);
