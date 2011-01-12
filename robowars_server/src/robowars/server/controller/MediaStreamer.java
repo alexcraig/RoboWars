@@ -7,6 +7,7 @@ import java.util.Vector;
 import javax.media.CaptureDeviceInfo;
 import javax.media.CaptureDeviceManager;
 import javax.media.Format;
+import javax.media.MediaLocator;
 
 import org.apache.log4j.Logger;
 
@@ -117,6 +118,12 @@ public class MediaStreamer {
 			}
 		}
 		
+		// ------------- TESTING -----------------
+		cameras.add(0, new CameraController(new CaptureDeviceInfo("Test Cam", 
+				new MediaLocator("locator"), null)));
+		selectedCamera = cameras.get(0); // TODO: Set through UI, this is just for testing
+		// ------------- TESTING -----------------
+		
 		oldCameras.clear();
 		oldCameras = null;
 	}
@@ -127,6 +134,19 @@ public class MediaStreamer {
 	 */
 	public CameraController getActiveCamera() {
 		return selectedCamera;
+	}
+	
+	/**
+	 * Sets the active camera. The specified camera must be either null (video
+	 * stream disabled), or a camera controller previously detected by the
+	 * MediaStreamer instance.
+	 * @param newCam	The camera controller to use as the active camera, or null
+	 * 					if no video feed is enabled.
+	 */
+	public void setActiveCamera(CameraController newCam) {
+		if(newCam == null || cameras.contains(newCam)) {
+			selectedCamera = newCam;
+		}
 	}
 	
 	/**
