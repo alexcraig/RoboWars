@@ -18,7 +18,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 public class RoboWars extends Activity implements SensorListener, Observer
-{
+{	
 	/* Views invoked by the application. */
 	private TextView chat, users;
 	private EditText entry, server, port, user;
@@ -28,13 +28,13 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	
 	private String userlist;		// Users currently in the lobby.
 	
-	private SensorManager mSensorManager;
+	private SensorManager mSensorManager;	// Manages the accelerometer and other sensors.
     
-    TextView mTextViewAcc;
-    TextView mTextViewMag;
-    TextView mTextViewOri;
+    TextView mTextViewAcc;	// Text view for accelerometer.
+    TextView mTextViewMag;	// Text view for magnetic field.
+    TextView mTextViewOri;	// Text view for orientation.
 	
-	private static final int MAX_LINES = 12;
+	private static final int MAX_LINES = 12;	// Max lines to show in the chat lobby.
 	
     /**
      * Creates a tab view.
@@ -87,11 +87,12 @@ public class RoboWars extends Activity implements SensorListener, Observer
         
         /* Setup the sensor manager. */
         
-        // Use these lines for the simulator
-        // mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
-        // mSensorManager.connectSimulator();
+        // Use these lines if using Android emulator.
         
-        // Use this line for actual hardware
+        //mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
+        //mSensorManager.connectSimulator();
+
+        // Use this line if using phone application.
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
     	
@@ -172,31 +173,6 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	        default:
 	        	printMessage("Unknown button pressed.");
     	}
-    }
-    
-    public void goForward(View view)
-    {
-    	tcp.sendMessage("c:w");
-    }
-    
-    public void goBackward(View view)
-    {
-    	tcp.sendMessage("c:s");
-    }
-    
-    public void goLeft(View view)
-    {
-    	tcp.sendMessage("c:a");
-    }
-    
-    public void goRight(View view)
-    {
-    	tcp.sendMessage("c:d");
-    }
-    
-    public void stop(View view)
-    {
-    	tcp.sendMessage("c:");
     }
     
     @Override
