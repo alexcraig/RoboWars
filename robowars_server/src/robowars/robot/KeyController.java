@@ -25,6 +25,4 @@ public class KeyController {
 		frame.setVisible(true);
 		
 	}
-
-
 }

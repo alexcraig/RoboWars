@@ -14,8 +14,8 @@ import lejos.robotics.navigation.*;
 public class RobotMovement {
 	private TachoPilot pilot;
 	private SimpleNavigator navigator;
-	private final static int MINDSTORM_WIDTH=110;
-	private final static int WHEEL_HEIGHT=43;
+	private final static int MINDSTORM_WIDTH=11;
+	private final static float WHEEL_HEIGHT=(float)4.3;
 	private final static int SPEED=100;
 	
 	public RobotMovement(){
@@ -26,40 +26,41 @@ public class RobotMovement {
 	
 	public synchronized void moveForward() {
 		// TODO Auto-generated method stub
-		if(pilot.isMoving())pilot.stop();
-		pilot.travel(15);
+		if(pilot.isMoving())navigator.stop();
+		navigator.travel(15);
 	}
 	public synchronized void moveBackwards() {
 		// TODO Auto-generated method stub
-		if(pilot.isMoving())pilot.stop();
-		pilot.travel(-15);
+		if(pilot.isMoving())navigator.stop();
+		navigator.travel(-15);
 	}
 	public synchronized void turnRight(float f) {
 		// TODO Auto-generated method stub
-		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(f);
+		if(pilot.isMoving())navigator.stop();
+		navigator.rotate(f);
 	}
 	public synchronized void turnLeft(float f) {
 		// TODO Auto-generated method stub
-		if(pilot.isMoving())pilot.stop();
-		pilot.rotate(-f);
+		if(pilot.isMoving())navigator.stop();
+		navigator.rotate(-f);
 	}
 	public synchronized void speedUp(){
-		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())pilot.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
+		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())navigator.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
 	}
 	public synchronized void slowDown(){
-		if(pilot.getMoveSpeed()>1)pilot.setMoveSpeed((pilot.getMoveSpeed()/(float)1.1));
+		if(pilot.getMoveSpeed()>1)navigator.setMoveSpeed((pilot.getMoveSpeed()/(float)1.1));
 	}
 	public synchronized void stop(){
-		pilot.stop();
+		navigator.stop();
 	}
 	public synchronized void setPos(Pose newPos){
 		navigator.setPose(newPos);
 	}
-	public Pose getPosition(){return navigator.getPose();}
+	public synchronized Pose getPosition(){return navigator.getPose();}
+	public synchronized void updatePosition(){navigator.updatePosition();}
 
 	public synchronized void moveContinuous(RobotCommand command) {
 		navigator.setMoveSpeed(pilot.getMoveMaxSpeed()*command.getThrottle());
-		pilot.forward();
+		navigator.forward();
 	}
 }
