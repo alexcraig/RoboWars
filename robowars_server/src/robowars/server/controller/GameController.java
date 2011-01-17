@@ -343,7 +343,12 @@ public class GameController implements Runnable, GameListener {
 			if(orientation != null) {
 				float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
 				int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
-				return RobotCommand.rollingTurn(moveSpeed, turnRate);
+				
+				if(moveSpeed < RobotCommand.MAX_SPEED / 20) {
+					return RobotCommand.stop();
+				} else {
+					return RobotCommand.rollingTurn(moveSpeed, turnRate);
+				}
 			}
 			
 		case SNAKE:
