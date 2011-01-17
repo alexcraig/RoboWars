@@ -9,7 +9,8 @@ import java.io.OutputStream;
 
 import robowars.shared.model.CommandType;
 import robowars.shared.model.RobotCommand;
-
+import java.math.*;
+import java.util.Date;
 
 public class Listener implements KeyListener{
 	private LejosOutputStream dataOut;
@@ -22,7 +23,6 @@ public class Listener implements KeyListener{
 			try {
 				System.out.println("Up");
 				dataOut.writeObject(RobotCommand.moveContinuous(100));
-				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -32,7 +32,6 @@ public class Listener implements KeyListener{
 			try {
 				System.out.println("Left");
 				dataOut.writeObject(RobotCommand.turnAngleLeft(90));
-				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -42,7 +41,6 @@ public class Listener implements KeyListener{
 			try {
 				System.out.println("Right");
 				dataOut.writeObject(RobotCommand.turnAngleRight(90));
-				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -52,7 +50,6 @@ public class Listener implements KeyListener{
 			try {
 				System.out.println("Stop");
 				dataOut.writeObject(RobotCommand.stop());
-				dataOut.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -62,7 +59,6 @@ public class Listener implements KeyListener{
 			try {
 				System.out.println("Exit");
 				dataOut.writeObject(RobotCommand.exit());
-				dataOut.flush();
 				dataOut.close();
 				System.exit(0);
 			} catch (IOException e) {
@@ -71,6 +67,23 @@ public class Listener implements KeyListener{
 			}
 		}
 		
+		if(arg0.getKeyCode()==KeyEvent.VK_DOWN){
+			try {
+				Date time = new Date();
+				long millis = time.getTime();
+				for(int i = 0 ; i < 200; i++){
+					dataOut.writeObject(RobotCommand.rollingTurn((float)Math.random()*30,(int) Math.random()*30));
+					System.out.println("Rolling Turn" + i);
+					//dataOut.writeObject(RobotCommand.stop());
+					//System.out.println("Stop " + i);
+				}
+				long diff = time.getTime() - millis;
+				System.out.println(diff/200);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

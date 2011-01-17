@@ -10,7 +10,7 @@ public class FreeTest extends GameModel{
 	public FreeTest() {
 		super.gameType = GameType.FREETEST;
 		super.initVariables();
-		Pose p = new Pose(100,0,0);
+		Pose p = new Pose(600,500,0);
 		theWall = new Obstacle(p,10,10,0,false,false,0);
 		entities.add(theWall);
 	}
