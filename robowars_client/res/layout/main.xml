@@ -21,7 +21,7 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab1"
 		    android:orientation="vertical"
-		    android:paddingTop="60px">
+		    android:paddingTop="90px">
 		    
 		    <TextView
 		    	android:id="@+id/textAcc"
@@ -47,14 +47,13 @@
 		    	android:lines="1"/>
 		    			    
 		</RelativeLayout>
-	    	
-    
+	    
 	    <TableLayout
 		    android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab2"
 		    android:orientation="vertical"
-		    android:paddingTop="60px">
+		    android:paddingTop="90px">
 			    <TableRow>
 				    <TextView
 				    	android:layout_column="1"
@@ -102,7 +101,7 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab3"
 		    android:orientation="vertical"
-		    android:paddingTop="60px">
+		    android:paddingTop="90px">
 	    <TextView
 	        android:id="@+id/userText"
 	        android:layout_width="wrap_content"

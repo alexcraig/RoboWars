@@ -118,11 +118,13 @@ public class MediaStreamer {
 			}
 		}
 		
+		/*
 		// ------------- TESTING -----------------
 		cameras.add(0, new CameraController(new CaptureDeviceInfo("Test Cam", 
 				new MediaLocator("locator"), null)));
 		selectedCamera = cameras.get(0); // TODO: Set through UI, this is just for testing
 		// ------------- TESTING -----------------
+		*/
 		
 		oldCameras.clear();
 		oldCameras = null;

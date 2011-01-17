@@ -31,7 +31,7 @@ public class RobotCommandController extends Thread{
 						}
 					}
 					try {
-						sleep(20);
+						sleep(333);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

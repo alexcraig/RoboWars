@@ -18,23 +18,29 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 public class RoboWars extends Activity implements SensorListener, Observer
-{
+{	
+	/** The interval at which orientation updates should be pushed to the server */
+	public static final long ORIENTATION_INTERVAL_MS = 300;
+	
 	/* Views invoked by the application. */
 	private TextView chat, users;
 	private EditText entry, server, port, user;
+	
+	/** The time at which the reading of the orientation sensor was last updated */
+	private long lastOrientationUpdate;
 	
 	private LobbyModel model;		// General application model.
 	private TcpClient tcp;			// TCP controller.
 	
 	private String userlist;		// Users currently in the lobby.
 	
-	private SensorManager mSensorManager;
+	private SensorManager mSensorManager;	// Manages the accelerometer and other sensors.
     
-    TextView mTextViewAcc;
-    TextView mTextViewMag;
-    TextView mTextViewOri;
+    TextView mTextViewAcc;	// Text view for accelerometer.
+    TextView mTextViewMag;	// Text view for magnetic field.
+    TextView mTextViewOri;	// Text view for orientation.
 	
-	private static final int MAX_LINES = 12;
+	private static final int MAX_LINES = 12;	// Max lines to show in the chat lobby.
 	
     /**
      * Creates a tab view.
@@ -87,17 +93,20 @@ public class RoboWars extends Activity implements SensorListener, Observer
         
         /* Setup the sensor manager. */
         
-        // Use these lines for the simulator
-        // mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
-        // mSensorManager.connectSimulator();
+        // Use these lines if using Android emulator.
         
-        // Use this line for actual hardware
+        //mSensorManager = SensorManagerSimulator.getSystemService(this, SENSOR_SERVICE);
+        //mSensorManager.connectSimulator();
+
+        // Use this line if using phone application.
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
     	
     	/* Allow scrolling of the chat and user list. */
     	chat.setMovementMethod(new ScrollingMovementMethod());
     	users.setMovementMethod(new ScrollingMovementMethod());
+    	
+    	lastOrientationUpdate = 0;
     	
     	/* Initially blank user list. */
     	userlist = "";
@@ -174,31 +183,6 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	}
     }
     
-    public void goForward(View view)
-    {
-    	tcp.sendMessage("c:w");
-    }
-    
-    public void goBackward(View view)
-    {
-    	tcp.sendMessage("c:s");
-    }
-    
-    public void goLeft(View view)
-    {
-    	tcp.sendMessage("c:a");
-    }
-    
-    public void goRight(View view)
-    {
-    	tcp.sendMessage("c:d");
-    }
-    
-    public void stop(View view)
-    {
-    	tcp.sendMessage("c:");
-    }
-    
     @Override
 	protected void onResume() {
 		super.onResume();
@@ -216,22 +200,26 @@ public class RoboWars extends Activity implements SensorListener, Observer
 
 	public void onSensorChanged(int sensor, float[] values) {
 		
-		switch(sensor) {
-		case SensorManager.SENSOR_ORIENTATION:
-			mTextViewOri.setText("Orientation: " 
-					+ values[0] + ", " 
-					+ values[1] + ", "
-					+ values[2]);
-			
-			if(tcp != null) {
-				tcp.sendMessage("c:<" 
-						+ values[0] + "," 
-						+ values[1] + ","
-						+ values[2] + ">");
+		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_INTERVAL_MS) {
+			switch(sensor) {
+			case SensorManager.SENSOR_ORIENTATION:
+				mTextViewOri.setText("Orientation: " 
+						+ values[0] + ", " 
+						+ values[1] + ", "
+						+ values[2]);
+				
+				if(tcp != null) {
+					tcp.sendMessage("c:<" 
+							+ values[0] + "," 
+							+ values[1] + ","
+							+ values[2] + ">");
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
+			
+			lastOrientationUpdate = System.currentTimeMillis();
 		}
 	}
 
