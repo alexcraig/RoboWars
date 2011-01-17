@@ -25,7 +25,13 @@ public class RobotProxy {
 	private static Logger log = Logger.getLogger(RobotProxy.class);
 	
 	/** The NXTComm object to use to initiate communication with the robot. */
-	NXTComm nxtComm;
+	private NXTComm nxtComm;
+	
+	/** 
+	 * Object used as a lock to ensure the input and output streams are never
+	 * used at the same time.
+	 */
+	private Object ioLock;
 	
 	/** Stream for robot output */
 	private LejosOutputStream outputStream;
@@ -54,6 +60,7 @@ public class RobotProxy {
 	 */
 	public RobotProxy(ServerLobby lobby, NXTInfo nxtInfo) {
 		this.lobby = lobby;
+		ioLock = new Object();
 		
 		// Use test sizes for now, actual dimensions should probably be sent
 		// by the robot
@@ -139,15 +146,15 @@ public class RobotProxy {
 	 */
 	public void sendCommand(RobotCommand command) {
 		if(outputStream != null) {
-			synchronized(outputStream) {
-				try {
+			try {
+				synchronized(ioLock) {
 					outputStream.writeObject(command);
 					getRobot().setLastCommand(command);
 					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString());
-				} catch (IOException e) {
-					log.error("Error writing command to robot: " + getIdentifier());
-					return;
 				}
+			} catch (IOException e) {
+				log.error("Error writing command to robot: " + getIdentifier());
+				return;
 			}
 		} else {
 			log.error("Attempted to send command to robot: " + getIdentifier()
@@ -179,8 +186,14 @@ public class RobotProxy {
 			Object readObj = null;
             
             try {
-				while ((readObj = inputStream.readObject()) != null) {
+				while (true) {
 				    
+					synchronized(ioLock) {
+						readObj = inputStream.readObject();
+					}
+					
+					if(readObj == null) break;
+					
 				    if (readObj instanceof Pose) {
 				    	Pose newPos = (Pose)readObj;
 
