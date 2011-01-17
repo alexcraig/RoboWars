@@ -290,8 +290,9 @@ public class GameController implements Runnable, GameListener {
 			RobotCommand command = null;
 			
 			command = generateCommand(orientation, buttons, model.getControlType());
-			
+			log.info("Generated command: " + command);
 			if(command != null && model.isValidCommand(command)) {
+				log.info("Sending command: " + command);
 				pairedRobot.sendCommand(command);
 			}
 		}

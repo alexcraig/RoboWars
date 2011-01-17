@@ -143,7 +143,7 @@ public class RobotProxy {
 				try {
 					outputStream.writeObject(command);
 					getRobot().setLastCommand(command);
-					log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
+					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 				} catch (IOException e) {
 					log.error("Error writing command to robot: " + getIdentifier());
 					return;
