@@ -82,7 +82,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		sidePanel.setLayout(new BorderLayout());
 		this.getContentPane().add(sidePanel, BorderLayout.EAST);
 		
-		// Source Selection Panel
+		// --- Source Selection Panel ---
 		JPanel selectionPanel = new JPanel();
 		selectionPanel.setBorder(BorderFactory.createTitledBorder("Source Selection"));
 		sidePanel.add(selectionPanel, BorderLayout.NORTH);
@@ -108,9 +108,8 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 					mediaSrc.setActiveCamera(newCam);
 					refreshSettingsFields();
 					setFieldsEnabled(true);
-					
-					// TODO: Actual video player needs to change camera sources
 				}
+				initVideoPlayer();
 			}
 		});
 		
@@ -125,7 +124,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		selectionPanel.add(detectDevices);
 		selectionPanel.add(camSelectBox);
 		
-		// Position Settings panel
+		// --- Position Settings panel ---
 		JPanel positionPanel = new JPanel();
 		positionPanel.setBorder(BorderFactory.createTitledBorder("Camera Settings"));
 		positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.Y_AXIS));
@@ -172,8 +171,19 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		
 		// CAMERA TESTING
 		updateDeviceList();
+		initVideoPlayer();
 		
+		this.pack();
+        this.setResizable(false);
+	}
+	
+	/**
+	 * Updates the video player to display the currently selected active camera,
+	 * or removes it if no camera is selected.
+	 */
+	private void initVideoPlayer() {
 		if(mediaSrc.getActiveCamera() != null) {
+			destroyVideoPlayer();
 			refreshSettingsFields();
 			setFieldsEnabled(true);
 			
@@ -203,10 +213,24 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		} else {
+			destroyVideoPlayer();
 		}
 		
 		this.pack();
-        this.setResizable(false);
+	}
+	
+	/**
+	 * Stops any currently active video player and removes it from the frame
+	 */
+	private void destroyVideoPlayer() {
+		if(player != null) {
+			player.close();
+			videoPanel.remove(player.getVisualComponent());
+			player = null;
+			this.getContentPane().remove(videoPanel);
+			videoPanel = null;
+		}
 	}
 	
 	/**
