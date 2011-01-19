@@ -1,5 +1,6 @@
 package robowars.server.controller;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -7,7 +8,9 @@ import java.util.Vector;
 import javax.media.CaptureDeviceInfo;
 import javax.media.CaptureDeviceManager;
 import javax.media.Format;
+import javax.media.Manager;
 import javax.media.MediaLocator;
+import javax.media.rtp.*;
 
 import org.apache.log4j.Logger;
 
@@ -16,8 +19,13 @@ import com.lti.civil.CaptureSystem;
 import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
 
 import net.sf.fmj.*;
+import java.net.*;
+import javax.media.protocol.DataSource;
+import javax.media.protocol.PushDataSource;
+
 import net.sf.fmj.media.RegistryDefaults;
 import net.sf.fmj.media.cdp.GlobalCaptureDevicePlugger;
+import net.sf.fmj.media.rtp.RTPSessionMgr;
 import net.sf.fmj.ui.FmjStudio;
 import net.sf.fmj.ui.application.CaptureDeviceBrowser;
 import net.sf.fmj.utility.ClasspathChecker;
@@ -25,7 +33,7 @@ import net.sf.fmj.utility.ClasspathChecker;
 /**
  * Handles the streaming of live video and transmission of other camera
  * status messages to connected users. This class also stores a list of
- * all available camera, and manages the selection of a currently active
+ * all available cameras, and manages the selection of a currently active
  * camera.
  */
 public class MediaStreamer {
@@ -78,9 +86,6 @@ public class MediaStreamer {
 	 * Clears the existing camera controller list and re-detects connected
 	 * capture devices. Note that the coordinate information for existing
 	 * cameras will be lost.
-	 * 
-	 * TODO:	Keep coordinate information for devices which have been
-	 * 			previously configured
 	 */
 	public void updateDeviceList() {
 		// Store the old list of cameras, and generate a new list to store
@@ -111,23 +116,66 @@ public class MediaStreamer {
 					CameraController newCam = new CameraController(info);
 					cameras.add(newCam);
 				}
-				
-				// ------------- TESTING -----------------
-				selectedCamera = cameras.get(0); // TODO: Set through UI, this is just for testing
-				// ------------- TESTING -----------------
 			}
 		}
 		
-		/*
-		// ------------- TESTING -----------------
-		cameras.add(0, new CameraController(new CaptureDeviceInfo("Test Cam", 
-				new MediaLocator("locator"), null)));
-		selectedCamera = cameras.get(0); // TODO: Set through UI, this is just for testing
-		// ------------- TESTING -----------------
-		*/
+		selectedCamera = null;
 		
 		oldCameras.clear();
 		oldCameras = null;
+	}
+	
+	private void initVideoStreamTest() {
+		if(selectedCamera != null) {
+			try {
+				// create the RTP Manager
+				RTPManager rtpManager = RTPManager.newInstance();
+				 
+				// create the local endpoint for the local interface on
+				// any local port
+				SessionAddress localAddress = new SessionAddress();
+				 
+				// initialize the RTPManager
+				rtpManager.initialize( localAddress);
+		
+				// add the ReceiveStreamListener if you need to receive data
+				// and do other application specific stuff
+				// ...
+				 
+				// specify the remote endpoint of this unicast session 
+				// the address string and port numbers in the following lines
+				// need to be replaced with your values.
+				
+				// TODO: Read these addresses from connected UserProxies
+				InetAddress ipAddress = InetAddress.getByName( "168.1.2.3");
+				 
+				SessionAddress remoteAddress = new SessionAddress(ipAddress, 3000);
+		
+				// open the connection
+				rtpManager.addTarget( remoteAddress);
+				 
+				// create a send stream for the output data source of a processor
+				// and start it
+				DataSource dataOutput = Manager.createDataSource(
+						 selectedCamera.getMediaLocator());
+		
+				SendStream sendStream = rtpManager.createSendStream( dataOutput, 1);
+				sendStream.start();
+				 
+				// send data and do other application specific stuff,
+				// ...
+				 
+				// close the connection if no longer needed.
+				rtpManager.removeTarget( remoteAddress, "client disconnected.");
+				 
+				// call dispose at the end of the life-cycle of this RTPManager so
+				// it is prepared to be garbage-collected.
+				rtpManager.dispose();
+			} catch (Exception e) {
+				log.error("Error initializing RTP stream.");
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**

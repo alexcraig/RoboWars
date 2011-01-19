@@ -8,7 +8,6 @@ public enum GameType {
 	}
 	
 	/**
-	 * TODO: Probably shouldn't be hard coded onto an enum
 	 * @return	The minimum number of players required to start a game
 	 */
 	public int getMinimumPlayers() {

@@ -359,7 +359,6 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	@Override
 	/** Disable local display of the video stream on window close */
 	public void windowClosing(WindowEvent e) {
-		log.info("windowClosing");
 		if(player != null) {
 			// Note: Call to stop() will leave the player in the "Prefetched" state
 			player.stop();
@@ -369,7 +368,6 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	@Override
 	/** Activate local display of the video stream on window activation */
 	public void windowActivated(WindowEvent e) {
-		log.info("windowActivated");
 		if(player != null && player.getState() == Controller.Prefetched) {
 			player.start();
 		}
