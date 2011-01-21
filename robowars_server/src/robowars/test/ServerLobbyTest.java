@@ -153,7 +153,7 @@ public class ServerLobbyTest {
 	public void testRegisterRobot() {
 		ArrayList<RobotProxy> testRobots = new ArrayList<RobotProxy>();
 		for(int i = 0; i < TEST_MAX_ROBOTS + 1; i++) {
-			RobotProxy testRobot = new RobotProxy("Robot" + Integer.toString(i));
+			RobotProxy testRobot = new TestRobotProxy(testLobby, "Robot" + Integer.toString(i));
 			testRobots.add(testRobot);
 		}
 		
@@ -181,8 +181,8 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testUnregisterRobot() {
-		RobotProxy testRobot = new RobotProxy("RegisteredRobot");
-		RobotProxy testRobot2 = new RobotProxy("UnregisteredRobot");
+		RobotProxy testRobot = new TestRobotProxy(testLobby, "RegisteredRobot");
+		RobotProxy testRobot2 = new TestRobotProxy(testLobby, "UnregisteredRobot");
 		testLobby.registerRobot(testRobot);
 		
 		testListener.clearNumEvents();
@@ -248,9 +248,10 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testGameInProgress() {
+		
 		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
 		user.getUser().setReady(true);
-		RobotProxy robot = new RobotProxy("test:mac:addr");
+		RobotProxy robot = new TestRobotProxy(testLobby, "test:mac:addr");
 		
 		testLobby.addUserProxy(user);
 		testLobby.registerRobot(robot);
@@ -267,6 +268,7 @@ public class ServerLobbyTest {
 		
 		testLobby.removeUserProxy(user);
 		testLobby.unregisterRobot(robot);
+		
 	}
 
 	@Test
