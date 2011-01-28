@@ -1,5 +1,7 @@
 package com.RoboWars;
 
+import android.media.MediaPlayer;
+
 /**
  * 
  * @author Steve Legere
@@ -10,5 +12,4 @@ package com.RoboWars;
  */
 public class MediaClient extends Thread
 {
-	
 }

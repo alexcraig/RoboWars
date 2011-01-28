@@ -21,7 +21,7 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab1"
 		    android:orientation="vertical"
-		    android:paddingTop="90px">
+		    android:paddingTop="100px">
 		    
 		    <TextView
 		    	android:id="@+id/textAcc"
@@ -45,7 +45,7 @@
 		    	android:layout_below="@id/textMag"
 		    	android:text="Orientation: x,y,z"
 		    	android:lines="1"/>
-		    			    
+		    		    
 		</RelativeLayout>
 	    
 	    <TableLayout
@@ -53,7 +53,7 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab2"
 		    android:orientation="vertical"
-		    android:paddingTop="90px">
+		    android:paddingTop="100px">
 			    <TableRow>
 				    <TextView
 				    	android:layout_column="1"
@@ -101,7 +101,7 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab3"
 		    android:orientation="vertical"
-		    android:paddingTop="90px">
+		    android:paddingTop="100px">
 	    <TextView
 	        android:id="@+id/userText"
 	        android:layout_width="wrap_content"
@@ -153,6 +153,59 @@
 	        android:layout_marginLeft="10dip"
 	        android:onClick="buttonClicked"
 	        android:text="Connect" />
+		</RelativeLayout>
+		
+		<RelativeLayout
+	    	android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:id="@+id/tab4"
+		    android:orientation="vertical"
+		    android:paddingTop="100px">
+		    
+		    <android.view.SurfaceView
+        		android:id="@+id/mediaSurface"
+        		android:layout_width="320px"
+        		android:layout_height="240px"
+        		/>
+        		
+        	<Button
+				android:id="@+id/streamMedia"
+				android:layout_width="200px"
+				android:layout_height="70px"
+				android:layout_toRightOf="@id/mediaSurface"
+				android:layout_marginLeft="10dip"
+				android:onClick="buttonClicked"
+				android:text="Start Video" />
+				
+			<Button
+				android:id="@+id/stopMedia"
+				android:layout_width="200px"
+				android:layout_height="70px"
+				android:layout_below="@id/streamMedia"
+				android:layout_toRightOf="@id/mediaSurface"
+				android:layout_marginLeft="10dip"
+				android:onClick="buttonClicked"
+				android:text="Stop Video" />
+				
+			<EditText
+	        	android:id="@+id/rtspAddress"
+	        	android:layout_width="480px"
+	        	android:layout_height="wrap_content"
+	        	android:background="@android:drawable/editbox_background"
+	        	android:layout_below="@id/stopMedia"
+	        	android:layout_toRightOf="@id/mediaSurface"
+	        	android:layout_marginLeft="10dip"
+	        	android:maxLines="3"/>
+	        	
+	        <TextView
+		    	android:id="@+id/videoStatus"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_below="@id/rtspAddress"
+		    	android:layout_toRightOf="@id/mediaSurface"
+		    	android:layout_marginLeft="10dip"
+		    	android:text="Status: Disabled"
+		    	android:lines="3"/>
 		</RelativeLayout>
 	</FrameLayout>
 </TabHost>
