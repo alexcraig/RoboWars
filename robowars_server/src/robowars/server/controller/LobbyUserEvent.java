@@ -8,6 +8,7 @@ import robowars.shared.model.User;
  * spectator / ready status has been modified.
  */
 public class LobbyUserEvent extends ServerLobbyEvent {
+	private static final long serialVersionUID = -830593124712928721L;
 	
 	/** The user who's state has changed */
 	private User user;
@@ -31,19 +32,19 @@ public class LobbyUserEvent extends ServerLobbyEvent {
 	}
 	
 	/**
-	 * @see ServerLobbyEvent#serialize()
+	 * @return	A plain text string description of the event
 	 */
-	public String serialize() {
+	public String toString() {
 		switch(getEventType()) {
-		case ServerLobbyEvent.EVENT_PLAYER_JOINED:
-			return "[" + ServerLobbyEvent.EVENT_PLAYER_JOINED + "|" + user.getUsername() + "]";
-		case ServerLobbyEvent.EVENT_PLAYER_LEFT:
-			return "[" + ServerLobbyEvent.EVENT_PLAYER_LEFT + "|" + user.getUsername() + "]";
-		case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
-			return "[" + ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE + "|" + user.getUsername()
-				+ "|" + user.isPureSpectator() + "|" + user.isReady() + "]";
+		case EVENT_PLAYER_JOINED:
+			return user.getUsername() + " has joined the server.";
+		case EVENT_PLAYER_LEFT:
+			return user.getUsername() + " has left the server.";
+		case EVENT_PLAYER_STATE_CHANGE:
+			return "< " + user.getUsername() + ": Ready = " + user.isReady()
+				+ ", Spectator = " + user.isPureSpectator() + " >";
 		default:
-			return "[ERROR]";
+			return "UNKNOWN EVENT TYPE";
 		}
 	}
 }

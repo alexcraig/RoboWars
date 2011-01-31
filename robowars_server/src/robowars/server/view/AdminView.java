@@ -185,13 +185,12 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	public void userStateChanged(LobbyUserEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_JOINED) {
 			userListModel.addElement(event.getUser().getUsername());
-			addLineToMainChat(event.getUser().getUsername() + " has joined the server.");
+			addLineToMainChat(event.toString());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_LEFT) {
 			userListModel.removeElement(event.getUser().getUsername());
-			addLineToMainChat(event.getUser().getUsername() + " has left the server.");
+			addLineToMainChat(event.toString());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE) {
-			addLineToMainChat("< " + event.getUser().getUsername() + " Ready = " +
-					event.getUser().isReady() +", Spectator = " + event.getUser().isPureSpectator() + " >");
+			addLineToMainChat(event.toString());
 		}
 	}
 
@@ -200,10 +199,10 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	public void robotStateChanged(LobbyRobotEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_ROBOT_REGISTERED) {
 			robotListModel.addElement(event.getRobot().getIdentifier());
-			addLineToMainChat("Robot " + event.getRobot().getIdentifier() + " has registered with the server.");
+			addLineToMainChat(event.toString());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_ROBOT_UNREGISTERED) {
 			robotListModel.removeElement(event.getRobot().getIdentifier());
-			addLineToMainChat("Robot " + event.getRobot().getIdentifier() + " has unregistered with the server.");
+			addLineToMainChat(event.toString());
 		}
 	}
 
@@ -211,15 +210,15 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	/** @see ServerLobbyListener#lobbyGameStateChanged(LobbyGameEvent) */
 	public void lobbyGameStateChanged(LobbyGameEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_GAMETYPE_CHANGE) {
-			addLineToMainChat("Game type changed to: " + event.getGameType().toString());
+			addLineToMainChat(event.toString());
 			setGameTypeLabel(event.getGameType());
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
-			// addLineToMainChat("--- New game has been launched ---");
+			// addLineToMainChat(event.toString());
 			ServerLobby source = (ServerLobby) event.getSource();
 			Admin2DGameView view = new Admin2DGameView((int) GameModel.DEFAULT_ARENA_SIZE, source.getCurrentGame().getGameModel());
 			source.getCurrentGame().getGameModel().addListener(view);
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_OVER) {
-			// addLineToMainChat("--- Game in progress terminated ---");
+			// addLineToMainChat(event.toString());
 		}
 		
 	}
@@ -249,7 +248,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	@Override
 	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
 	public void lobbyChatMessage(LobbyChatEvent event) {
-		 addLineToMainChat(event.getMessage());
+		 addLineToMainChat(event.toString());
 	}
 	@Override
 	public void gameStateChanged(GameEvent event){}

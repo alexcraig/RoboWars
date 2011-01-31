@@ -30,8 +30,15 @@ public class GameController implements Runnable, GameListener {
 	private static Logger log = Logger.getLogger(GameController.class);
 	
 	/** Scaling factors for client orientation input */
-	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED / (float)180.0;
-	public static final float ROLL_SCALING_FACTOR = (float)200 / (float)90;
+	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED;
+	public static final float ROLL_SCALING_FACTOR = (float)200;
+	
+	/** 
+	 * If a calculated move value is less than RobotCommand.MAX_SPEED / STOP THRESHOLD,
+	 * a STOP command will be sent instead (effectively sets what fraction of max
+	 * move speed is required to send a move command).
+	 */
+	public static final float STOP_THRESHOLD = 20;
 	
 	/** A list of all control pairs registered with this game */
 	private List<ControlPair> controlPairs;
@@ -274,6 +281,9 @@ public class GameController implements Runnable, GameListener {
 			return;
 		}
 		
+		// Set buttons to an empty string if none was provided
+		if(buttons == null) buttons = "";
+		
 		if(orientation != null) {
 			log.info("Got command from " + player.getUser().getUsername() +": orientation: <" 
 					+ orientation.get(0) + "," + orientation.get(1) + "," + orientation.get(2) + ">  Buttons: <" 
@@ -337,15 +347,12 @@ public class GameController implements Runnable, GameListener {
 			}
 			
 			// Scale vector input
-			// Pitch should range from -RobotCommand.MAX_SPEED to RobotCommand.MAX_SPEED
-			// Roll should range from -200 to 200
-			// TODO: This scaling should be done on the client side to ensure
-			//		 that input is consistent across different hardware
 			if(orientation != null) {
 				float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
 				int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
 				
-				if(moveSpeed < RobotCommand.MAX_SPEED / 20) {
+				if(moveSpeed < RobotCommand.MAX_SPEED / STOP_THRESHOLD 
+						&& moveSpeed > -RobotCommand.MAX_SPEED / STOP_THRESHOLD) {
 					return RobotCommand.stop();
 				} else {
 					return RobotCommand.rollingTurn(moveSpeed, turnRate);

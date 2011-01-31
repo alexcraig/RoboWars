@@ -2,11 +2,22 @@ package com.RoboWars;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.IOException;
 
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import android.util.Log;
+
+import robowars.server.controller.ClientCommand;
+import robowars.server.controller.LobbyChatEvent;
+import robowars.server.controller.LobbyGameEvent;
+import robowars.server.controller.LobbyRobotEvent;
+import robowars.server.controller.LobbyUserEvent;
+import robowars.server.controller.ServerLobbyEvent;
 
 /**
  * @author Steve Legere
@@ -27,8 +38,8 @@ public class TcpClient extends Thread
 	private int port;
 	
 	private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private boolean connected;
     
 	public TcpClient(LobbyModel model)
@@ -41,14 +52,28 @@ public class TcpClient extends Thread
     {
 		if (!handshake()) return;
 		
-        String response;
+		Object response;
         
         /* Run forever, handling incoming messages. */
-        try { while ((response = in.readLine()) != null) handle(response); }
-        catch (IOException e) { printMessage(ERROR, "Lost connection to the server."); }
-        finally {
+        try {
+        	while (true) {
+        		response = in.readObject();
+        		if(response == null) break;
+        		
+        		Log.i("RoboWars", "Read object.");
+        		if(response instanceof String) {
+        			Log.i("RoboWars", "Read string: " + (String)response);
+        			printMessage(EVENT, (String)response);
+        		} else if (response instanceof ServerLobbyEvent) {
+        			Log.i("RoboWars", "Read event.");
+        			handle((ServerLobbyEvent)response);
+        		}
+        	}
+        } catch (IOException e) { printMessage(ERROR, "Lost connection to the server."); 
+        } catch (ClassNotFoundException e) { printMessage(ERROR, "Could not deserialize message from server."); 
+        } finally {
         	try {
-        		sendMessage("q");
+        		sendClientCommand(new ClientCommand(ClientCommand.DISCONNECT));
 				out.close();
 				in.close();
 				socket.close();
@@ -67,8 +92,8 @@ public class TcpClient extends Thread
 		printMessage(EVENT, "Connecting...");
 		try {
             socket = new Socket(IPAddress, port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
             
             connected = true;
             
@@ -85,12 +110,39 @@ public class TcpClient extends Thread
 	}
 	
 	/**
-	 * @param message
-	 * Sends a command to the server.
+	 * Sends a string to the server in UTF format. This should only be used
+	 * for the connection handshake (protocol string and username), as all
+	 * further communication should used RoboWars protocol 
+	 * (Serialized ServerLobbyEvents and ClientCommands).
+	 * @param message	The string to be sent to the server.
 	 */
-	public void sendMessage(String message)
+	public void sendUTFString(String message)
 	{
-		if (connected) out.println(message);
+		if (connected) {
+				synchronized(out) {
+				try {
+					out.writeUTF(message);
+					out.reset();
+				} catch (IOException e) {
+					// TODO: Properly log / notify user of error
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public void sendClientCommand(ClientCommand cmd) {
+		if (connected) {
+			synchronized(out) {
+				try {
+					out.writeObject(cmd);
+					out.reset();
+				} catch (IOException e) {
+					// TODO: Properly log / notify user of error
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -101,8 +153,8 @@ public class TcpClient extends Thread
 		String version = model.getVersion();
 		User user = model.getMyUser();
 		if (user != null) {
-			sendMessage(version);
-			sendMessage(user.getName());
+			sendUTFString(version);
+			sendUTFString(user.getName());
 			return true;
 		}
 		else {
@@ -115,71 +167,49 @@ public class TcpClient extends Thread
 	 * @param message
 	 * Determines what to do, given an input message.
 	 */
-	private void handle(String message)
+	private void handle(ServerLobbyEvent event)
 	{
-		if (message.startsWith("[0"))
-		{
-			// User joined lobby.
-			String username = message.substring(3, message.length()-1);
-			model.userJoined(username);
-			printMessage(EVENT, username + " has connected to the server.");
+		// User events
+		if(event instanceof LobbyUserEvent) {
+			LobbyUserEvent userEvent = (LobbyUserEvent)event;
+			switch(userEvent.getEventType()) {
+			case ServerLobbyEvent.EVENT_PLAYER_JOINED:
+				// Player joined
+				model.userJoined(userEvent.getUser().getUsername());
+				printMessage(EVENT, event.toString());
+				return;
+			case ServerLobbyEvent.EVENT_PLAYER_LEFT:
+				// Player left
+				model.userLeft(userEvent.getUser().getUsername());
+				printMessage(EVENT, event.toString());
+				return;
+			case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
+				// Player state changed
+				model.printMessage(EVENT, event.toString());
+				return;
+			default:
+				return;
+			}
 		}
-		else if (message.startsWith("[1"))
-		{
-			// User left lobby.
-			String username = message.substring(3, message.length()-1);
-			model.userLeft(username);
-			printMessage(EVENT, username + " has left the server.");
+		
+		// Robot events
+		if(event instanceof LobbyRobotEvent) {
+			LobbyRobotEvent robotEvent = (LobbyRobotEvent)event;
+			model.printMessage(EVENT, event.toString());
 		}
-		else if (message.startsWith("[2"))
-		{
-			// Chat message event.
-			String msg = message.substring(3, message.length()-1);
-			model.printMessage(CHAT, msg);
+		
+		// Game events
+		if(event instanceof LobbyGameEvent) {
+			LobbyGameEvent gameEvent = (LobbyGameEvent)event;
+			model.printMessage(EVENT, event.toString());
 		}
-		else if (message.startsWith("[3"))
-		{
-			// Robot joined server.
-			String msg = message.substring(3, message.length()-1);
-			model.printMessage(EVENT, msg);
-		}
-		else if (message.startsWith("[4"))
-		{
-			// Robot left server.
-			String msg = message.substring(3, message.length()-2);
-			model.printMessage(EVENT, msg);
-		}
-		else if (message.startsWith("[5"))
-		{
-			// Player state changed.
-			String msg = message.substring(3, message.length()-2);
-			model.printMessage(EVENT, msg);
-		}
-		else if (message.startsWith("[6"))
-		{
-			// Game launch.
-			String msg = "Launching game...";
-			model.printMessage(EVENT, msg);
-		}
-		else if (message.startsWith("[7"))
-		{
-			// Game ended.
-			String msg = "Game terminated.";
-			model.printMessage(EVENT, msg);
-		}
-		else if (message.startsWith("[8"))
-		{
-			// Gametype change.
-			String msg = "Game mode change to: " + message.substring(3, message.length()-2);
-			model.printMessage(EVENT, msg);
-		}
-		else
-		{
-			// Not a command... Just print for now.
-			model.printMessage(EVENT, message);
+		
+		// Chat events
+		if(event instanceof LobbyChatEvent) {
+			LobbyChatEvent chatEvent = (LobbyChatEvent)event;
+			model.printMessage(EVENT, event.toString());
 		}
 	}
-	
 	
 	private void printMessage(int type, String message)
 	{

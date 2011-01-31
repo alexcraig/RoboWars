@@ -3,11 +3,14 @@ package robowars.server.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+
 
 import robowars.shared.model.GameType;
 import robowars.shared.model.User;
@@ -27,10 +30,10 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	private User user;
 
 	/** Reader for client input */
-	private BufferedReader inputStream;
+	private ObjectInputStream inputStream;
 	
 	/** Writer for client output */
-	private PrintWriter outputStream;
+	private ObjectOutputStream outputStream;
 	
 	/** The socket to generate input/output streams for */
 	private Socket userSocket;
@@ -64,43 +67,35 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	public void run(){
-		
 		log.debug("Opening input/output streams.");
 		try {
-			this.inputStream = new BufferedReader(new InputStreamReader(userSocket.getInputStream()));
-			this.outputStream = new PrintWriter(userSocket.getOutputStream(), true);
+			this.outputStream = new ObjectOutputStream(userSocket.getOutputStream());
+			this.inputStream = new ObjectInputStream(userSocket.getInputStream());
 		} catch (IOException e) {
 			log.error("Failed to open input/output streams.");
 			e.printStackTrace();
 		}
 
 		try {
-			
-			// Protocol handshake
-			synchronized(outputStream) {
-				outputStream.println(SystemControl.USER_PROTOCOL_VERSION);
-			}
-			
-			String protocol= inputStream.readLine();
+			// Read protocol string, ensure protocol matches
+			String protocol = inputStream.readUTF();
+			log.info("Read protocol string: " + protocol);
 			
 			if(!protocol.equals(SystemControl.USER_PROTOCOL_VERSION)) {
-				sendMessage("Error - Protocol Mismatch (try updating your client)");
+				sendMessage("Error - Protocol Mismatch (Got: \"" + protocol + "\", Expected: \""
+						+ SystemControl.USER_PROTOCOL_VERSION + ")");
 				return;
 			} else {
 				sendMessage("Valid Protocol - Enter Username");
 			}
 			
 			// User name selection
-			boolean validName = false;
-			String name = null;
-			
-			while(!validName) {
-				name = inputStream.readLine();
-				if(!lobby.isUsernameRegistered(name)) {
-					validName = true;
-				} else {
-					sendMessage("Selected Username Already In Use - Try Again");
-				}
+			String name = inputStream.readUTF();
+			log.info("Read name: " + name);
+			if(lobby.isUsernameRegistered(name)) {
+				// Close the connection to the client if the selected username already exists
+				sendMessage("Selected Username Already In Use - Please Reconnect.");
+				return;
 			}
 			
 			// Generate user object and add to server lobby
@@ -110,11 +105,23 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 			if (lobby.addUserProxy(this)) {
 				// Read strings from socket until connection is terminated
-				String incomingMessage;
-				while ((incomingMessage = inputStream.readLine()) != null) {
-					log.debug("Received: " + incomingMessage);
-					handleInput(incomingMessage);
+				Object incomingMessage;
+				try {
+					
+					// Note: Input stream should only ever be read by this thread,
+					// and therefore does not need to be synchronized.
+					while ((incomingMessage = inputStream.readObject()) != null) {
+						if(incomingMessage instanceof ClientCommand) {
+							ClientCommand clientCmd = (ClientCommand)incomingMessage;
+							handleInput(clientCmd);
+						}
+					}
+					
+				} catch (ClassNotFoundException e) {
+					log.info("Class for incoming message could not be determined.");
+					e.printStackTrace();
 				}
+				
 				log.info(user.getUsername() + " terminated connection with server.");
 			} else {
 				sendMessage("Error - Server Full");
@@ -148,8 +155,26 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * @param message	The message to send
 	 */
 	public void sendMessage(String message) {
+		sendEvent(new LobbyChatEvent(lobby, message));
+		log.debug("Message sent to client: " + message);
+	}
+	
+	/**
+	 * Sends a ServerLobbyEvent (or any of its subclasses) to the connected client.
+	 * @param e	The event to send to the client
+	 */
+	public void sendEvent(ServerLobbyEvent event) {
 		synchronized(outputStream) {
-			outputStream.println(message);
+			try {
+				outputStream.writeObject(event);
+				
+				// Must be called to ensure writing a modified object
+				// does not just send a reference to the previously written object
+				// (which would not have any modified values)
+				outputStream.reset(); 
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -198,47 +223,56 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	/**
-	 * Dispatches user input to the relevant processing functions based on the input received.
-	 * 
-	 * Commands:
-	 * m:<message> - chat message 
-	 * r:<t or f> - set ready state
-	 * s:<t or f> - set pure spectator state
-	 * g:<game_type_string> - set game type
-	 * c:<x,y,z> or c:<x,y,z>button_string  or c:button_string
-	 * 		a command string to be passed to a paired robot
-	 * 		(Note: If no gyro is available tilt should always be <0,0,0>
-	 * l - launch game
-	 * q - disconnect
+	 * Investigates the type of the passed ClientCommand, and performs the
+	 * action associated with the specified command type.
 	 */
-	private void handleInput(String command){
+	private void handleInput(ClientCommand cmd){
 		if(user == null) {
 			log.error("Proxy attempted to handle input with no associated user.");
 			return;
 		}
 		
-		if(command.startsWith("c:")) {
-			handleGameplayCommand(command.substring(2));
-		} else if(command.startsWith("m:")) {
+		switch(cmd.getCommandType()) {
+		case ClientCommand.LAUNCH_GAME:
+				// Request to launch game
+				processGameLaunch();
+				break;
+				
+		case ClientCommand.DISCONNECT:
+			// Disconnect message
+			// TODO: Ensure connection is terminated after disconnect received
+			break;
+		
+		case ClientCommand.READY_STATUS:
+			// Request to change ready status
+			handleChangeReadyState(cmd.getBoolData());
+			break;
+			
+		case ClientCommand.SPECTATOR_STATUS:
+			// Request to change spectator status
+			handleChangeSpectatorState(cmd.getBoolData());
+			break;
+			
+		case ClientCommand.CHAT_MESSAGE:
 			// Chat message
-			lobby.broadcastMessage(user.getUsername() + ": " + command.substring(2));
+			lobby.broadcastMessage(user.getUsername() + ": " + cmd.getStringData());
+			break;
 			
-		} else if(command.startsWith("r:")) {
-			// Change of ready state
-			handleChangeReadyState(command.substring(2,3));
-			
-		} else if(command.startsWith("s:")) {
-			// Change of spectator state
-			handleChangeSpectatorState(command.substring(2,3));
-			
-		} else if(command.startsWith("g:")) {
-			// Change of game type
-			if(GameType.parseString(command.substring(2)) != null) {
-				lobby.setGameType(GameType.parseString(command.substring(2)));
+		case ClientCommand.GAME_TYPE_CHANGE:
+			// Request to change game type
+			if(GameType.parseString(cmd.getStringData()) != null) {
+				lobby.setGameType(GameType.parseString(cmd.getStringData()));
 			}
+			break;
 			
-		} else if(command.startsWith("l")) {
-			processGameLaunch();
+		case ClientCommand.GAMEPLAY_COMMAND:
+			// Gameplay command
+			handleGameplayCommand(cmd.getAzimuth(), cmd.getPitch(), cmd.getRoll(),
+					cmd.getStringData());
+			break;
+			
+		default:
+			break;
 		}
 	}
 	
@@ -248,9 +282,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	private void processGameLaunch() {
 		if(user.isPureSpectator()) {
 			log.debug("Game launch blocked (" + user.getUsername() + " is a pure spectator)");
-			synchronized(outputStream) {
-				outputStream.println("Spectators may not launch a new game.");
-			}
+			sendMessage("Spectators may not launch a new game.");
 		} else {
 			lobby.launchGame();
 		}
@@ -258,34 +290,19 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	
 	/**
 	 * Handles client input that corresponds to a change in ready state.
-	 * @param newState	The new ready state (either "t" or "f")
+	 * @param newState	The new ready state (true or false)
 	 */
-	private void handleChangeReadyState(String newState) {
-		if (newState.equalsIgnoreCase("t")) {
-			user.setReady(true);
-		} else if (newState.equalsIgnoreCase("f")) {
-			user.setReady(false);
-		} else {
-			// Ensures broadcast only occurs if state actually changed
-			return;
-		}
-		
+	private void handleChangeReadyState(boolean newState) {
+		user.setReady(newState);
 		lobby.broadcastUserStateUpdate(this);
 	}
 	
 	/**
 	 * Handles client input that corresponds to a change in spectator state.
-	 * @param newState	The new spectator state (either "t" or "f")
+	 * @param newState	The new spectator state (either true or false)
 	 */
-	private void handleChangeSpectatorState(String newState) {
-		if (newState.equalsIgnoreCase("t")) {
-			user.setPureSpectator(true);
-		} else if (newState.equalsIgnoreCase("f")) {
-			user.setPureSpectator(false);
-		} else {
-			// Ensures broadcast only occurs if state actually changed
-			return;
-		}
+	private void handleChangeSpectatorState(boolean newState) {
+		user.setPureSpectator(newState);
 		lobby.broadcastUserStateUpdate(this);
 	}
 	
@@ -294,75 +311,63 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * and treated as a remote robot command.
 	 * @param command	The command string received from the client
 	 */
-	private void handleGameplayCommand(String command) {
+	private void handleGameplayCommand(Float azimuth, Float pitch, Float roll, String buttons) {
 		// Ignore commands from unpaired players
 		if(controller == null) { return; }
 		
-		// Rough check of orientation validity (use regex instead?)
-		if(!command.startsWith("<") || !command.contains(">")) {
-			log.info("No orientation information provided with gameplay command.");
-			controller.processInput(this, null, command);
-			return;
+		if(azimuth == null || pitch == null || roll == null) {
+			// Case where no orientation was supplied
+			log.info("None or incomplete orientation vector supplied with gameplay command.");
+			controller.processInput(this, null, buttons);
+		} else {
+			// Case where orientation was supplied
+			Vector<Float> orientation = new Vector<Float>();
+			orientation.addElement(clamp(azimuth, -1, 1));
+			orientation.addElement(clamp(pitch, -1, 1));
+			orientation.addElement(clamp(roll, -1, 1));
+			controller.processInput(this, orientation, buttons);
 		}
 		
-		// Assume valid input at this point
-		Vector<Float> orientation = new Vector<Float>();
+		return;
 		
-		try {
-			// Get azimuth
-			Float azimuth = Float.parseFloat(command.substring(1, command.indexOf(",")));
-			command = command.substring(command.indexOf(",") + 1);
-			log.info("Got AZIMUTH: " + azimuth);
-			
-			// Get pitch
-			Float pitch = Float.parseFloat(command.substring(0, command.indexOf(",")));
-			command = command.substring(command.indexOf(",") + 1);
-			log.info("Got PITCH: " + pitch);
-			
-			// Get roll
-			Float roll = Float.parseFloat(command.substring(0, command.indexOf(">")));
-			command = command.substring(command.indexOf(">") + 1);
-			log.info("Got ROLL: " + roll);
-			
-			// Read orientation floats into a vector
-			orientation.addElement(azimuth);
-			orientation.addElement(pitch);
-			orientation.addElement(roll);
-			
-			controller.processInput(this, orientation, command);
-			
-		} catch (NumberFormatException e) {
-			log.error("Invalid gameplay command format (gameplay command format invalid).");
-			return;
-		}
-		
+	}
+	
+	/**
+	 * Clamps an input value between a provided minimum and maximum, and returns
+	 * the value (this is primarily used to ensure that vector input is in the
+	 * 1 to -1 range).
+	 * @param input	The input value
+	 * @param min	The minimum output value
+	 * @param max	The maximum output value
+	 * @return	The input value, clamped to the provided minimum and maximum
+	 */
+	private float clamp(float input, float min, float max) {
+		if(input > max) return max;
+		if(input < min) return min;
+		return input;
 	}
 
 	@Override
 	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
 	public void userStateChanged(LobbyUserEvent event) {
-		log.debug(event.serialize());
-		sendMessage(event.serialize());
+		sendEvent(event);
 	}
 
 	@Override
 	/** @see ServerLobbyListener#robotStateChanged(LobbyRobotEvent) */
 	public void robotStateChanged(LobbyRobotEvent event) {
-		log.debug(event.serialize());
-		sendMessage(event.serialize());
+		sendEvent(event);;
 	}
 
 	@Override
 	/** @see ServerLobbyListener#lobbyGameStateChanged(LobbyGameEvent) */
 	public void lobbyGameStateChanged(LobbyGameEvent event) {
-		log.debug(event.serialize());
-		sendMessage(event.serialize());
+		sendEvent(event);
 	}
 
 	@Override
 	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
 	public void lobbyChatMessage(LobbyChatEvent event) {
-		log.debug(event.serialize());
-		sendMessage(event.serialize());
+		sendEvent(event);
 	}
 }

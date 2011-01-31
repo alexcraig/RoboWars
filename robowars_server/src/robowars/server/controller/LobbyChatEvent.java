@@ -8,6 +8,7 @@ import robowars.shared.model.GameType;
  * users.
  */
 public class LobbyChatEvent extends ServerLobbyEvent {
+	private static final long serialVersionUID = -4763514958441257998L;
 	
 	/** The message that the chat event should carry */
 	private String message;
@@ -30,9 +31,14 @@ public class LobbyChatEvent extends ServerLobbyEvent {
 	}
 	
 	/**
-	 * @see ServerLobbyEvent#serialize()
+	 * @return	A plain text string description of the event
 	 */
-	public String serialize() {
-		return "[" + getEventType() + "|" + getMessage() + "]";
+	public String toString() {
+		switch(getEventType()) {
+		case EVENT_CHAT_MESSAGE:
+			return message;
+		default:
+			return "UNKNOWN EVENT TYPE";
+		}
 	}
 }

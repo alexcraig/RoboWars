@@ -9,6 +9,7 @@ import java.util.EventObject;
  * has been launched or terminated.
  */
 public abstract class ServerLobbyEvent extends EventObject {
+	private static final long serialVersionUID = 6651435788123635338L;
 	
 	/** Constants defining event type */
 	public static final int EVENT_PLAYER_JOINED = 0;
@@ -40,12 +41,4 @@ public abstract class ServerLobbyEvent extends EventObject {
 	public int getEventType() {
 		return type;
 	}
-	
-	/**
-	 * TODO: Should be replaced with a more efficient data type than string at
-	 * 		 some point (use java standard serialization instead)
-	 * @return	A string representation of the event which can be sent over
-	 * 			a network to connected clients.
-	 */
-	public abstract String serialize();
 }

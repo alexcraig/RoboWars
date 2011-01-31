@@ -7,6 +7,7 @@ import robowars.shared.model.GameType;
  * a game.
  */
 public class LobbyGameEvent extends ServerLobbyEvent {
+	private static final long serialVersionUID = -4326889526179283306L;
 	
 	/** The type of the game that was just launched or terminated */
 	private GameType gameType;
@@ -30,16 +31,19 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	}
 	
 	/**
-	 * @see ServerLobbyEvent#serialize()
+	 * @return	A plain text string description of the event
 	 */
-	public String serialize() {
+	public String toString() {
 		switch(getEventType()) {
-		case ServerLobbyEvent.EVENT_GAME_LAUNCH:
-		case ServerLobbyEvent.EVENT_GAME_OVER:
-		case ServerLobbyEvent.EVENT_GAMETYPE_CHANGE:
-			return "[" + getEventType() + "|" + gameType.toString() + "]";
+		case EVENT_GAMETYPE_CHANGE:
+			return "Selected game type changed to: " + gameType + " (Minimum players = " 
+				+ gameType.getMinimumPlayers() + ").";
+		case EVENT_GAME_LAUNCH:
+			return "New game launched (" + gameType + ").";
+		case EVENT_GAME_OVER:
+			return "Game terminated.";
 		default:
-			return "[ERROR]";
+			return "UNKNOWN EVENT TYPE";
 		}
 	}
 }

@@ -1,12 +1,16 @@
 package robowars.shared.model;
 
+import java.io.Serializable;
+
 /**
 * Represents a single user connected to the system. This class
 * is responsible for storing all information regarding user state,
 * such as their selected user name, ready status and spectator
 * status.
 */
-public class User {
+public class User implements Serializable {
+	private static final long serialVersionUID = -933378756508773869L;
+
 	/** The username of the connected user */
 	private String username;
 

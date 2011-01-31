@@ -19,7 +19,7 @@ public class SystemControl {
 	 * to ensure version mismatches between client and server do not occur, and
 	 * also used in administrator GUI)
 	 */
-	public static final String USER_PROTOCOL_VERSION = "RoboWars V0.1";
+	public static final String USER_PROTOCOL_VERSION = "RoboWars V0.2";
 	public static final String ROBOT_PROTOCOL_VERSION = "RoboWars V0.1";
 	
 	public static void main (String args[]){
@@ -55,7 +55,7 @@ public class SystemControl {
 		
 		// TESTING
 		new TestRobotProxy(lobby, "Robot1");
-		// new TestRobotProxy(lobby, "Robot2");
+		new TestRobotProxy(lobby, "Robot2");
 	}
 	
 }

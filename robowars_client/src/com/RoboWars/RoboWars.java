@@ -3,6 +3,8 @@ package com.RoboWars;
 import java.util.Observable;
 import java.util.Observer;
 
+import robowars.server.controller.ClientCommand;
+
 import android.app.Activity;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
@@ -221,8 +223,14 @@ public class RoboWars extends Activity implements SensorListener, Observer
     			String message = entry.getText().toString();
         		entry.setText("");
         		
-        		// Send the message over TCP to the server.
-        		tcp.sendMessage(message);
+        		// Try to generate a client command, send the string as a
+        		// chat message if command generation fails
+        		ClientCommand cmd = ClientCommand.parse(message);
+        		if(cmd == null) {
+        			cmd = new ClientCommand(ClientCommand.CHAT_MESSAGE);
+        			cmd.setStringData(message);
+        		}
+        		tcp.sendClientCommand(cmd);
         		
         		break;
         	
@@ -259,20 +267,25 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	public void onAccuracyChanged(int sensor, int accuracy) { }
 
 	public void onSensorChanged(int sensor, float[] values) {
+		// Scale all values to 1 to -1 range
+		values[0] = (values[0] - 180) / 180; // Azimuth sensor range 0 to 360
+		values[1] = (values[1] / 180);	// Pitch sensor range -180 to 180
+		values[2] = (values[2] / 90);	// Roll sensor range -90 to 90
 		
 		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_INTERVAL_MS) {
 			switch(sensor) {
 			case SensorManager.SENSOR_ORIENTATION:
+				// Set the text display on client side
 				mTextViewOri.setText("Orientation: " 
 						+ values[0] + ", " 
 						+ values[1] + ", "
 						+ values[2]);
 				
+				// Send the new orientation to the server
 				if(tcp != null) {
-					tcp.sendMessage("c:<" 
-							+ values[0] + "," 
-							+ values[1] + ","
-							+ values[2] + ">");
+					ClientCommand cmd = new ClientCommand(ClientCommand.GAMEPLAY_COMMAND);
+					cmd.setOrientation(values[0], values[1], values[2]);
+					tcp.sendClientCommand(cmd);
 				}
 				break;
 			default:
