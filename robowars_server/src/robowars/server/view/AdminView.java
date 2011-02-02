@@ -1,38 +1,43 @@
 package robowars.server.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-import javax.media.CannotRealizeException;
-import javax.media.Controller;
-import javax.media.Manager;
-import javax.media.NoPlayerException;
-import javax.media.Player;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.UIManager;
-
-import java.awt.*;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 
 import lejos.robotics.Pose;
 
-import net.sf.fmj.ui.application.PlayerPanel;
-
 import org.apache.log4j.Logger;
 
-import robowars.server.controller.*;
+import robowars.server.controller.LobbyChatEvent;
+import robowars.server.controller.LobbyGameEvent;
+import robowars.server.controller.LobbyRobotEvent;
+import robowars.server.controller.LobbyUserEvent;
+import robowars.server.controller.MediaStreamer;
+import robowars.server.controller.RobotProxy;
+import robowars.server.controller.ServerLobby;
+import robowars.server.controller.ServerLobbyEvent;
+import robowars.server.controller.ServerLobbyListener;
 import robowars.shared.model.GameEvent;
 import robowars.shared.model.GameListener;
 import robowars.shared.model.GameModel;

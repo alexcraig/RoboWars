@@ -1,6 +1,5 @@
 package robowars.server.controller;
 
-import robowars.shared.model.GameType;
 
 /**
  * Event class indicating that a server lobby has broadcasted a chat message

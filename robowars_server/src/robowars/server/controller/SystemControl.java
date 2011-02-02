@@ -5,7 +5,6 @@ import javax.swing.UIManager;
 import org.apache.log4j.PropertyConfigurator;
 
 import robowars.server.view.AdminView;
-import robowars.shared.model.CommandType;
 import robowars.test.TestRobotProxy;
 
 /**
@@ -54,8 +53,8 @@ public class SystemControl {
 		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer());
 		
 		// TESTING
-		new TestRobotProxy(lobby, "Robot1");
-		new TestRobotProxy(lobby, "Robot2");
+		new TestRobotProxy(lobby, "TestRobot1");
+		// new TestRobotProxy(lobby, "TestRobot2");
 	}
 	
 }

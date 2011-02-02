@@ -1,16 +1,10 @@
 package com.RoboWars;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.IOException;
-
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import android.util.Log;
 
 import robowars.server.controller.ClientCommand;
 import robowars.server.controller.LobbyChatEvent;
@@ -18,6 +12,7 @@ import robowars.server.controller.LobbyGameEvent;
 import robowars.server.controller.LobbyRobotEvent;
 import robowars.server.controller.LobbyUserEvent;
 import robowars.server.controller.ServerLobbyEvent;
+import android.util.Log;
 
 /**
  * @author Steve Legere

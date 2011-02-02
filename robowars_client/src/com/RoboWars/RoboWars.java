@@ -4,7 +4,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import robowars.server.controller.ClientCommand;
-
 import android.app.Activity;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
