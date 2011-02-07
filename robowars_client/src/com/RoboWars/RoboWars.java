@@ -1,5 +1,7 @@
 package com.RoboWars;
 
+import java.lang.Math;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -18,8 +20,18 @@ import android.widget.TextView;
 
 public class RoboWars extends Activity implements SensorListener, Observer
 {	
-	/** The interval at which orientation updates should be pushed to the server */
-	public static final long ORIENTATION_INTERVAL_MS = 300;
+	/** The minimum interval at which orientation updates should be pushed to the server */
+	public static final long ORIENTATION_MINIMUM_INTERVAL_MS = 300;
+	
+	/** The maximum interval at which orientation updates should be pushed to the server */
+	public static final long ORIENTATION_MAXIMUM_INTERVAL_MS = 2000;
+	
+	/** 
+	 * The threshold for input change that should prompt an immediate update
+	 * to the server (all orientations are scaled to a range of -1 to 1 before
+	 * this comparison is applied).
+	 */
+	public static final float ORIENTATION_DELTA_THRESHOLD = (float)0.15;
 	
 	/* Views invoked by the application. */
 	private TextView chat, users;
@@ -43,6 +55,9 @@ public class RoboWars extends Activity implements SensorListener, Observer
 
 	/** MediaPlayer used to display streaming video */
 	private MediaClient mediaClient;
+	
+	/** The last values for each orientation vector that were sent to the server */
+	private double lastAzimuth, lastPitch, lastRoll;
 	
     /**
      * Creates a tab view.
@@ -121,6 +136,10 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	ImageStreamView mediaView = (ImageStreamView) findViewById(R.id.mediaSurface);
     	TextView mediaStatus = (TextView) findViewById(R.id.mediaStatus);
     	mediaClient = new MediaClient(mediaView, mediaAddress, mediaPort, mediaStatus);
+    	
+    	lastAzimuth = 0;
+    	lastPitch = 0;
+    	lastRoll = 0;
     	
     	/* Initially blank user list. */
     	userlist = "";
@@ -232,31 +251,38 @@ public class RoboWars extends Activity implements SensorListener, Observer
 
 	public void onSensorChanged(int sensor, float[] values) {
 		// Scale all values to 1 to -1 range
-		values[0] = (values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
-		values[1] = (values[1] / 180);	// Pitch sensor standard range -180 to 180
-		values[2] = (values[2] / 90);	// Roll sensor standard range -90 to 90
+		float azimuth = (values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
+		float pitch = (values[1] / 90);	// Pitch sensor standard range -90 to 90
+		float roll = (values[2] / 180);	// Roll sensor standard range -180 to 180
 		
-		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_INTERVAL_MS) {
-			switch(sensor) {
-			case SensorManager.SENSOR_ORIENTATION:
-				// Set the text display on client side
-				mTextViewOri.setText("Orientation: " 
-						+ values[0] + ", " 
-						+ values[1] + ", "
-						+ values[2]);
+		switch(sensor) {
+		case SensorManager.SENSOR_ORIENTATION:
+			// Set the text display on client side
+			mTextViewOri.setText("Orientation: " 
+					+ azimuth + "(" + values[0] + "), " 
+					+ pitch + "(" + values[1] + "), "
+					+ roll+ "(" + values[2] + ")");
+			
+			if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MAXIMUM_INTERVAL_MS ||
+					(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MINIMUM_INTERVAL_MS
+					&& (Math.abs(azimuth - lastAzimuth) > ORIENTATION_DELTA_THRESHOLD
+					|| Math.abs(pitch - lastPitch) > ORIENTATION_DELTA_THRESHOLD
+					|| Math.abs(roll - lastRoll) > ORIENTATION_DELTA_THRESHOLD))) {
 				
 				// Send the new orientation to the server
 				if(tcp != null) {
 					ClientCommand cmd = new ClientCommand(ClientCommand.GAMEPLAY_COMMAND);
-					cmd.setOrientation(values[0], values[1], values[2]);
+					cmd.setOrientation(azimuth, pitch, roll);
 					tcp.sendClientCommand(cmd);
+					lastAzimuth = azimuth;
+					lastRoll = roll;
+					lastPitch = pitch;
+					lastOrientationUpdate = System.currentTimeMillis();
 				}
-				break;
-			default:
-				break;
 			}
-			
-			lastOrientationUpdate = System.currentTimeMillis();
+			break;
+		default:
+			break;
 		}
 	}
 
