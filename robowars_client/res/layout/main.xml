@@ -162,7 +162,7 @@
 		    android:orientation="vertical"
 		    android:paddingTop="100px">
 		    
-		    <android.view.SurfaceView
+		    <com.RoboWars.ImageStreamView
         		android:id="@+id/mediaSurface"
         		android:layout_width="320px"
         		android:layout_height="240px"
@@ -188,7 +188,7 @@
 				android:text="Stop Video" />
 				
 			<EditText
-	        	android:id="@+id/rtspAddress"
+	        	android:id="@+id/mediaAddress"
 	        	android:layout_width="480px"
 	        	android:layout_height="wrap_content"
 	        	android:background="@android:drawable/editbox_background"
@@ -197,11 +197,21 @@
 	        	android:layout_marginLeft="10dip"
 	        	android:maxLines="3"/>
 	        	
+	        <EditText
+	        	android:id="@+id/mediaPort"
+	        	android:layout_width="480px"
+	        	android:layout_height="wrap_content"
+	        	android:background="@android:drawable/editbox_background"
+	        	android:layout_below="@id/mediaAddress"
+	        	android:layout_toRightOf="@id/mediaSurface"
+	        	android:layout_marginLeft="10dip"
+	        	android:maxLines="2"/>
+	        	
 	        <TextView
-		    	android:id="@+id/videoStatus"
+		    	android:id="@+id/mediaStatus"
 		    	android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
-		    	android:layout_below="@id/rtspAddress"
+		    	android:layout_below="@id/mediaPort"
 		    	android:layout_toRightOf="@id/mediaSurface"
 		    	android:layout_marginLeft="10dip"
 		    	android:text="Status: Disabled"

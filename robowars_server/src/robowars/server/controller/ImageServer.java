@@ -135,14 +135,6 @@ public class ImageServer implements CaptureObserver, Runnable {
 		}
 	}
 	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws IOException {
-		PropertyConfigurator.configure("config/log_config.properties");
-		new Thread(new ImageServer(33331)).start();
-    }
-	
 	@Override
 	public void onError(CaptureStream stream, CaptureException err) {
 		log.error("Error in capture stream:\n" + err.getMessage());
@@ -246,6 +238,9 @@ public class ImageServer implements CaptureObserver, Runnable {
 							gotAck = true;
 							log.info("Got ACK");
 						}
+					} else if (reply.equalsIgnoreCase("QUIT")) {
+						log.info("Got QUIT message.");
+						break;
 					}
 				}
 			} catch (IOException e) {
@@ -265,4 +260,12 @@ public class ImageServer implements CaptureObserver, Runnable {
 			
 		}
 	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) throws IOException {
+		PropertyConfigurator.configure("config/log_config.properties");
+		new Thread(new ImageServer(33331)).start();
+    }
 }

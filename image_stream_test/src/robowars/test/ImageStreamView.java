@@ -42,19 +42,20 @@ class ImageStreamView extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		// TODO Auto-generated method stub
-		
+		drawThread.terminate();
 	}
 	
 	private class ImageThread implements Runnable {
 		private SurfaceHolder holder;
 		private Bitmap image;
 		private Object imageLock;
+		private boolean terminateFlag;
 		
 		public ImageThread(SurfaceHolder holder) {
 			this.holder = holder;
 			image = null;
 			imageLock = new Object();
+			terminateFlag = false;
 		}
 		
 		public void setImage(Bitmap image) {
@@ -63,10 +64,14 @@ class ImageStreamView extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			//Log.i("ImageStreamTest", "Image set.");
 		}
+		
+		public void terminate() {
+			terminateFlag = true;
+		}
 
 		@Override
 		public void run() {
-			while(true) {
+			while(!terminateFlag) {
 				Canvas drawCanvas = holder.lockCanvas();
 				if(drawCanvas == null) continue;
 				

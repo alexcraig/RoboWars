@@ -18,9 +18,11 @@ public final class R {
         public static final int connect=0x7f050011;
         public static final int entry=0x7f050008;
         public static final int gap1=0x7f05000d;
+        public static final int mediaAddress=0x7f050016;
+        public static final int mediaPort=0x7f050017;
+        public static final int mediaStatus=0x7f050018;
         public static final int mediaSurface=0x7f050013;
         public static final int port=0x7f050010;
-        public static final int rtspAddress=0x7f050016;
         public static final int send=0x7f050009;
         public static final int server=0x7f05000f;
         public static final int serverText=0x7f05000e;
@@ -37,7 +39,6 @@ public final class R {
         public static final int userText=0x7f05000b;
         public static final int username=0x7f05000c;
         public static final int users=0x7f050007;
-        public static final int videoStatus=0x7f050017;
     }
     public static final class layout {
         public static final int main=0x7f030000;

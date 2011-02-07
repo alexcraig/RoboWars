@@ -7,15 +7,9 @@ import robowars.server.controller.ClientCommand;
 import android.app.Activity;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnBufferingUpdateListener;
-import android.media.MediaPlayer.OnErrorListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TabHost;
@@ -24,18 +18,12 @@ import android.widget.TextView;
 
 public class RoboWars extends Activity implements SensorListener, Observer
 {	
-	/** 
-	 * The address of the RTSP stream to use for video streaming (ideally, this
-	 * should be sent by the server upon connection.
-	 */
-	public static final String DEFAULT_RTSP_STREAM_ADDRESS = "rtsp://192.168.1.104:5544/Test";
-	
 	/** The interval at which orientation updates should be pushed to the server */
 	public static final long ORIENTATION_INTERVAL_MS = 300;
 	
 	/* Views invoked by the application. */
-	private TextView chat, users, videoStatus;
-	private EditText entry, server, port, user, rtspAddress;
+	private TextView chat, users;
+	private EditText entry, server, port, user;
 	
 	/** The time at which the reading of the orientation sensor was last updated */
 	private long lastOrientationUpdate;
@@ -54,10 +42,7 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	private static final int MAX_LINES = 12;	// Max lines to show in the chat lobby.
 
 	/** MediaPlayer used to display streaming video */
-	private MediaPlayer mp;
-	
-	/** Flag to determine if the SurfaceHolder for the MediaPlayer is currently initialized */
-	private boolean mediaSurfaceCreated;
+	private MediaClient mediaClient;
 	
     /**
      * Creates a tab view.
@@ -108,13 +93,11 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	server 			= (EditText) findViewById(R.id.server);
     	port 			= (EditText) findViewById(R.id.port);
     	user			= (EditText) findViewById(R.id.username);
-    	rtspAddress		= (EditText) findViewById(R.id.rtspAddress);
     	
     	/* The x,y,z coordinates of the orientation of the phone. */
     	mTextViewAcc = (TextView) findViewById(R.id.textAcc);
         mTextViewMag = (TextView) findViewById(R.id.textMag);
         mTextViewOri = (TextView) findViewById(R.id.textOri);
-        videoStatus = (TextView) findViewById(R.id.videoStatus);
         
         /* Setup the sensor manager. */
         
@@ -132,30 +115,12 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	
     	lastOrientationUpdate = 0;
     	
-    	/* Setup media surface for use with MediaPlayer */
-    	rtspAddress.setText(DEFAULT_RTSP_STREAM_ADDRESS);
-    	mediaSurfaceCreated = false;
-    	SurfaceView mediaView = (SurfaceView)findViewById(R.id.mediaSurface);
-        SurfaceHolder holder = mediaView.getHolder();
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        holder.addCallback(new SurfaceHolder.Callback() {
-			@Override
-			public void surfaceDestroyed(SurfaceHolder holder) {
-				Log.i("RoboWars", "Got surfaceDestroyed callback");
-				mediaSurfaceCreated = false;
-			}
-			
-			@Override
-			public void surfaceCreated(SurfaceHolder holder) {
-				Log.i("RoboWars", "Got surfaceCreated callback");
-		        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		        mediaSurfaceCreated = true;
-			}
-			
-			@Override
-			public void surfaceChanged(SurfaceHolder holder, int format, int width,
-					int height) {}
-		});
+    	/* Setup the media client */
+    	EditText mediaAddress = (EditText) findViewById(R.id.mediaAddress);
+    	EditText mediaPort = (EditText) findViewById(R.id.mediaPort);
+    	ImageStreamView mediaView = (ImageStreamView) findViewById(R.id.mediaSurface);
+    	TextView mediaStatus = (TextView) findViewById(R.id.mediaStatus);
+    	mediaClient = new MediaClient(mediaView, mediaAddress, mediaPort, mediaStatus);
     	
     	/* Initially blank user list. */
     	userlist = "";
@@ -236,13 +201,13 @@ public class RoboWars extends Activity implements SensorListener, Observer
         	/* Start Video button */
     		case(R.id.streamMedia):
     			Log.i("RoboWars", "Stream Video Button Pressed");
-    			launchMediaPlayer(((SurfaceView)findViewById(R.id.mediaSurface)).getHolder());
+    			mediaClient.launchStream();
     			break;
     		
     		/* Stop Video button */
     		case(R.id.stopMedia):
     			Log.i("RoboWars", "Stop Video Button Pressed");
-    			destroyMediaPlayer("Video Status: Disabled");
+    			mediaClient.terminateStream();
     			break;
 	        	
 	        default:
@@ -267,9 +232,9 @@ public class RoboWars extends Activity implements SensorListener, Observer
 
 	public void onSensorChanged(int sensor, float[] values) {
 		// Scale all values to 1 to -1 range
-		values[0] = (values[0] - 180) / 180; // Azimuth sensor range 0 to 360
-		values[1] = (values[1] / 180);	// Pitch sensor range -180 to 180
-		values[2] = (values[2] / 90);	// Roll sensor range -90 to 90
+		values[0] = (values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
+		values[1] = (values[1] / 180);	// Pitch sensor standard range -180 to 180
+		values[2] = (values[2] / 90);	// Roll sensor standard range -90 to 90
 		
 		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_INTERVAL_MS) {
 			switch(sensor) {
@@ -312,84 +277,5 @@ public class RoboWars extends Activity implements SensorListener, Observer
 			userlist = model.getUsers();
 			updateUsers();
 		}
-	}
-	
-	/**
-	 * Starts the MediaPlayer used for displaying streaming video, given that the
-	 * SurfaceHolder has already been initialized. The MediaPlayer will attempt
-	 * to stream from the RTSP stream address provided in the rtspAddress text field.
-	 * @param holder	The SurfaceHolder to display the video in (must already
-	 * 					be fully initialized)
-	 */
-	private void launchMediaPlayer(SurfaceHolder holder) {
-		// Do nothing if MediaPlayer already exists or surface holder
-		// has not been initialized
-		if(mp != null || !mediaSurfaceCreated) return;
-		
-		// Generate new MediaPlayer, and load RTSP address from the provided
-		// text field
-		Log.i("RoboWars", "Generating Media Player");
-		mp = new MediaPlayer();
-		mp.setDisplay(holder);
-		mp.setScreenOnWhilePlaying(true);
-		try {
-			mp.setDataSource(rtspAddress.getText().toString());
-		} catch (Exception e) {
-			return;
-		}
-		
-		// Begin buffering of video stream
-		Log.i("RoboWars", "Beginning MediaPlayer preparation.");
-		videoStatus.setText("Video Status: Buffering (0%)");
-		mp.prepareAsync();
-    	
-		// Listener to initiate video playback when buffering is complete
-    	mp.setOnPreparedListener(new OnPreparedListener() {
-			@Override
-			public void onPrepared(MediaPlayer arg0) {
-				Log.i("RoboWars", "Preparation Complete, starting play");
-				videoStatus.setText("Video Status: Enabled");
-				arg0.start();
-				Log.i("RoboWars", "MediaPlayer activated.");
-			}
-    	});
-    	
-    	// Listener to update status text with current buffering percentage
-    	mp.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
-			@Override
-			public void onBufferingUpdate(MediaPlayer mp, int percent) {
-				Log.i("RoboWars", "MediaPlayer reports percent buffered: " + percent);
-				videoStatus.setText("Video Status: Buffering (" + percent + "%)");
-			}
-    	});
-    	
-    	// Listener to release MediaPlayer resources if RTSP address cannot be
-    	// accessed (or other error occurs)
-    	mp.setOnErrorListener(new OnErrorListener() {
-			@Override
-			public boolean onError(MediaPlayer mp, int what, int extra) {
-				Log.e("RoboWars", "ERROR: " + what + " / " + extra);
-				destroyMediaPlayer("Video Status: Could not connect to RTSP server at: " +
-						rtspAddress.getText().toString());
-				return false;
-			}
-    	});
-	}
-	
-	/**
-	 * Stops the current MediaPlayer (if one exists) and releases its resources.
-	 * @param statusMessage	The message that should be displayed in the video
-	 * 						status text field.
-	 */
-	private void destroyMediaPlayer(String statusMessage) {
-		if(mp != null) {
-			mp.stop();
-			mp.release();
-			mp = null;
-			Log.i("RoboWars", "Destroyed existing MediaPlayer");
-			videoStatus.setText(statusMessage);
-			return;
-		}
-		Log.i("RoboWars", "No existing MediaPlayer to destroy");
 	}
 }
