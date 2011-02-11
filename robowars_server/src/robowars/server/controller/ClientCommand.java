@@ -192,7 +192,7 @@ public class ClientCommand implements Serializable {
 		} else if (commandString.startsWith("c:")) {
 			ClientCommand gameplayCmd = new ClientCommand(GAMEPLAY_COMMAND);
 			
-			if(commandString.substring(2,2).equals("<") && commandString.contains(">")) {
+			if(commandString.substring(2,3).equals("<") && commandString.contains(">")) {
 				// Orientation vector was provided
 				String vectorString = commandString.substring(3, commandString.indexOf(">"));
 				commandString = commandString.substring(commandString.indexOf(">") + 1);
