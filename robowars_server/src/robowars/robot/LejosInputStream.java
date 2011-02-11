@@ -1,4 +1,5 @@
 package robowars.robot;
+
 /**
  * LejosInputStream.java
  * 
@@ -11,12 +12,10 @@ package robowars.robot;
 import java.io.*;
 import java.util.Vector;
 
+import robowars.shared.model.*;
+
 import lejos.robotics.Pose;
 
-import robowars.shared.model.CommandType;
-import robowars.shared.model.MapPoint;
-import robowars.shared.model.RobotCommand;
-import robowars.shared.model.RobotMap;
 
 public class LejosInputStream {
 	private InputStream in;
@@ -41,37 +40,38 @@ public class LejosInputStream {
 				s+=(char)input;
 				if((char)input==']')break;
 			}
+			//}
 			//System.out.println("READ COMMAND FROM NXT: " + s);
 			
 			//decide what command
 			s=s.substring(1,s.length());
-			String type=s.substring(0,s.indexOf('|'));
-			if(type.equals("MOVE_CONTINUOUS")){
-				s=s.substring(s.indexOf("speed"));
-				s=s.substring(s.indexOf(":")+1,s.indexOf('|'));
+			int type=Integer.parseInt(s.substring(0,s.indexOf('|')));
+			if(type==CommandType.MOVE_CONTINUOUS.ordinal()){
+				s=s.substring(s.indexOf("|")+1);
+				s=s.substring(0,s.indexOf("|"));
 				return RobotCommand.moveContinuous(Float.parseFloat(s));
 			}
-			else if(type.equals("TURN_ANGLE_RIGHT")){
-				s=s.substring(s.indexOf("turn"));
-				s=s.substring(s.indexOf(":")+1,s.length());
+			else if(type==CommandType.TURN_ANGLE_RIGHT.ordinal()){
+				s=s.substring(s.indexOf("|")+1);
+				s=s.substring(s.indexOf("|")+1);
+				//System.out.println(s);
 				return RobotCommand.turnAngleRight((int)Float.parseFloat(s));
 			}
-			else if(type.equals("TURN_ANGLE_LEFT")){
-				s=s.substring(s.indexOf("turn"));
-				s=s.substring(s.indexOf(":")+1,s.length());
+			else if(type==CommandType.TURN_ANGLE_LEFT.ordinal()){
+				s=s.substring(s.indexOf("|")+1);
+				s=s.substring(s.indexOf("|")+1);
 				return RobotCommand.turnAngleLeft((int)Float.parseFloat(s));
 			}
-			else if (type.equals("ROLLING_TURN")){
-				String speed=s.substring(s.indexOf("speed"));
-				String turn=s.substring(s.indexOf("turn"));
-				speed=speed.substring(speed.indexOf(':')+1,speed.indexOf('|'));
-				turn=turn.substring(turn.indexOf(':')+1,turn.length());
+			else if (type==CommandType.ROLLING_TURN.ordinal()){
+				s=s.substring(s.indexOf("|")+1);
+				String speed=s.substring(0,s.indexOf("|"));
+				String turn=s.substring(s.indexOf("|")+1);
 				return RobotCommand.rollingTurn((int)Float.parseFloat(speed), (int)Float.parseFloat(turn));
 			}
-			else if(type.equals("STOP")){
+			else if(type==CommandType.STOP.ordinal()){
 				return RobotCommand.stop();
 			}
-			else if(type.equals("EXIT")){
+			else if(type==CommandType.EXIT.ordinal()){
 				return RobotCommand.exit();
 			}
 		}
@@ -89,15 +89,13 @@ public class LejosInputStream {
 			//System.out.println("READ POSE FROM NXT: " + s);
 			
 			//find x,y,heading
+			
 			s=s.substring(1,s.length()-1);
 			String x=s.substring(0,s.indexOf("|"));
 			s=s.substring(s.indexOf("|")+1);
 			String y=s.substring(0,s.indexOf("|"));
 			s=s.substring(s.indexOf("|")+1);
 			String h=s;
-			x=x.substring(2);
-			y=y.substring(2);
-			h=h.substring(2);
 			return new Pose(Float.parseFloat(x),Float.parseFloat(y),Float.parseFloat(h));
 		}
 		else if((char) input=='3'){
@@ -108,7 +106,7 @@ public class LejosInputStream {
 			}
 			s=s.substring(1);
 			s=s.substring(0, s.length()-1);
-			Vector<MapPoint> points=getPoints(s,',');
+			Vector points=getPoints(s,',');
 			return new RobotMap(points);
 		}
 		
@@ -147,18 +145,18 @@ public class LejosInputStream {
 	 * @param splitter
 	 * @return Vector of compiled MapPoints
 	 */
-	private Vector<MapPoint> getPoints(String s, char splitter) {
-		Vector<MapPoint> v=new Vector<MapPoint>();
+	private Vector getPoints(String s, char splitter) {
+		Vector v=new Vector();
 		while(s.indexOf(splitter)!=-1){
 			String point="";
 			point=s.substring(0, s.indexOf(splitter));
 			point=point.substring(1,point.length()-1);
-			v.add(buildPoint(point));
+			v.addElement(buildPoint(point));
 			s=s.substring(s.indexOf(splitter)+1);
 		}
 		String point=s;
 		point=point.substring(1,point.length()-1);
-		v.add(buildPoint(point));
+		v.addElement(buildPoint(point));
 		return v;
 	}
 }

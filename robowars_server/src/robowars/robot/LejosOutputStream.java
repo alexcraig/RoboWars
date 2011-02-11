@@ -1,6 +1,9 @@
 package robowars.robot;
 
 /**
+ 
+
+/**
  * LejosOutputStream.java
  * This Class is used to send objects from either the client or the mindstorm
  * it overcomes the problems with the Lejos library where objects cannot be properly
@@ -9,14 +12,17 @@ package robowars.robot;
  */
 import java.io.IOException;
 import java.io.OutputStream;
+
+import robowars.shared.model.*;
 import lejos.robotics.Pose;
-import robowars.shared.model.RobotCommand;
-import robowars.shared.model.RobotMap;
+
 
 public class LejosOutputStream {
 	private OutputStream out;
+	
 	public LejosOutputStream(OutputStream out){
 		this.out=out;
+		
 	}
 	/**
 	 * This is the function to actually send the object it takes 4 steps
@@ -31,29 +37,31 @@ public class LejosOutputStream {
 		String s=null;
 		if(o instanceof RobotCommand){
 			s="1";
-			s+=((RobotCommand)o).toString();
+			s+=((RobotCommand)o).toOutputString();
 		}
 		else if(o instanceof Pose){
 			Pose p=(Pose)o;
 			s="2[";
-			s+="x:"+p.getX();
-			s+="|y:"+p.getY();
-			s+="|h:"+p.getHeading()+"]";
+			s+=p.getX();
+			s+="|"+p.getY();
+			s+="|"+p.getHeading()+"]";
 		}
 		else if(o instanceof RobotMap){
 			s="3";
 			s+=((RobotMap)o).toString();
 		}
 		else return;
-		
-		//System.out.println("WRITING TO NXT: " + s);
 		byte[] bytes=getBytes(s);
+		
 		if(bytes!=null){
+			
 			for(int i=0; i<bytes.length-1; i++){
 					out.write((int)bytes[i]);
 			}
+			flush();
+	
 		}
-		out.flush();
+		
 	}
 	/**
 	 * Converts the input string into a byte array so we can transfer them
@@ -67,8 +75,7 @@ public class LejosOutputStream {
 	        for(int i=0;i<inputText.length();i++){
 	            nameBytes[i] = (byte) inputText.charAt(i);
 	        }
-	        nameBytes[inputText.length()] = 0;
-	 
+	        nameBytes[nameBytes.length-1]=0;
 	        return nameBytes;
 	}
 	public void flush() throws IOException{out.flush();}

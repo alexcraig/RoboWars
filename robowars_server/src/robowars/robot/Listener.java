@@ -7,16 +7,21 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import robowars.server.controller.RobotProxy;
 import robowars.shared.model.CommandType;
 import robowars.shared.model.RobotCommand;
 import java.math.*;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 public class Listener implements KeyListener{
 	private LejosOutputStream dataOut;
+	private static Logger log = Logger.getLogger(RobotProxy.class);
 	public Listener(OutputStream dataOut){
 		this.dataOut=new LejosOutputStream(dataOut);
 	}
+	
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if(arg0.getKeyCode()==KeyEvent.VK_UP){
@@ -71,14 +76,28 @@ public class Listener implements KeyListener{
 			try {
 				Date time = new Date();
 				long millis = time.getTime();
-				for(int i = 0 ; i < 200; i++){
-					dataOut.writeObject(RobotCommand.rollingTurn((float)Math.random()*30,(int) Math.random()*30));
-					System.out.println("Rolling Turn" + i);
+				for(int i = 0 ; i < 100; i++){
+					int neg;
+					if(Math.random()>.5)neg=1;
+					else neg=-1;
+					int neg2;
+					if(Math.random()>.5)neg2=1;
+					else neg2=-1;
+					dataOut.writeObject(RobotCommand.rollingTurn((float)Math.random()*100*neg2,(int) Math.random()*200*neg));
+					log.info("Wrote to robot: " +i);
+					System.out.println("Wrote to robot: " +i);
+					if(Math.random()>.9)dataOut.writeObject(RobotCommand.stop());
+					try {
+						Thread.sleep((long) (Math.random()*400));
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					//dataOut.writeObject(RobotCommand.stop());
 					//System.out.println("Stop " + i);
 				}
 				long diff = time.getTime() - millis;
-				System.out.println(diff/200);
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

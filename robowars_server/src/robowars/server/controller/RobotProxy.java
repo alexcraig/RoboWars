@@ -147,11 +147,11 @@ public class RobotProxy {
 	public void sendCommand(RobotCommand command) {
 		if(outputStream != null) {
 			try {
-				synchronized(ioLock) {
+				//synchronized(ioLock) {
 					outputStream.writeObject(command);
 					getRobot().setLastCommand(command);
 					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString());
-				}
+				//}
 			} catch (IOException e) {
 				log.error("Error writing command to robot: " + getIdentifier());
 				return;
@@ -188,9 +188,9 @@ public class RobotProxy {
             try {
 				while (true) {
 				    
-					synchronized(ioLock) {
+					//synchronized(ioLock) {
 						readObj = inputStream.readObject();
-					}
+					//}
 					
 					if(readObj == null) break;
 					

@@ -39,16 +39,17 @@ public class BluetoothServer implements Runnable {
 		while(true) {			
 			try {
 				NXTComm nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
-			
-				NXTInfo[] allNxts = nxtComm.search("NXT", NXTCommFactory.BLUETOOTH);
-				
-				for(NXTInfo nxt : allNxts) {
-					if(lobby.getRobotProxy(nxt.name) == null) {
-						log.info("Discovered NXT: " + nxt.name);
-						new RobotProxy(lobby, nxt);
+				String[] nxtName={"NXT", "NXT2"};
+				for(int i=0;i<nxtName.length; i++){
+					NXTInfo[] allNxts = nxtComm.search(nxtName[i], NXTCommFactory.BLUETOOTH);
+					
+					for(NXTInfo nxt : allNxts) {
+						if(lobby.getRobotProxy(nxt.name) == null) {
+							log.info("Discovered NXT: " + nxt.name);
+							new RobotProxy(lobby, nxt);
+						}
 					}
 				}
-				
 				// Arbitrary delay between Bluetooth searches to prevent a robot
 				// from being detected twice before it is registered to the lobby
 				

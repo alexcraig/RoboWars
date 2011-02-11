@@ -178,6 +178,20 @@ public class RobotCommand implements Serializable{
 		returnStr += "]";
 		return returnStr;
 	}
-
+	public String toOutputString(){
+		String returnStr="[" + type.ordinal() + "|";
+		returnStr += moveSpeed + "|" + turnParam;
+		if(specialFlags != null) {
+			returnStr += "|" + specialFlags;
+		}
+		
+		if(newPos != null) {
+			returnStr += "|x:" + newPos.getX() + " y:" + newPos.getY()
+				+ " h:" + newPos.getHeading();
+		} 
+		returnStr += "]";
+		
+		return returnStr;
+	}
 }
 
