@@ -53,7 +53,7 @@ public class SystemControl {
 		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer());
 		
 		// TESTING
-		new TestRobotProxy(lobby, "TestRobot1");
+		//new TestRobotProxy(lobby, "TestRobot1");
 		// new TestRobotProxy(lobby, "TestRobot2");
 	}
 	

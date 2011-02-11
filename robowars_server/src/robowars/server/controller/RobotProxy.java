@@ -54,6 +54,8 @@ public class RobotProxy {
 	 */
 	private GameRobot robot;
 	
+	int commandSent=0;
+	
 	/**
 	 * Generates a new robot proxy
 	 * @param identifier	A string identifier for this robot
@@ -150,7 +152,7 @@ public class RobotProxy {
 				//synchronized(ioLock) {
 					outputStream.writeObject(command);
 					getRobot().setLastCommand(command);
-					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString());
+					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString()+" "+commandSent++);
 				//}
 			} catch (IOException e) {
 				log.error("Error writing command to robot: " + getIdentifier());

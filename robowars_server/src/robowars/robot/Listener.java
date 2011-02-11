@@ -83,9 +83,10 @@ public class Listener implements KeyListener{
 					int neg2;
 					if(Math.random()>.5)neg2=1;
 					else neg2=-1;
-					dataOut.writeObject(RobotCommand.rollingTurn((float)Math.random()*100*neg2,(int) Math.random()*200*neg));
-					log.info("Wrote to robot: " +i);
-					System.out.println("Wrote to robot: " +i);
+					RobotCommand rc=RobotCommand.rollingTurn((float)(Math.random()*100*neg2),(int) ((float)Math.random()*200*neg));
+					dataOut.writeObject(rc);
+					log.info("Wrote to robot: " +i+" "+rc);
+					System.out.println("Wrote to robot: " +i+" "+rc);
 					if(Math.random()>.9)dataOut.writeObject(RobotCommand.stop());
 					try {
 						Thread.sleep((long) (Math.random()*400));

@@ -12,7 +12,7 @@ import lejos.robotics.*;
 import lejos.robotics.navigation.*;
 
 public class RobotMovement {
-	private TachoPilot pilot;
+	private RoboWarsTachoPilot pilot;
 	private SimpleNavigator navigator;
 	private final static float MINDSTORM_WIDTH=11;
 	private final static float WHEEL_HEIGHT=(float) 4.3;
@@ -20,7 +20,7 @@ public class RobotMovement {
 	int count=0;
 	
 	public RobotMovement(){
-		pilot=new TachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
+		pilot=new RoboWarsTachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
 		pilot.setSpeed(SPEED);
 		navigator=new SimpleNavigator(pilot);
 	}
