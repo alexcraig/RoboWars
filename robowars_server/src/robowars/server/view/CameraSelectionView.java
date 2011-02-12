@@ -2,20 +2,14 @@ package robowars.server.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.IOException;
 
 import javax.media.Controller;
-import javax.media.Manager;
-import javax.media.NoPlayerException;
 import javax.media.Player;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -122,6 +116,26 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 			}
 		});
 		selectionPanel.add(detectDevices);
+		
+		JButton startStream = new JButton("Start Video Stream");
+		startStream.addActionListener(new ActionListener() {
+			@Override
+			/** Activate media streaming */
+			public void actionPerformed(ActionEvent e) {
+				mediaSrc.playStream();
+			}
+		});
+		selectionPanel.add(startStream);
+		
+		JButton stopStream = new JButton("Stop Video Stream");
+		stopStream.addActionListener(new ActionListener() {
+			@Override
+			/** Deactivate media streaming */
+			public void actionPerformed(ActionEvent e) {
+				mediaSrc.stopStream();
+			}
+		});
+		selectionPanel.add(stopStream);
 		selectionPanel.add(camSelectBox);
 		
 		// --- Position Settings panel ---
@@ -182,6 +196,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	 * or removes it if no camera is selected.
 	 */
 	private void initVideoPlayer() {
+		/*
 		if(mediaSrc.getActiveCamera() != null) {
 			destroyVideoPlayer();
 			refreshSettingsFields();
@@ -218,6 +233,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		}
 		
 		this.pack();
+		*/
 	}
 	
 	/**

@@ -66,6 +66,10 @@ public class ImageServer implements CaptureObserver, Runnable {
 		lastImageWrite = 0;
 	}
 	
+	public int getPort() {
+		return serverPort;
+	}
+	
 	public void setCaptureDevice() {
 		// RegistryDefaults.registerAll(RegistryDefaults.FMJ);
 		// GlobalCaptureDevicePlugger.addCaptureDevices();

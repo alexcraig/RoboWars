@@ -1,7 +1,5 @@
 package com.RoboWars;
 
-import java.lang.Math;
-
 import java.util.Observable;
 import java.util.Observer;
 
@@ -11,7 +9,6 @@ import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TabHost;
@@ -131,11 +128,9 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	lastOrientationUpdate = 0;
     	
     	/* Setup the media client */
-    	EditText mediaAddress = (EditText) findViewById(R.id.mediaAddress);
-    	EditText mediaPort = (EditText) findViewById(R.id.mediaPort);
     	ImageStreamView mediaView = (ImageStreamView) findViewById(R.id.mediaSurface);
     	TextView mediaStatus = (TextView) findViewById(R.id.mediaStatus);
-    	mediaClient = new MediaClient(mediaView, mediaAddress, mediaPort, mediaStatus);
+    	mediaClient = new MediaClient(mediaView, mediaStatus);
     	
     	lastAzimuth = 0;
     	lastPitch = 0;
@@ -196,6 +191,7 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	        	model.setMyUser(new User(username));
 	        	tcp = new TcpClient(model);
 	        	tcp.connect(address, portNumber);
+	        	mediaClient.launchStream(address, portNumber + 1);
 	        	
 	        	break;
 	        
@@ -216,18 +212,6 @@ public class RoboWars extends Activity implements SensorListener, Observer
         		tcp.sendClientCommand(cmd);
         		
         		break;
-        	
-        	/* Start Video button */
-    		case(R.id.streamMedia):
-    			Log.i("RoboWars", "Stream Video Button Pressed");
-    			mediaClient.launchStream();
-    			break;
-    		
-    		/* Stop Video button */
-    		case(R.id.stopMedia):
-    			Log.i("RoboWars", "Stop Video Button Pressed");
-    			mediaClient.terminateStream();
-    			break;
 	        	
 	        default:
 	        	printMessage("Unknown button pressed.");

@@ -9,8 +9,6 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 
-import robowars.server.view.AdminView;
-
 /**
  * Listens for incoming TCP connections to a specified port, and generates a new
  * UserProxy for each new connection. This class also ensures that each
@@ -55,10 +53,12 @@ public class TcpServer implements Runnable {
 			System.exit(1);
 		}
 		
-		log.info("Succesfully opened listen socket on port " + listenPort);
+		log.info("Succesfully opened listen socket on port: " + listenPort);
 		
 		this.lobby = lobby;
-		mediaStreamer = new MediaStreamer();
+		mediaStreamer = new MediaStreamer(port + 1);
+		mediaStreamer.updateDeviceList();
+		new Thread(mediaStreamer).start();
 	}
 
 	/**

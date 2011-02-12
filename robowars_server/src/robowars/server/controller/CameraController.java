@@ -1,7 +1,12 @@
 package robowars.server.controller;
 
-import javax.media.CaptureDeviceInfo;
-import javax.media.MediaLocator;
+import org.apache.log4j.Logger;
+
+import com.lti.civil.CaptureDeviceInfo;
+import com.lti.civil.CaptureException;
+import com.lti.civil.CaptureStream;
+import com.lti.civil.CaptureSystem;
+import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
 
 /**
  * Handles data transfer with a single connected USB camera. This class also
@@ -9,10 +14,12 @@ import javax.media.MediaLocator;
  * camera (which is required for rendering calculations).
  */
 public class CameraController {
+	/** The logger used by this class */
+	private static Logger log = Logger.getLogger(CameraController.class);
 	
 	/**
-	 * Stores details on the camera controlled by this controller, such as its
-	 * name, supported formats, and location for the media source.
+	 * Stores details on the camera controlled by this controller, such descriptive
+	 * name and identifier.
 	 */
 	private CaptureDeviceInfo deviceInfo;
 	
@@ -52,27 +59,40 @@ public class CameraController {
 		fov = 90;
 	}
 	
+	public String getDeviceId() {
+		return deviceInfo.getDeviceID();
+	}
+	
 	/**
 	 * @return	The name of the camera managed by this controller (usually the
 	 * 			make of the camera, i.e. "Logitech Quickcam Pro 9000")
 	 */
 	public String getCameraName() {
-		return deviceInfo.getName();
+		return toString();
 	}
 	
 	/**
 	 * @return	A MediaLocator object specifying where the video source for this
 	 * 			camera can be read.
 	 */
-	public MediaLocator getMediaLocator() {
-		return deviceInfo.getLocator();
+	public CaptureStream getCaptureStream() {
+		NativeCaptureSystemFactory captureFactory = new NativeCaptureSystemFactory();
+		CaptureSystem captureSystem;
+		try {
+			captureSystem = captureFactory.createCaptureSystem();
+			captureSystem.init();
+			return  captureSystem.openCaptureDeviceStream(deviceInfo.getDeviceID());
+		} catch (CaptureException e) {
+			log.error("Error opening capture stream for device: " + deviceInfo.getDescription());
+			return null;
+		}
 	}
 	
 	/**
 	 * @return	A string representation of the camera controller.
 	 */
 	public String toString() {
-		return deviceInfo.getName();
+		return deviceInfo.getDescription();
 	}
 	
 	/**

@@ -18,16 +18,12 @@ public final class R {
         public static final int connect=0x7f050011;
         public static final int entry=0x7f050008;
         public static final int gap1=0x7f05000d;
-        public static final int mediaAddress=0x7f050016;
-        public static final int mediaPort=0x7f050017;
-        public static final int mediaStatus=0x7f050018;
+        public static final int mediaStatus=0x7f050014;
         public static final int mediaSurface=0x7f050013;
         public static final int port=0x7f050010;
         public static final int send=0x7f050009;
         public static final int server=0x7f05000f;
         public static final int serverText=0x7f05000e;
-        public static final int stopMedia=0x7f050015;
-        public static final int streamMedia=0x7f050014;
         public static final int tab1=0x7f050001;
         public static final int tab2=0x7f050005;
         public static final int tab3=0x7f05000a;

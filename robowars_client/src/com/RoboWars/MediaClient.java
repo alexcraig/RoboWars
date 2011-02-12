@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.TextView;
 
 /**
@@ -23,10 +22,6 @@ public class MediaClient {
 	 */
 	public static final String DEFAULT_MEDIA_ADDRESS = "192.168.1.109";
 	public static final int DEFAULT_MEDIA_PORT = 33331;
-	
-	/** Fields that the media server IP address and port should be read from */
-	private EditText addressField;
-	private EditText portField;
 	
 	/** The text display that status indications should be written to */
 	private TextView statusView;
@@ -47,16 +42,11 @@ public class MediaClient {
 	 * @param portField		The field that the server port should be read from
 	 * @param statusView	The text display for status indiciation to be written to
 	 */
-	public MediaClient(ImageStreamView mediaView, EditText addressField, 
-			EditText portField, TextView statusView) {
+	public MediaClient(ImageStreamView mediaView, 
+			TextView statusView) {
 		this.mediaView = mediaView;
-		this.addressField = addressField;
-		this.portField = portField;
 		this.statusView = statusView;
 		mediaSocket = null;
-		
-		addressField.setText(DEFAULT_MEDIA_ADDRESS);
-		portField.setText(Integer.toString(DEFAULT_MEDIA_PORT));
 		statusView.setText("Streaming player initialized.");
 	}
 	
@@ -65,20 +55,10 @@ public class MediaClient {
 	 * input fields, and launches a stream decoding thread. Does nothing
 	 * if a connection is already active.
 	 */
-	public void launchStream() {
+	public void launchStream(String ipAddress, int port) {
 		if(mediaSocket != null) {
 			// Video stream is already active, do nothing
 			Log.i("RoboWars", "Attempted to launch active stream, ignoring.");
-			return;
-		}
-		
-		String ipAddress = addressField.getText().toString();
-		int port;
-		try {
-			port = Integer.parseInt(portField.getText().toString());
-		} catch (NumberFormatException e) {
-			statusView.setText("Valid port could not be parsed from text: " 
-					+ portField.getText().toString());
 			return;
 		}
 		
