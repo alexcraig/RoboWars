@@ -21,6 +21,7 @@ public class ColorSensor extends Thread{
 		this.move=move;
 	}
 	public void run(){
+		/*
 		while(true){
 			int[] reading=sensor.getColor();
 			if(reading[0]==255&&reading[1]==255&&reading[2]==255){
@@ -35,6 +36,21 @@ public class ColorSensor extends Thread{
 			}
 			try {
 				sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+		while(true){
+			int[] reading=sensor.getColor();
+			try {
+				output.writeObject(new Pose(reading[0],reading[1],reading[2]));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				sleep(5);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

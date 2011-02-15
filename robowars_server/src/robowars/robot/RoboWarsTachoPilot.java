@@ -657,4 +657,12 @@ public class RoboWarsTachoPilot implements Pilot {
 													// changes to float for
 													// angle, get rid of (int)
 	}
+
+	public void robowarsSteer(float turnBearing, float throttle) {
+		if(throttle<0)_parity=-1;
+		else _parity=1;
+		
+		steer(turnBearing);
+		
+	}
 }

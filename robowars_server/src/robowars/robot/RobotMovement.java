@@ -13,7 +13,7 @@ import lejos.robotics.navigation.*;
 
 public class RobotMovement {
 	private RoboWarsTachoPilot pilot;
-	private SimpleNavigator navigator;
+	private RoboWarsNavigator navigator;
 	private final static float MINDSTORM_WIDTH=11;
 	private final static float WHEEL_HEIGHT=(float) 4.3;
 	private final static int SPEED=75;
@@ -22,7 +22,7 @@ public class RobotMovement {
 	public RobotMovement(){
 		pilot=new RoboWarsTachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
 		pilot.setSpeed(SPEED);
-		navigator=new SimpleNavigator(pilot);
+		navigator=new RoboWarsNavigator(pilot);
 	}
 	
 	public synchronized void moveForward() {
@@ -48,7 +48,7 @@ public class RobotMovement {
 		count++;
 		LCD.drawString("RC:"+count, 0,4);
 		navigator.setMoveSpeed(command.getThrottle());
-		navigator.steer((int)(command.getTurnBearing()));
+		navigator.steer(command.getTurnBearing(), command.getThrottle());
 	}
 	public synchronized void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())navigator.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
