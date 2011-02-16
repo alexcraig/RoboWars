@@ -73,8 +73,9 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		
 		// Render
 		buffedG2D.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-		drawPlayers(buffedG2D);
-		drawWalls(buffedG2D);
+		drawEntities(buffedG2D);
+		//drawPlayers(buffedG2D);
+		//drawWalls(buffedG2D);
 		
 		// Restore original transform matrix
 		buffedG2D.setTransform(saveAT);
@@ -84,30 +85,57 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		buffedG2D = (Graphics2D) canvas.getBufferStrategy().getDrawGraphics();
 	}
 	
+	private void drawEntities(Graphics2D g2d){
+		for(GameEntity e : model.getEntities()){
+			System.out.println("Centre: (" + e.getPose().getX() + "," + e.getPose().getY() + "," + e.getPose().getHeading() + ")");
+			int n = e.getVertices().length;
+			int x[] = new int[n];
+			int y[] = new int[n];
+			e.getCoordArrays(x, y);
+			//System.out.print("Vertices: ");
+			//for (int i = 0; i < n; i++){
+			//	System.out.print("(" + x[i] + "," + y[i] + ")");
+			//}
+			//System.out.print("/n");
+			g2d.setColor(Color.BLUE);
+			g2d.fillPolygon(x, y, n);
+			g2d.setColor(Color.ORANGE);
+			g2d.fillOval((int) e.getPose().getX(), (int) e.getPose().getY(), 5, 5);
+		}
+	}
+	
+	private void drawCollision(Graphics2D g2d){
+		g2d.setColor(Color.RED);
+		g2d.fillOval(0, 480, 20, 20);
+	}
+	
 	private void drawPlayers(Graphics2D g2d) {
 		for(GameRobot r : model.getGameRobotList()) {
 			// Draw the "body" of the robot
 			g2d.setColor(Color.BLUE);
-			g2d.fillOval((int) r.getPose().getX(), (int) r.getPose().getY(), (int) r.getWidth(), (int) r.getLength());
+			//g2d.fillOval((int) r.getPose().getX(), (int) r.getPose().getY(), (int) r.getWidth(), (int) r.getLength());
 			
 			// Draw the "nose" of the robot
 			g2d.setColor(Color.ORANGE);
-			g2d.fillOval((int) ((r.getPose().getX() + 2*r.getWidth()/5) + Math.cos(Math.toRadians(r.getPose().getHeading())) * (r.getWidth()/2)),
+			/*g2d.fillOval((int) ((r.getPose().getX() + 2*r.getWidth()/5) + Math.cos(Math.toRadians(r.getPose().getHeading())) * (r.getWidth()/2)),
 					(int) ((r.getPose().getY() + 2*r.getLength()/5) + Math.sin(Math.toRadians(r.getPose().getHeading())) * (r.getLength()/2)),
 					(int) (r.getWidth() / 5),
-					(int) (r.getLength() / 5));
+					(int) (r.getLength() / 5));*/
 		}
 	}
 	
 	private void drawWalls(Graphics2D g2d){
 		g2d.setColor(Color.YELLOW);
 		for(GameEntity e : model.getEntities()){
-			if(e instanceof Obstacle)
+			/*if(e instanceof Obstacle)
 				g2d.drawRect((int) e.getPose().getX(), (int) e.getPose().getY(), (int) e.getWidth(), (int) e.getLength());
+			*/
 		}
 	}
 	
 	public void gameStateChanged(GameEvent e) {
 		drawState();
+		if(e.getEventType() == GameEvent.COLLISION_DETECTED)
+			drawCollision(buffedG2D);
 	}
 }

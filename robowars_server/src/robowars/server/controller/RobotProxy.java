@@ -66,7 +66,7 @@ public class RobotProxy {
 		
 		// Use test sizes for now, actual dimensions should probably be sent
 		// by the robot
-		robot = (new GameRobot(50, 50, nxtInfo.name));
+		robot = (new GameRobot(nxtInfo.name));
 		
 		controller = null;
 		nxtComm = null;

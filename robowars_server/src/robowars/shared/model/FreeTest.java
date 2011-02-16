@@ -11,15 +11,22 @@ public class FreeTest extends GameModel{
 		super.gameType = GameType.FREETEST;
 		super.initVariables();
 		Pose p = new Pose(600,500,0);
-		theWall = new Obstacle(p,10,10,0,false,false,0);
+		//theWall = new Obstacle(p,10,10,0,false,false,0);
 		entities.add(theWall);
 	}
 	
-	public void updateGameState(long timeElapsed){
-		if(robots.get(0).checkCollision(theWall))
-			for (GameListener l : listeners) {
-				l.gameStateChanged(new GameEvent(this, GameEvent.COLLISION_DETECTED));
+	public void updateGameState(long timeElapsed){	
+		for(GameEntity e : entities){
+			for(GameEntity t : entities){
+				if(!e.equals(t)){
+					if(e.checkCollision(t)){
+						for (GameListener l : listeners) {
+							l.gameStateChanged(new GameEvent(this, GameEvent.COLLISION_DETECTED));
+						}
+					}
+				}
 			}
+		}
 	}
 	
 	public boolean checkGameOver(){

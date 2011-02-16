@@ -1,6 +1,5 @@
 package robowars.shared.model;
 
-import java.util.Vector;
 import lejos.robotics.Pose;
 
 public class Projectile extends GameEntity{
@@ -11,8 +10,10 @@ public class Projectile extends GameEntity{
 	private static final long serialVersionUID = 193578038942405071L;
 	private float speed;
 
-	public Projectile(Pose pose, float length, float width, int speed, int id) {
-		super(pose, length, width, id);
+	public Projectile(Pose pose, int speed, int id) {
+		super(pose, null, id);
+		Vector shape[] = new Vector[0];
+		setVertices(shape);
 		this.speed=speed;
 		// TODO Auto-generated constructor stub
 	}

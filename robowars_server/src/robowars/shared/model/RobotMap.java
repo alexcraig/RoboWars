@@ -3,8 +3,9 @@ package robowars.shared.model;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.Vector;
 import robowars.robot.*;
+
 public class RobotMap {
 	private Vector<MapPoint> points;
 	public RobotMap(){

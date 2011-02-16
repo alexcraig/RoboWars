@@ -1,6 +1,5 @@
 package robowars.shared.model;
 
-import java.util.Vector;
 import lejos.robotics.Pose;
 import lejos.geom.Point;
 
@@ -26,8 +25,8 @@ public class GameRobot extends GameEntity{
 	/** Lock object to ensure mutual exclusion when accessing the last valid command */
 	private final Object lastCommandLock = new Object();
 
-	public GameRobot(Pose pose, float length, float width, int id, int health, String robotId) {
-		super(pose, length, width, id);
+	public GameRobot(Pose pose, Vector shape[], int id, int health, String robotId) {
+		super(pose, shape, id);
 		this.startingHealth=health;
 		this.health=health;
 		this.initLocation=pose.getLocation();
@@ -38,14 +37,48 @@ public class GameRobot extends GameEntity{
 	}
 
 	/**
-	* Generates a new robot with a position (0,0) and heading of 0 (looking 
-	* along positive x-axis) and it's id set to 0.
-	* @param length The length of the robot being represented
-	* @param width The width of the robot being represented
+	* Generates a new robot with a given position and heading, shaped 
+	* as a 30x20 arrow, and it's id set to 0.
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
-	public GameRobot(float length, float width, String identifier) {
-		super(new Pose(0,0,0), length, width, 0);
+	public GameRobot(String identifier, Pose pose) {
+		super(pose, null, 0);
+		Vector shape[] = new Vector[6];
+		shape[0] = new Vector(10,10);
+		shape[1] = new Vector(-10,10);
+		shape[2] = new Vector(0,0);
+		shape[3] = new Vector(-10,-10);
+		shape[4] = new Vector(10,-10);
+		shape[5] = new Vector(20,0);	
+		
+		super.setVertices(shape);
+
+		startingHealth = DEFAULT_START_HEALTH;
+		health = startingHealth;
+		this.initLocation=pose.getLocation();
+		this.lastPose = pose;
+
+		robotIdentifier = identifier;
+		command = null;
+	}
+	
+	
+	/**
+	* Generates a new robot with a position (0,0) and heading of 0 (looking 
+	* along positive x-axis), shaped as a 30x20 arrow, and it's id set to 0.
+	* @param identifier The identifier of the robot (MAC address?);
+	*/
+	public GameRobot(String identifier) {
+		super(new Pose(0,0,0), null, 0);
+		Vector shape[] = new Vector[6];
+		shape[0] = new Vector(10,10);
+		shape[1] = new Vector(-10,10);
+		shape[2] = new Vector(0,0);
+		shape[3] = new Vector(-10,-10);
+		shape[4] = new Vector(10,-10);
+		shape[5] = new Vector(20,0);	
+		
+		super.setVertices(shape);
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
@@ -60,30 +93,6 @@ public class GameRobot extends GameEntity{
 		// TODO: This should probably generate a serious of "move to coordinate"
 		// commands (to ensure robots do not hit each other)
 		return RobotCommand.returnToStart();
-	}
-
-	public boolean checkCollision(GameEntity target){
-		// TODO: This appears to be circle on rectangle collision detection, but
-		// robots are currently represented as rectangles. Also note that this 
-		// will not support any collisions where the rectangles are rotated.
-		
-		float closestX = clamp(this.getPose().getX(), 
-				target.getPose().getX()-target.getLength(), target.getPose().getX()+target.getLength());
-		float closestY = clamp(this.getPose().getY(), 
-				target.getPose().getY()-target.getWidth(), target.getPose().getY()+target.getWidth());
-		float distanceX = Math.abs(closestX - this.getPose().getX());
-		float distanceY = Math.abs(closestY - this.getPose().getY());
-		
-		if(((distanceX*distanceX)+(distanceY*distanceY))<=this.getWidth()*this.getWidth()) {
-			return true;
-		}
-		return false;
-	}
-
-	private float clamp(float value, float min, float max){
-		if (value > max) return max;
-		if (value < min) return min;
-		return value;
 	}
 
 	public Pose getLastPose(){

@@ -1,6 +1,5 @@
 package robowars.shared.model;
 
-import java.util.Vector;
 import lejos.robotics.Pose;
 
 public class Obstacle extends GameEntity{
@@ -11,19 +10,20 @@ public class Obstacle extends GameEntity{
 	private boolean destroyOnContact;
 	private boolean destroyByProjectile;
 
-	public Obstacle(Pose pose,float length, float width, int strength, 
+	public Obstacle(Pose pose, Vector shape[], int strength, 
 			boolean destroyOnContact, boolean destroyByProjectile, int id) {
-		super(pose, length, width, id);
+		super(pose, shape, id);
 		this.strength=strength;
 		this.destroyByProjectile=destroyByProjectile;
 		this.destroyOnContact=destroyOnContact;
 		lifeTime = 0;
 	}
+	
 	public void shrink(int amount){
-		if(amount>=1)this.setLength(this.getLength() - amount);
+		//if(amount>=1)this.setLength(this.getLength() - amount);
 	}
 	public void grow(int amount){
-		if(amount>=1)this.setLength(this.getLength() + amount);
+		//if(amount>=1)this.setLength(this.getLength() + amount);
 	}
 	public void passTime(long time){
 		lifeTime += time;
