@@ -14,6 +14,7 @@ public class TankSimulation extends GameModel {
 		this.projectileRange = 1;
 		this.initialObstacles = 0;
 		gameType = GameType.TANK_SIMULATION;
+		initVariables();
 	}
 
 	public TankSimulation(int initialHealth, int projectileRange, int initialObstacles) {

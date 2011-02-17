@@ -38,21 +38,20 @@ public abstract class GameEntity implements Serializable{
 	        } else {
 	            currentEdge = target.getEdges()[i - edges.length];
 	        }
-
-			Vector perpAxis = new Vector(currentEdge.getX(), -currentEdge.getY());
+			Vector perpAxis = new Vector(-currentEdge.getY(), currentEdge.getX());
 	        perpAxis.unitVector();
-
-	        float minA = 0; float minB = 0; float maxA = 0; float maxB = 0;
-	        projectToAxis(perpAxis, this.vertices,  minA, maxA);
-	        projectToAxis(perpAxis, target.getVertices(),  minB, maxB);
 	        
-	        if (intervalDistance(minA, maxA, minB, maxB) > 0){
+	        Vector intervalA = new Vector(0,0);
+	        Vector intervalB = new Vector(0,0);
+	        projectToAxis(perpAxis, this.vertices,  intervalA);
+	        projectToAxis(perpAxis, target.getVertices(),  intervalB);
+	        if (intervalDistance(intervalA, intervalB) > 0){
 	        	System.out.println("None.");
 	            return false;
 	        }
 
 		}
-		System.out.println("Collision!!!");
+		System.out.println("Collision between " + this.getId() + " and " + target.getId());
 		return true;
 	}
 	
@@ -114,35 +113,32 @@ public abstract class GameEntity implements Serializable{
 		return edges;
 	}
 	
-	private void projectToAxis(Vector perpAxis, Vector[] vertices, float min,  float max) {
+	private void projectToAxis(Vector perpAxis, Vector[] vertices, Vector interval) {
 
 		float dotProduct = perpAxis.dotProduct(vertices[0]);
-		min = dotProduct;
-		max = dotProduct;
+		interval.setX(dotProduct);
+		interval.setY(dotProduct);
 		for (int i = 0; i < vertices.length; i++) {
 			dotProduct = vertices[i].dotProduct(perpAxis);
-			if (dotProduct < min) {
-				min = dotProduct;
+			if (dotProduct < interval.getX()) {
+				interval.setX(dotProduct);
 			} else {
-				if (dotProduct > max) {
-					max = dotProduct;
+				if (dotProduct > interval.getY()) {
+					interval.setY(dotProduct);
 				}
 			}
 		}
 	}
 	
-	private float intervalDistance(float minA, float maxA, float minB, float maxB) {
-	    if (minA < minB) {
-	        return minB - maxA;
+	private float intervalDistance(Vector intervalA, Vector intervalB) {
+	    if (intervalA.getX() < intervalB.getX()) {
+	        return intervalB.getX() - intervalA.getY();
 	    } else {
-	        return minA - maxB;
+	        return intervalA.getX() - intervalB.getY();
 	    }
 	}
 	
 	private void compensateForRotation(Vector points[], float angleDifference){
-		for (Vector p : points){
-			System.out.print("(" + p.getX() + "," + p.getY() + ")");
-		}
 		for (Vector p : points){
 			p.setX(p.getX() - pose.getX());
 			p.setY(p.getY() - pose.getY());
@@ -152,10 +148,5 @@ public abstract class GameEntity implements Serializable{
 			p.setX(p.getX() + pose.getX());
 			p.setY(p.getY() + pose.getY());
 		}
-		System.out.print("\n");
-		for (Vector p : points){
-			System.out.print("(" + p.getX() + "," + p.getY() + ")");
-		}
-		System.out.print("\n");
 	}
 }

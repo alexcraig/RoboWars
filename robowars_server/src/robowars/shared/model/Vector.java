@@ -17,6 +17,8 @@ public class Vector {
 	
 	public void unitVector(){
 		float magnitude = (float) Math.sqrt(x*x + y*y);
+		x /= magnitude;
+		y /= magnitude;
 	}
 
 	public static void setPolarCoord(Vector p){

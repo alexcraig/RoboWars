@@ -12,7 +12,7 @@ public class FreeTest extends GameModel{
 		super.initVariables();
 		Pose p = new Pose(600,500,0);
 		//theWall = new Obstacle(p,10,10,0,false,false,0);
-		entities.add(theWall);
+		//entities.add(theWall);
 	}
 	
 	public void updateGameState(long timeElapsed){	

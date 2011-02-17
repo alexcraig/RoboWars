@@ -41,8 +41,8 @@ public class GameRobot extends GameEntity{
 	* as a 30x20 arrow, and it's id set to 0.
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
-	public GameRobot(String identifier, Pose pose) {
-		super(pose, null, 0);
+	public GameRobot(String identifier, Pose pose, int id) {
+		super(pose, null, id);
 		Vector shape[] = new Vector[6];
 		shape[0] = new Vector(10,10);
 		shape[1] = new Vector(-10,10);
