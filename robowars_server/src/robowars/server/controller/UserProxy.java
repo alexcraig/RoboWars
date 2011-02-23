@@ -38,6 +38,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	private ServerLobby lobby;
 	
 	/** The media server that streams video to the user */
+	// TODO: Either find a need for this or remove it
 	private MediaStreamer mediaStreamer;
 	
 	/** 
@@ -95,7 +96,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			}
 			
 			// Generate user object and add to server lobby
-			user = new User(name);
+			user = new User(name, userSocket.getInetAddress());
 			log.debug("Client username: " + user.getUsername());
 			sendMessage(user.getUsername() + " connected to: " + lobby.getServerName());
 			

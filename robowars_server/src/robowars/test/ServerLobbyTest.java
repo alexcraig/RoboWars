@@ -374,7 +374,7 @@ public class ServerLobbyTest {
 	private class TestUserProxy extends UserProxy {
 		public TestUserProxy(ServerLobby lobby, String username) {
 			super(null, lobby, null);
-			setUser(new User(username));
+			setUser(new User(username, null));
 		}
 
 		/**

@@ -1,11 +1,11 @@
 package robowars.server.controller;
 
-import java.io.BufferedReader;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-import com.lti.civil.CaptureDeviceInfo;
+import robowars.shared.model.User;
+
 import com.lti.civil.CaptureException;
 import com.lti.civil.CaptureObserver;
 import com.lti.civil.CaptureStream;
@@ -33,20 +34,27 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(MediaStreamer.class);
 	
-	public static long IMAGE_WRITE_INTERVAL = 200;
-	public static int VIDEO_HEIGHT = 240;
+	/** The minimum interval (in ms) between frame transmissions to the network */
+	public static long IMAGE_WRITE_INTERVAL = 100;
+	
+	/** The desired video resolution width and height */
 	public static int VIDEO_WIDTH = 320;
+	public static int VIDEO_HEIGHT = 240;
 	
-	/** Port to serve images from */
-	private int serverPort;
+	/** Size of the buffer for reading incoming packets */
+	public static int INC_BUFFER_SIZE = 16384;
 	
-	/** Device to capture images from */
-	private CaptureDeviceInfo captureDevice;
+	/** Socket used to send image frames to the network */
+	private DatagramSocket serverSocket;
 	
-	/** The stream to receive images from */
-	private CaptureStream captureStream;
+	/** Port to use for transmission of image frames */
+	private int mediaPort;
 	
-	private ArrayList<MediaClientRecord> clients;
+	/** The time at which an image was last written to the network stream */
+	private long lastImageWrite;
+	
+	/** A list of all connected clients */
+	private ArrayList<User> clients;
 	
 	/** 
 	 * A list of all connected CameraControllers (each controller represents
@@ -70,23 +78,24 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 
 	/**
 	 * Generates a new MediaStreamer
-	 * @arg port	The port at which to accept incoming media connections
+	 * @param port	The port at which to accept incoming media connections
 	 */
 	public MediaStreamer(int port) 
 	{
-		serverPort = port;
-		captureDevice = null;
+		mediaPort = port;
 		cameras = new ArrayList<CameraController>();
-		clients = new ArrayList<MediaClientRecord>();
+		clients = new ArrayList<User>();
+		serverSocket = null;
 		currentStream = null;
 		observer = this;
+		lastImageWrite = System.currentTimeMillis();
 	}
 	
 	/**
 	 * @return	The port the media streamer is serving frames on
 	 */
 	public int getPort() {
-		return serverPort;
+		return mediaPort;
 	}
 	
 	/**
@@ -94,39 +103,21 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	 * a new connection is received.
 	 */
 	public void waitForConnections() {
-		try {
-			// Establish the listen socket.
-			ServerSocket listenSocket = new ServerSocket(serverPort);
-			
-			log.info("MediaServer initialized and waiting on port: " + serverPort);
-			
-			// Process HTTP service requests in an infinite loop.
-			while (true) {
-			    // Listen for a TCP connection request.
-				Socket clientSocket = listenSocket.accept();
-				log.info("Got new connection from: " + clientSocket.getInetAddress().getCanonicalHostName());
+		byte[] incomingBuffer = new byte[INC_BUFFER_SIZE];
 		
-			    // Start a new thread to handle the new client.
-				MediaClientRecord newClient = new MediaClientRecord(clientSocket);
-				new Thread(newClient).start();
-			    synchronized(clients) {
-			    	clients.add(newClient);
-			    }
-			}
+		try {
+			// Establish the datagram socket.
+			serverSocket = new DatagramSocket(mediaPort);
+			log.info("MediaServer initialized and waiting at port: " + mediaPort);
+			
+			// Process incoming UDP packets
+			// TODO: Figure out what needs to be done here once multiple client
+			// support is implemented
+			while (true) {}
 		} catch (IOException e) {
 			log.error("Socket error in media listen thread, terminating thread.");
 			e.printStackTrace();
 			return;
-		}
-	}
-	
-	/**
-	 * Removes a client from the list of clients to serve video frames to
-	 * @param client	The client to stop serving media to
-	 */
-	public void removeClient(MediaClientRecord client) {
-		synchronized(clients) {
-			clients.remove(this);
 		}
 	}
 	
@@ -165,6 +156,8 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 			for(com.lti.civil.CaptureDeviceInfo device : devices) {
 				log.info("LTI-Civil found device: " + device.getDescription() + " - " + device.getDeviceID());
 				
+				// Add the previously existing camera controller for the detected
+				// device, or create a new one of no controller is available
 				boolean foundExisting = false;
 				for(CameraController c : oldCameras) {
 					if(c.getDeviceId().equals(device.getDeviceID())) {
@@ -173,7 +166,6 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 						break;
 					}
 				}
-				
 				if(!foundExisting) {
 					CameraController newCam = new CameraController(device);
 					cameras.add(newCam);
@@ -306,7 +298,45 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 		return currentStream != null;
 	}
 	
+	/**
+	 * Adds a new user to the list of users that should receive a media stream.
+	 * 
+	 * @param user	The user to stream media to
+	 * @return	True if the user was successfully added, false if not (duplicate
+	 * 			record existed)
+	 */
+	public boolean addUser(User user) {
+		synchronized(clients) {
+			for(User u : clients) {
+				if(u == user) {
+					return false;
+				}
+			}
+			clients.add(user);
+			log.info("Added user \"" + user.getUsername() + "\" to streaming media clients.");
+			return true;
+		}
+	}
+	
+	/**
+	 * Removes a user from the list of users that should receive a media stream.
+	 * 
+	 * @param user	The user to stop streaming media to
+	 * @return	True if the user was successfully removed, false if not (user
+	 * 			could not be found in existing client list)
+	 */
+	public boolean removeUser(User user) {
+		synchronized(clients) {
+			log.info("Removing user \"" + user.getUsername() + "\" from streaming media clients.");
+			return clients.remove(user);
+		}
+	}
+	
 	@Override
+	/**
+	 * Starts and stops the network video stream when a game is launched
+	 * or terminated.
+	 */
 	public void lobbyGameStateChanged(LobbyGameEvent event) {
 		if(event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
 			// Game is launching, stream video to the network
@@ -323,7 +353,18 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	}
 	
 	@Override
-	public void userStateChanged(LobbyUserEvent event) {}
+	/**
+	 * Adds and removes users from the streaming media client list when a user
+	 * joins or leaves the server lobby.
+	 */
+	public void userStateChanged(LobbyUserEvent event) {
+		User user = event.getUser();
+		if(event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_JOINED) {
+			addUser(user);
+		} else if (event.getEventType() == ServerLobbyEvent.EVENT_PLAYER_LEFT) {
+			removeUser(user);
+		}
+	}
 
 	@Override
 	public void robotStateChanged(LobbyRobotEvent event) {}
@@ -340,121 +381,49 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	@Override
 	/** Called whenever a new frame is read from the active capture stream */
 	public void onNewImage(CaptureStream stream, Image image) {
-		synchronized(clients) {
-			for(MediaClientRecord client : clients) {
-				client.writeImageToCaptureStream(image);
+		if(System.currentTimeMillis() > lastImageWrite + IMAGE_WRITE_INTERVAL) {
+			try {
+				long preSocket = System.currentTimeMillis();
+				ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+				DataOutputStream dataOut = new DataOutputStream(byteOutput);
+				
+				BufferedImage bufImg = AWTImageConverter.toBufferedImage(image);
+				ImageIO.write(AWTImageConverter.toBufferedImage(image), "jpg", dataOut);
+				dataOut.flush();
+				
+				byte[] frameBuffer = byteOutput.toByteArray();
+				// log.info("Generated packet is " + frameBuffer.length + " bytes long.");
+				synchronized(clients) {
+					for(User u : clients) {
+						sendDataPacket(u, frameBuffer);
+					}
+				}
+				//log.info("Writing image to clients took: " 
+				//		+ (System.currentTimeMillis() - preSocket) + " ms.");
+				lastImageWrite = System.currentTimeMillis();
+			} catch (IOException e1) {
+				log.error("Error multicasting image frame.");
+				e1.printStackTrace();
 			}
 		}
 	}
 	
 	/**
-	 * Thread implementation to store information on a connected client, and
-	 * continually read incoming ACK messages in response to outgoing
-	 * video frames.
+	 * Sends the data contained in the passed buffer to the client
+	 * @param dataBuffer	The data to send to the client
 	 */
-	private class MediaClientRecord implements Runnable {
-		/** Socket used to communicate with the client */
-		private Socket clientSocket;
+	private void sendDataPacket(User user, byte[] dataBuffer) {
+		DatagramPacket outputPacket = new DatagramPacket(dataBuffer, dataBuffer.length, 
+				user.getAddress(), mediaPort);
 		
-		/** Output stream to write to the socket */
-		private OutputStream socketOut;
-		
-		/** Input reader to read from the client socket */
-		private BufferedReader socketIn;
-		
-		/** Flag to signal that the socket reading thread should terminate */
-		private boolean terminateFlag;
-		
-		/** Flag used to determine if an ACK has been received for the previous frame */
-		private boolean gotAck;
-		
-		/** Mutex for the acknowledgement flag */
-		private Object ackLock;
-		
-		/**
-		 * Generates a new MediaClientRecord
-		 * @param clientSocket	The connected socket for the client connection
-		 */
-		public MediaClientRecord(Socket clientSocket) {
-			this.clientSocket = clientSocket;
-			terminateFlag = false;
-			gotAck = true;
-			ackLock = new Object();
-			
-			try {
-				socketOut = clientSocket.getOutputStream();
-				socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			} catch (IOException e) {
-				log.error("Error getting socket streams");
-				return;
-			}
-		}
-		
-		/**
-		 * Writes the provided image to the client socket, given that an ACK
-		 * has been received for the previous image.
-		 * @param image	The image to be written to the network.
-		 */
-		public void writeImageToCaptureStream(Image image) {
-			if(socketOut != null) {
-				try {
-					synchronized(ackLock) {
-						if(gotAck) {
-							synchronized(socketOut) {
-								// Note: Image must be sent as png or gif (Android does not appear to support
-								// decoding of jpg?)
-								ImageIO.write(AWTImageConverter.toBufferedImage(image), "png", socketOut);
-								socketOut.flush();
-								log.info("Wrote image to socket.");
-							}
-							gotAck = false;
-						}
-					}
-				} catch (IOException e) {
-					log.error("Error writing JPEG to socket");
-					gotAck = false;
-					terminateFlag = true;
-				}
-			}
-		}
-
-		@Override
-		/**
-		 * Continually reads from the client's socket to receive ACK or QUIT messages
-		 */
-		public void run() {
-			String reply = "";
-			try {
-				while(!terminateFlag) {
-					// log.info("Reading data from client: " + clientSocket.getInetAddress().getCanonicalHostName());
-					reply = socketIn.readLine();
-					if(reply == null) break;
-					
-					// log.info("Read reply: " + reply);
-					if(reply.equalsIgnoreCase("ACK")) {
-						synchronized(ackLock) {
-							gotAck = true;
-							// log.info("Got ACK");
-						}
-					} else if (reply.equalsIgnoreCase("QUIT")) {
-						log.info("Got QUIT message.");
-						break;
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				log.info("Terminating client.");
-				removeClient(this);
-				try {
-					clientSocket.close();
-					socketIn.close();
-					socketOut.close();
-				} catch (IOException e) {
-					log.error("Error closing client socket");
-					e.printStackTrace();
-				}
-			}
+		try {
+			serverSocket.send(outputPacket);
+			// log.info("Sent data packet to: " + user.getAddress().getHostAddress() 
+			//		+ ":" + mediaPort);
+		} catch (IOException e) {
+			log.error("Error sending image frame to client: " + user.getAddress().getHostAddress()
+					+ ":" + mediaPort);
+			e.printStackTrace();
 		}
 	}
 }

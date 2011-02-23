@@ -124,17 +124,27 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 		});
 		selectionPanel.add(detectDevices);
 		
-		JButton startStream = new JButton("View Preview");
-		startStream.addActionListener(new ActionListener() {
+		JButton startPreview = new JButton("View Preview");
+		startPreview.addActionListener(new ActionListener() {
 			@Override
 			/** Activate media streaming */
 			public void actionPerformed(ActionEvent e) {
-				initVideoPlayer();
+				initVideoPlayer(CameraSelectionView.this);
 			}
 		});
-		selectionPanel.add(startStream);
+		selectionPanel.add(startPreview);
 		
-		JButton stopStream = new JButton("Close Preview");
+		JButton startNetwork = new JButton("Start Network Stream");
+		startNetwork.addActionListener(new ActionListener() {
+			@Override
+			/** Activate media streaming */
+			public void actionPerformed(ActionEvent e) {
+				initVideoPlayer(null);
+			}
+		});
+		selectionPanel.add(startNetwork);
+		
+		JButton stopStream = new JButton("Stop Preview/Stream");
 		stopStream.addActionListener(new ActionListener() {
 			@Override
 			/** Deactivate media streaming */
@@ -204,12 +214,14 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 	/**
 	 * Updates the video player to display the currently selected active camera,
 	 * or removes it if no camera is selected.
+	 * @param observer	The observer to use for the stream (typically "this" to
+	 * 					display a local preview, and "null" for network stream)
 	 */
-	private void initVideoPlayer() {
+	private void initVideoPlayer(CaptureObserver observer) {
 		mediaSrc.stopStream();
-		mediaSrc.setObserver(CameraSelectionView.this);
+		mediaSrc.setObserver(observer);
 		mediaSrc.playStream();
-		if(mediaSrc.isStreaming()) {
+		if(mediaSrc.isStreaming() && observer == this) {
 			player.setVisible(true);
 		} else {
 			player.setVisible(false);

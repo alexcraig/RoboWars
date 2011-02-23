@@ -1,6 +1,7 @@
 package robowars.shared.model;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 
 /**
 * Represents a single user connected to the system. This class
@@ -22,13 +23,20 @@ public class User implements Serializable {
 	* not be considered for control pairing with robots.
 	*/
 	private boolean isPureSpectator;
+	
+	/**
+	 * The IP address the user is connected from
+	 */
+	private InetAddress address;
 
 	/**
 	* Generates a new User object with a false ready and spectator state.
-	* @param username The user name selected by the user.
+	* @param username The user name selected by the user
+	* @param address	The IP address the user is connected from
 	*/
-	public User(String username) {
+	public User(String username, InetAddress address) {
 		this.username = username;
+		this.address = address;
 		isReady = false;
 		isPureSpectator = false;
 	}
@@ -76,6 +84,13 @@ public class User implements Serializable {
 	*/
 	public boolean isPureSpectator() {
 		return isPureSpectator;
+	}
+	
+	/**
+	 * @return	The IP address that the user is connected from
+	 */
+	public InetAddress getAddress() {
+		return address;
 	}
 }
 

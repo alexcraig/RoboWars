@@ -1,5 +1,7 @@
 package com.RoboWars;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -191,8 +193,8 @@ public class RoboWars extends Activity implements SensorListener, Observer
 	        	model.setMyUser(new User(username));
 	        	tcp = new TcpClient(model);
 	        	tcp.connect(address, portNumber);
-	        	mediaClient.launchStream(address, portNumber + 1);
 	        	
+				mediaClient.launchMediaStream(portNumber + 1);
 	        	break;
 	        
 	        /* Send button. */
