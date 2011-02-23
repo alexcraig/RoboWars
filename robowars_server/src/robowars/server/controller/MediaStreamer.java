@@ -11,9 +11,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import net.sf.fmj.media.RegistryDefaults;
-import net.sf.fmj.media.cdp.GlobalCaptureDevicePlugger;
-
 import org.apache.log4j.Logger;
 
 import com.lti.civil.CaptureDeviceInfo;
@@ -77,7 +74,6 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	 */
 	public MediaStreamer(int port) 
 	{
-		RegistryDefaults.registerAll(RegistryDefaults.FMJ);
 		serverPort = port;
 		captureDevice = null;
 		cameras = new ArrayList<CameraController>();

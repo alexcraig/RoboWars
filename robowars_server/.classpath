@@ -4,16 +4,15 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/bluecove.jar"/>
-	<classpathentry kind="lib" path="lib/fmj.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="RoboWars/lib/native-win32x86"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/classes.jar"/>
 	<classpathentry kind="lib" path="lib/jtools.jar"/>
 	<classpathentry kind="lib" path="lib/pccomm.jar"/>
 	<classpathentry kind="lib" path="lib/pctools.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
-	<classpathentry kind="lib" path="lib/lti-civil-no_s_w_t.jar"/>
+	<classpathentry kind="lib" path="lib/lti-civil-no_s_w_t.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="RoboWars/lib/native/win32-x86"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
