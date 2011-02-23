@@ -32,7 +32,7 @@ import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
  * all available cameras, and manages the selection of a currently active
  * camera.
  */
-public class MediaStreamer implements Runnable, CaptureObserver {
+public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObserver {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(MediaStreamer.class);
 	
@@ -67,6 +67,9 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 	 * when no active capture is in progress. 
 	 */
 	private CaptureStream currentStream;
+	
+	/** The Capture Observer to attach to the next stream that is opened. */
+	private CaptureObserver observer;
 
 	/**
 	 * Generates a new MediaStreamer
@@ -80,7 +83,7 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 		cameras = new ArrayList<CameraController>();
 		clients = new ArrayList<MediaClientRecord>();
 		currentStream = null;
-		GlobalCaptureDevicePlugger.addCaptureDevices();
+		observer = this;
 	}
 	
 	/**
@@ -209,30 +212,25 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 			CaptureStream stream = getActiveCamera().getCaptureStream();
 			if(stream != null) {
 				try {
-					
 					boolean gotValidFormat = false;
 					for(VideoFormat v : stream.enumVideoFormats()) {
 						if(v.getWidth() == VIDEO_WIDTH && v.getHeight() == VIDEO_HEIGHT) {
 							stream.setVideoFormat(v);
-							
-							log.info("Selected capture format:\n" + v.getWidth() 
+							log.info("Selected capture format: " + v.getWidth() 
 									+ "x" + v.getHeight() + " - " + v.getFPS() 
 									+ " fps - " + v.getFormatType() + "(" + VideoFormat.RGB24 
 									+ " RGB24, " + VideoFormat.RGB32 + " RGB32)");
-							
 							gotValidFormat = true;
 							break;
 						}
 					}
-					
 					
 					if(!gotValidFormat) {
 						log.error("Selected capture device does not support the required resolution: "
 								+ VIDEO_WIDTH + " x " + VIDEO_HEIGHT + " px");
 					}
 					
-					
-					stream.setObserver(this);
+					stream.setObserver(observer);
 					stream.start();
 					currentStream = stream;
 				} catch (CaptureException e) {
@@ -241,6 +239,22 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Sets the observer that will be used to capture frames from the next
+	 * opened stream. Changes will not take place until the next call
+	 * to playStream().
+	 * 
+	 * @param observer	The observer object to use with the next opened capture stream.
+	 */
+	public synchronized void setObserver(CaptureObserver observer) {
+		if(observer == null) {
+			this.observer = this;
+		} else {
+			this.observer = observer;
+		}
+		
 	}
 	
 	/**
@@ -262,6 +276,7 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 					log.error("Attempt to dispose capture stream failed.");
 					e.printStackTrace();
 				}
+				currentStream = null;
 			}
 			
 		}
@@ -286,6 +301,39 @@ public class MediaStreamer implements Runnable, CaptureObserver {
 	public List<CameraController> getAvailableCameras() {
 		return cameras;
 	}
+	
+	/**
+	 * @return	True if a capture stream is currently active (i.e. currentStream
+	 * 			is not null)
+	 */
+	public boolean isStreaming() {
+		return currentStream != null;
+	}
+	
+	@Override
+	public void lobbyGameStateChanged(LobbyGameEvent event) {
+		if(event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
+			// Game is launching, stream video to the network
+			log.info("Game launched, streaming media to network.");
+			stopStream();
+			setObserver(null);
+			playStream();
+		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_OVER) {
+			// Game is ending, stop video streaming
+			log.info("Game terminated, closing media stream to network.");
+			stopStream();
+		}
+		
+	}
+	
+	@Override
+	public void userStateChanged(LobbyUserEvent event) {}
+
+	@Override
+	public void robotStateChanged(LobbyRobotEvent event) {}
+
+	@Override
+	public void lobbyChatMessage(LobbyChatEvent event) {}
 	
 	@Override
 	/** Logs errors in the capture stream */

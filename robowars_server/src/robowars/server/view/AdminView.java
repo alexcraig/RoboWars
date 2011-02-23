@@ -90,7 +90,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         initContentArea();
         
         // Initialize the camera selection frame
-        cameraSelect = new CameraSelectionView("Camera Options - " + windowTitle, 
+        cameraSelect = new CameraSelectionView(windowTitle, 
         		mediaSource);
 
         // Set view to listen on the provided ServerLobby

@@ -9,8 +9,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import javax.media.Controller;
-import javax.media.Player;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -27,10 +25,17 @@ import org.apache.log4j.Logger;
 import robowars.server.controller.CameraController;
 import robowars.server.controller.MediaStreamer;
 
+import com.lti.civil.CaptureException;
+import com.lti.civil.CaptureObserver;
+import com.lti.civil.CaptureStream;
+import com.lti.civil.Image;
+import com.lti.civil.awt.AWTImageConverter;
+import com.lti.civil.swing.ImageFrame;
+
 /**
  * A GUI for the selection and viewing of local video streams.
  */
-public class CameraSelectionView extends JFrame implements WindowListener {
+public class CameraSelectionView extends JFrame implements WindowListener, CaptureObserver {
 	/** Special string to represent no camera selected in camera selection options */
 	private final String NO_CAMERA = "No Video Feed";
 	
@@ -46,8 +51,8 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	 */
 	private JPanel videoPanel;
 	
-	/** FMJ Player for the selected video feed */
-	private Player player;
+	/** ImageFrame used to display the camera selection preview */
+	private ImageFrame player;
 	
 	/** The combo box used for camera selection */
 	private JComboBox camSelectBox;
@@ -68,7 +73,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	 */
 	public CameraSelectionView(String windowTitle, MediaStreamer mediaSource) {
 		
-		super(windowTitle);
+		super("Camera Options - " + windowTitle);
 		mediaSrc = mediaSource;
 		this.addWindowListener(this);
 		
@@ -103,7 +108,6 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 					refreshSettingsFields();
 					setFieldsEnabled(true);
 				}
-				initVideoPlayer();
 			}
 		});
 		
@@ -112,27 +116,32 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 			@Override
 			/** Trigger a re-detection of connected cameras */
 			public void actionPerformed(ActionEvent e) {
+				if(mediaSrc.isStreaming()) {
+					stopVideoPlayer();
+				}
 				updateDeviceList();
 			}
 		});
 		selectionPanel.add(detectDevices);
 		
-		JButton startStream = new JButton("Start Video Stream");
+		JButton startStream = new JButton("View Preview");
 		startStream.addActionListener(new ActionListener() {
 			@Override
 			/** Activate media streaming */
 			public void actionPerformed(ActionEvent e) {
-				mediaSrc.playStream();
+				initVideoPlayer();
 			}
 		});
 		selectionPanel.add(startStream);
 		
-		JButton stopStream = new JButton("Stop Video Stream");
+		JButton stopStream = new JButton("Close Preview");
 		stopStream.addActionListener(new ActionListener() {
 			@Override
 			/** Deactivate media streaming */
 			public void actionPerformed(ActionEvent e) {
 				mediaSrc.stopStream();
+				mediaSrc.setObserver(null);
+				player.setVisible(false);
 			}
 		});
 		selectionPanel.add(stopStream);
@@ -147,7 +156,7 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		xPos = generateTextEntryPanel("X Position: ", 10, positionPanel);
 		yPos = generateTextEntryPanel("Y Position: ", 10, positionPanel);
 		zPos = generateTextEntryPanel("Z Position: ", 10, positionPanel);
-
+	
 		hOrientation = generateTextEntryPanel("Horizontal Orientation: ", 10, 
 				positionPanel);
 		vOrientation = generateTextEntryPanel("Vertical Orientation: ", 10, 
@@ -183,12 +192,13 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		// Default input fields to disabled until an active camera is found
 		setFieldsEnabled(false);
 		
-		// CAMERA TESTING
-		updateDeviceList();
-		initVideoPlayer();
+		// Camera Preview Frame
+		player = new ImageFrame("Camera Preview - " + windowTitle);
 		
+		
+		updateDeviceList();	
 		this.pack();
-        this.setResizable(false);
+	    this.setResizable(false);
 	}
 	
 	/**
@@ -196,57 +206,23 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 	 * or removes it if no camera is selected.
 	 */
 	private void initVideoPlayer() {
-		/*
-		if(mediaSrc.getActiveCamera() != null) {
-			destroyVideoPlayer();
-			refreshSettingsFields();
-			setFieldsEnabled(true);
-			
-			try {
-				log.debug("Attempting to start streaming of: " 
-						+ mediaSrc.getActiveCamera().getCameraName() 
-						+ " - " + mediaSrc.getActiveCamera().getMediaLocator());
-				player = Manager.createPlayer(mediaSrc.getActiveCamera().getMediaLocator());
-				
-				player.realize(); // Note: Call does not block
-				while(player.getState() != Controller.Realized) {
-					// Do nothing / wait for realization
-					try { Thread.sleep(100); } catch (InterruptedException e) { e.printStackTrace(); }
-				}
-	
-				videoPanel = new JPanel();
-				videoPanel.setBorder(BorderFactory.createTitledBorder("Current Video Stream"));
-				videoPanel.setPreferredSize(new Dimension(640, 480));
-				videoPanel.add(player.getVisualComponent());
-				this.getContentPane().add(videoPanel, BorderLayout.CENTER);
-				player.start(); // Note: Call does not block
-				
-			} catch (NoPlayerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		mediaSrc.stopStream();
+		mediaSrc.setObserver(CameraSelectionView.this);
+		mediaSrc.playStream();
+		if(mediaSrc.isStreaming()) {
+			player.setVisible(true);
 		} else {
-			destroyVideoPlayer();
+			player.setVisible(false);
 		}
-		
-		this.pack();
-		*/
 	}
 	
 	/**
 	 * Stops any currently active video player and removes it from the frame
 	 */
-	private void destroyVideoPlayer() {
-		if(player != null) {
-			player.close();
-			videoPanel.remove(player.getVisualComponent());
-			player = null;
-			this.getContentPane().remove(videoPanel);
-			videoPanel = null;
-		}
+	private void stopVideoPlayer() {
+		mediaSrc.stopStream();
+		mediaSrc.setObserver(null);
+		player.setVisible(false);
 	}
 	
 	/**
@@ -370,23 +346,27 @@ public class CameraSelectionView extends JFrame implements WindowListener {
 		
 		return false;
 	}
+	
+	// CaptureObserver Methods
+	@Override
+	public void onError(CaptureStream arg0, CaptureException arg1) {
+	}
+
+	@Override
+	public void onNewImage(CaptureStream arg0, Image image) {
+		player.setImage(AWTImageConverter.toBufferedImage(image));
+	}
 
 	// WindowListener Methods
 	@Override
 	/** Disable local display of the video stream on window close */
 	public void windowClosing(WindowEvent e) {
-		if(player != null) {
-			// Note: Call to stop() will leave the player in the "Prefetched" state
-			player.stop();
-		}
+		stopVideoPlayer();
 	}
 	
 	@Override
 	/** Activate local display of the video stream on window activation */
 	public void windowActivated(WindowEvent e) {
-		if(player != null && player.getState() == Controller.Prefetched) {
-			player.start();
-		}
 	}
 	
 	@Override
