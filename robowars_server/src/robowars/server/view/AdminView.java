@@ -29,6 +29,7 @@ import lejos.robotics.Pose;
 
 import org.apache.log4j.Logger;
 
+import robowars.server.controller.BluetoothServer;
 import robowars.server.controller.LobbyChatEvent;
 import robowars.server.controller.LobbyGameEvent;
 import robowars.server.controller.LobbyRobotEvent;
@@ -64,6 +65,9 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	/** Reference to the ServerLobby this AdminView should manage */
 	private ServerLobby lobby;
 	
+	/** The server responsible for communication the the NXT robots */
+	private BluetoothServer bluetooth;
+	
 	/** Reference to the frame used for camera selection */
 	private JFrame cameraSelect;
 	
@@ -72,8 +76,10 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 	 * @param frameTitle	The title of the frame
 	 * @param lobby			The ServerLobby that this view should listen for events from
 	 * @param mediaSource	The MediaStreamer managing camera selection and settings
+	 * @param BluetoothServer	The BluetoothServer responsible for robot communications
 	 **/
-	public AdminView(String windowTitle, ServerLobby lobby, MediaStreamer mediaSource) {
+	public AdminView(String windowTitle, ServerLobby lobby, MediaStreamer mediaSource,
+			BluetoothServer bluetooth) {
 		super(windowTitle);
 		
 		// TODO:	Should have a window listener that cleanly terminates active
@@ -82,6 +88,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         
         setLayout(new BorderLayout());
         this.lobby = lobby;
+        this.bluetooth = bluetooth;
 
 		// Setup menus
         initMenus();
@@ -140,6 +147,21 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
                 }
         });
         settingsMenu.add(cameraOptions);
+        
+        // Robots
+        JMenu robotsMenu = new JMenu("Robots");
+        settingsMenu.setMnemonic(KeyEvent.VK_R);
+        this.getJMenuBar().add(robotsMenu);
+        
+        // Robots -> Launch Robot Detection
+        JMenuItem detectRobots = new JMenuItem("Launch Robot Detection", KeyEvent.VK_L);
+        detectRobots.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                	bluetooth.initRobotDetection();
+                }
+        });
+        robotsMenu.add(detectRobots);
 	}
 	
 	/**
