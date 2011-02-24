@@ -44,7 +44,7 @@
 		    	android:layout_height="wrap_content"
 		    	android:layout_below="@id/textMag"
 		    	android:text="Orientation: x,y,z"
-		    	android:lines="1"/>
+		    	android:lines="4"/>
 		    		    
 		</RelativeLayout>
 	    

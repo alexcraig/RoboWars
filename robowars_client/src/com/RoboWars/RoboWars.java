@@ -1,7 +1,5 @@
 package com.RoboWars;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -10,7 +8,6 @@ import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -308,14 +305,14 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		
 		// Scale all values to 1 to -1 range
 		float azimuth = (event.values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
-		float pitch = (event.values[1] / 90);	// Pitch sensor standard range -90 to 90
-		float roll = (event.values[2] / 180);	// Roll sensor standard range -180 to 180
+		float pitch = (clamp(-event.values[2], -40, 40) / 40);	// Pitch sensor standard range -90 to 90
+		float roll = (clamp(event.values[1], -40, 40) / 40);	// Roll sensor standard range -180 to 180
 
 		// Set the text display on client side
-		mTextViewOri.setText("Orientation: " 
-				+ azimuth + "(" + event.values[0] + "), " 
-				+ pitch + "(" + event.values[1] + "), "
-				+ roll+ "(" + event.values[2] + ")");
+		mTextViewOri.setText("Orientation:\n" 
+				+ "Azimuth:  " + azimuth + " (" + event.values[0] + ")\n" 
+				+ "Pitch:  " + pitch + " (" + event.values[2] + ")\n"
+				+ "Roll:  " + roll + " (" + event.values[1] + ")\n");
 		
 		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MAXIMUM_INTERVAL_MS ||
 				(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MINIMUM_INTERVAL_MS
@@ -334,5 +331,11 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 				lastOrientationUpdate = System.currentTimeMillis();
 			}
 		}
+	}
+	
+	private float clamp(float value, float min, float max) {
+		if(value > max) return max;
+		if(value < min) return min;
+		return value;
 	}
 }
