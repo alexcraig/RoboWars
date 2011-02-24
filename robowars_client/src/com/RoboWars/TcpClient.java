@@ -12,6 +12,7 @@ import robowars.server.controller.LobbyGameEvent;
 import robowars.server.controller.LobbyRobotEvent;
 import robowars.server.controller.LobbyUserEvent;
 import robowars.server.controller.ServerLobbyEvent;
+import robowars.shared.model.GameEvent;
 import android.util.Log;
 
 /**
@@ -55,14 +56,18 @@ public class TcpClient extends Thread
         		response = in.readObject();
         		if(response == null) break;
         		
-        		Log.i("RoboWars", "Read object.");
+        		// Log.i("RoboWars", "Read object.");
         		if(response instanceof String) {
         			Log.i("RoboWars", "Read string: " + (String)response);
         			printMessage(EVENT, (String)response);
         		} else if (response instanceof ServerLobbyEvent) {
-        			Log.i("RoboWars", "Read event.");
+        			Log.i("RoboWars", "Read lobby event.");
         			handle((ServerLobbyEvent)response);
+        		} else if (response instanceof GameEvent) {
+        			Log.i("RoboWars", "Read game event.");
         		}
+        		
+        		Thread.yield();
         	}
         } catch (IOException e) { printMessage(ERROR, "Lost connection to the server."); 
         } catch (ClassNotFoundException e) { printMessage(ERROR, "Could not deserialize message from server."); 

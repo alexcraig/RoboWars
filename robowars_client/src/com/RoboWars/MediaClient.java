@@ -38,6 +38,7 @@ public class MediaClient {
 	/** Socket used to connect to the server and read images */
 	private DatagramSocket mediaSocket;
 	
+	/** Thread used to reassemble incoming image data */
 	private DecoderThread decodeThread;
 	
 	/**
@@ -162,7 +163,7 @@ public class MediaClient {
 					int frameNum = readData.readInt();
 					int segmentNum = readData.readInt();
 					boolean lastSegment = readData.readBoolean();
-					// Log.i("RoboWars", "Read packet, frame#: " + frameNum + "  seg#: " + segmentNum
+					// Log.d("RoboWars", "Read packet, frame#: " + frameNum + "  seg#: " + segmentNum
 					//		+ "   lastSegment: " + lastSegment + "   length: " + recvPacket.getLength());
 					
 					if(segmentNum == 0) {
@@ -190,7 +191,7 @@ public class MediaClient {
 						// Read the image data from the packet to the image buffer
 						
 						// (-5) -> Already read 2 ints (4 bytes each) and a boolean (1 byte)
-						Log.i("RoboWars", "Copying data, offset: " + offset + "   length: " + (recvPacket.getLength() - 9));
+						// Log.d("RoboWars", "Copying data, offset: " + offset + "   length: " + (recvPacket.getLength() - 9));
 						readLength = byteInput.read(imageBuffer, offset, recvPacket.getLength() - 9);
 						offset += readLength;
 						totalRead += readLength;
@@ -203,11 +204,13 @@ public class MediaClient {
 							if(image == null) {
 								// Happens when only partial data is available, ignore for now
 							} else {
-								Log.i("RoboWars", "Decoding took: " + (System.currentTimeMillis() - preDecode)
-										+ " ms.");
+								// Log.d("RoboWars", "Decoding took: " + (System.currentTimeMillis() - preDecode)
+								//		+ " ms.");
 								mediaView.setImage(image);
 							}
 						}
+						
+						Thread.yield();
 					}
 				} catch (IOException e) {
 					Log.e("RoboWars", "Error reading incoming media packet, skipping.");

@@ -187,6 +187,8 @@ public class GameController implements Runnable, GameListener {
 				terminateFlag = true;
 				lobby.broadcastMessage("<Server> 60 Second testing duration expired.");
 			}
+			
+			Thread.yield();
 		}
 		
 		lobby.broadcastMessage("<Server> Game terminating.");
@@ -393,7 +395,19 @@ public class GameController implements Runnable, GameListener {
 		return model;
 	}
 	
+	/**
+	 * Sends updated game state to clients whenever the game state changes.
+	 */
 	public void gameStateChanged(GameEvent event){
-		
+		synchronized(controlPairs) {
+			for(ControlPair p : controlPairs) {
+				p.getUserProxy().sendEvent(event);
+			}
+		}
+		synchronized(spectators) {
+			for(UserProxy p : spectators) {
+				p.sendEvent(event);
+			}
+		}
 	}
 }

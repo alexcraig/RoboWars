@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.EventObject;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -157,10 +158,13 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	/**
-	 * Sends a ServerLobbyEvent (or any of its subclasses) to the connected client.
+	 * Sends a EventObject (or any of its subclasses) to the connected client.
+	 * This is typically used for sending both ServerLobbyEvents and
+	 * GameEvents
+	 * 
 	 * @param e	The event to send to the client
 	 */
-	public void sendEvent(ServerLobbyEvent event) {
+	public void sendEvent(EventObject event) {
 		synchronized(outputStream) {
 			try {
 				outputStream.writeObject(event);

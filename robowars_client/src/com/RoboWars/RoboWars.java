@@ -7,6 +7,9 @@ import java.util.Observer;
 
 import robowars.server.controller.ClientCommand;
 import android.app.Activity;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -17,7 +20,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
-public class RoboWars extends Activity implements SensorListener, Observer
+public class RoboWars extends Activity implements SensorEventListener, Observer
 {	
 	/** The minimum interval at which orientation updates should be pushed to the server */
 	public static final long ORIENTATION_MINIMUM_INTERVAL_MS = 300;
@@ -68,7 +71,8 @@ public class RoboWars extends Activity implements SensorListener, Observer
     	TabHost tabHost=(TabHost)findViewById(R.id.tabHost);
     	tabHost.setCurrentTab(0);
     	tabHost.setup();
-
+    	tabHost.setKeepScreenOn(true);
+    	
     	/* First tab (Webcam interface; control the robot from here). */
     	TabSpec spec1=tabHost.newTabSpec("Main");
     	spec1.setIndicator("Main");
@@ -223,8 +227,8 @@ public class RoboWars extends Activity implements SensorListener, Observer
     @Override
 	protected void onResume() {
 		super.onResume();
-		mSensorManager.registerListener(this, SensorManager.SENSOR_ORIENTATION);
-				
+		mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), 
+				SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	@Override
@@ -288,6 +292,47 @@ public class RoboWars extends Activity implements SensorListener, Observer
 		{
 			userlist = model.getUsers();
 			updateUsers();
+		}
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		// TODO:	Currently assumes orientation events are the only events
+		//			that will be received.
+		
+		// Scale all values to 1 to -1 range
+		float azimuth = (event.values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
+		float pitch = (event.values[1] / 90);	// Pitch sensor standard range -90 to 90
+		float roll = (event.values[2] / 180);	// Roll sensor standard range -180 to 180
+
+		// Set the text display on client side
+		mTextViewOri.setText("Orientation: " 
+				+ azimuth + "(" + event.values[0] + "), " 
+				+ pitch + "(" + event.values[1] + "), "
+				+ roll+ "(" + event.values[2] + ")");
+		
+		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MAXIMUM_INTERVAL_MS ||
+				(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MINIMUM_INTERVAL_MS
+				&& (Math.abs(azimuth - lastAzimuth) > ORIENTATION_DELTA_THRESHOLD
+				|| Math.abs(pitch - lastPitch) > ORIENTATION_DELTA_THRESHOLD
+				|| Math.abs(roll - lastRoll) > ORIENTATION_DELTA_THRESHOLD))) {
+			
+			// Send the new orientation to the server
+			if(tcp != null) {
+				ClientCommand cmd = new ClientCommand(ClientCommand.GAMEPLAY_COMMAND);
+				cmd.setOrientation(azimuth, pitch, roll);
+				tcp.sendClientCommand(cmd);
+				lastAzimuth = azimuth;
+				lastRoll = roll;
+				lastPitch = pitch;
+				lastOrientationUpdate = System.currentTimeMillis();
+			}
 		}
 	}
 }
