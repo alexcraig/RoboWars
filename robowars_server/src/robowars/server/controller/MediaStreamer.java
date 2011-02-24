@@ -44,6 +44,9 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	/** Size of the buffer for reading incoming packets */
 	public static int INC_BUFFER_SIZE = 16384;
 	
+	/** The number of bytes of data that should be sent in each packet */
+	public static int PACKET_SIZE = 1450;
+	
 	/** Socket used to send image frames to the network */
 	private DatagramSocket serverSocket;
 	
@@ -75,6 +78,12 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	
 	/** The Capture Observer to attach to the next stream that is opened. */
 	private CaptureObserver observer;
+	
+	/** 
+	 * The next sequence number to use for image packets (should just alternate between
+	 * 1 and 0)
+	 */
+	private int nextSeqNum;
 
 	/**
 	 * Generates a new MediaStreamer
@@ -89,6 +98,7 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 		currentStream = null;
 		observer = this;
 		lastImageWrite = System.currentTimeMillis();
+		nextSeqNum = 0;
 	}
 	
 	/**
@@ -383,6 +393,8 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	public void onNewImage(CaptureStream stream, Image image) {
 		if(System.currentTimeMillis() > lastImageWrite + IMAGE_WRITE_INTERVAL) {
 			try {
+				lastImageWrite = System.currentTimeMillis();
+				
 				long preSocket = System.currentTimeMillis();
 				ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
 				DataOutputStream dataOut = new DataOutputStream(byteOutput);
@@ -393,14 +405,55 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 				
 				byte[] frameBuffer = byteOutput.toByteArray();
 				// log.info("Generated packet is " + frameBuffer.length + " bytes long.");
-				synchronized(clients) {
-					for(User u : clients) {
-						sendDataPacket(u, frameBuffer);
+				
+				int numPackets = (int)Math.ceil((double)frameBuffer.length / PACKET_SIZE);
+				// log.info("Sending data as " + numPackets + " packets.");
+				
+				byteOutput.reset();
+				
+				int dataIndex = 0;
+				
+				for(int segIndex = 0; segIndex < numPackets; segIndex++) {
+					// Write out the frame sequence number (either 1 or 0)
+					dataOut.writeInt(nextSeqNum);
+					
+					// Write out the segment number
+					dataOut.writeInt(segIndex);
+					
+					// Write out the "last segment" field
+					if(segIndex == numPackets - 1) {
+						dataOut.writeBoolean(true);
+					} else {
+						dataOut.writeBoolean(false);
+					}
+					
+					// Determine how much image data should be written to this
+					// packet
+					int writeLength = 0;
+					if((segIndex * PACKET_SIZE) + PACKET_SIZE < frameBuffer.length) {
+						writeLength = PACKET_SIZE;
+					} else if ((segIndex * PACKET_SIZE) + PACKET_SIZE >= frameBuffer.length) {
+						writeLength = frameBuffer.length - (segIndex * PACKET_SIZE);
+					}
+					// log.info("Writing " + writeLength + " bytes to packet " + segIndex);
+					
+					dataOut.write(frameBuffer, (segIndex * PACKET_SIZE), writeLength);
+					dataOut.flush();
+					
+					byte[] packet = byteOutput.toByteArray();
+					byteOutput.reset();
+					
+					synchronized(clients) {
+						for(User u : clients) {
+							sendDataPacket(u, packet);
+						}
 					}
 				}
+				
 				//log.info("Writing image to clients took: " 
 				//		+ (System.currentTimeMillis() - preSocket) + " ms.");
-				lastImageWrite = System.currentTimeMillis();
+				
+				dataOut.close();
 			} catch (IOException e1) {
 				log.error("Error multicasting image frame.");
 				e1.printStackTrace();
