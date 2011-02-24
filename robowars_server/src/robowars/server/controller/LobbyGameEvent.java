@@ -1,5 +1,6 @@
 package robowars.server.controller;
 
+import robowars.shared.model.CameraPosition;
 import robowars.shared.model.GameType;
 
 /**
@@ -12,6 +13,12 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	/** The type of the game that was just launched or terminated */
 	private GameType gameType;
 	
+	/** 
+	 * Position information on the currently selected camera.
+	 * (so that clients can determine the position and orientation to use for rendering)
+	 */
+	private CameraPosition camera;
+	
 	/**
 	 * Generates a new LobbyGameEvent
 	 * @param src	The ServerLobby that generated the event
@@ -21,6 +28,7 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	public LobbyGameEvent(ServerLobby src, int type, GameType gameType) {
 		super(src, type);
 		this.gameType = gameType;
+		this.camera = null;
 	}
 	
 	/**
@@ -28,6 +36,21 @@ public class LobbyGameEvent extends ServerLobbyEvent {
 	 */
 	public GameType getGameType() {
 		return gameType;
+	}
+	
+	/**
+	 * Sets the camera controller that should be transmitted with this event
+	 * @param cam	The camera controller to transmit with this event
+	 */
+	public void setCameraPosition(CameraPosition cam) {
+		this.camera = cam;
+	}
+	
+	/**
+	 * @return	The camera controller associated with this event
+	 */
+	public CameraPosition getCameraPosition() {
+		return camera;
 	}
 	
 	/**

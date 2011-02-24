@@ -234,45 +234,6 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		super.onStop();
 	}
 
-	public void onAccuracyChanged(int sensor, int accuracy) { }
-
-	public void onSensorChanged(int sensor, float[] values) {
-		// Scale all values to 1 to -1 range
-		float azimuth = (values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
-		float pitch = (values[1] / 90);	// Pitch sensor standard range -90 to 90
-		float roll = (values[2] / 180);	// Roll sensor standard range -180 to 180
-		
-		switch(sensor) {
-		case SensorManager.SENSOR_ORIENTATION:
-			// Set the text display on client side
-			mTextViewOri.setText("Orientation: " 
-					+ azimuth + "(" + values[0] + "), " 
-					+ pitch + "(" + values[1] + "), "
-					+ roll+ "(" + values[2] + ")");
-			
-			if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MAXIMUM_INTERVAL_MS ||
-					(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MINIMUM_INTERVAL_MS
-					&& (Math.abs(azimuth - lastAzimuth) > ORIENTATION_DELTA_THRESHOLD
-					|| Math.abs(pitch - lastPitch) > ORIENTATION_DELTA_THRESHOLD
-					|| Math.abs(roll - lastRoll) > ORIENTATION_DELTA_THRESHOLD))) {
-				
-				// Send the new orientation to the server
-				if(tcp != null) {
-					ClientCommand cmd = new ClientCommand(ClientCommand.GAMEPLAY_COMMAND);
-					cmd.setOrientation(azimuth, pitch, roll);
-					tcp.sendClientCommand(cmd);
-					lastAzimuth = azimuth;
-					lastRoll = roll;
-					lastPitch = pitch;
-					lastOrientationUpdate = System.currentTimeMillis();
-				}
-			}
-			break;
-		default:
-			break;
-		}
-	}
-
 	/**
 	 * Updates based on changes to the model.
 	 */
@@ -305,8 +266,8 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		
 		// Scale all values to 1 to -1 range
 		float azimuth = (event.values[0] - 180) / 180; // Azimuth sensor standard range 0 to 360
-		float pitch = (clamp(-event.values[2], -40, 40) / 40);	// Pitch sensor standard range -90 to 90
-		float roll = (clamp(event.values[1], -40, 40) / 40);	// Roll sensor standard range -180 to 180
+		float pitch = (clamp(-event.values[2], -45, 45) / 45);	// Pitch sensor standard range -90 to 90
+		float roll = (clamp(event.values[1], -45, 45) / 45);	// Roll sensor standard range -180 to 180
 
 		// Set the text display on client side
 		mTextViewOri.setText("Orientation:\n" 
@@ -333,6 +294,14 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		}
 	}
 	
+	/**
+	 * Clamps an input value between a provided minimum and maximum, and returns
+	 * the value
+	 * @param input	The input value
+	 * @param min	The minimum output value
+	 * @param max	The maximum output value
+	 * @return	The input value, clamped to the provided minimum and maximum
+	 */
 	private float clamp(float value, float min, float max) {
 		if(value > max) return max;
 		if(value < min) return min;

@@ -2,6 +2,8 @@ package robowars.server.controller;
 
 import org.apache.log4j.Logger;
 
+import robowars.shared.model.CameraPosition;
+
 import com.lti.civil.CaptureDeviceInfo;
 import com.lti.civil.CaptureException;
 import com.lti.civil.CaptureStream;
@@ -21,25 +23,16 @@ public class CameraController {
 	 * Stores details on the camera controlled by this controller, such descriptive
 	 * name and identifier.
 	 */
-	private CaptureDeviceInfo deviceInfo;
+	private transient CaptureDeviceInfo deviceInfo;
 	
-	/**
-	 * The X,Y, and Z coordinates of the camera (should use the same units and
-	 * axis orientation as the game model, with the Z axis added to represent
-	 * height). 
+	/** 
+	 * A text description of the device (usually the name of the camera, ex.
+	 * "Logitech Quickcam Pro 9000"
 	 */
-	private float xPos, yPos, zPos;
+	private String deviceDescription;
 	
-	/**
-	 * The horizontal and vertical orientation of the camera (measured in degrees
-	 * of clockwise offset from the positive direction of the x axis).
-	 */
-	private float horOrientation, verOrientation;
-	
-	/**
-	 * The field of view of the camera (in degrees)
-	 */
-	private float fov;
+	/** Stores all information on the position, orientation, and FOV of the device */
+	private CameraPosition position;
 	
 	/**
 	 * Generates a new CameraController.
@@ -51,15 +44,13 @@ public class CameraController {
 	 */
 	public CameraController(CaptureDeviceInfo info) {
 		deviceInfo = info;
-		xPos = 0;
-		yPos = 0;
-		zPos = 0;
-		horOrientation = 0;
-		verOrientation = 0;
-		fov = 90;
+		deviceDescription =  deviceInfo.getDescription();
+		position = new CameraPosition();
 	}
 	
 	public String getDeviceId() {
+		if(deviceInfo == null) return null;
+		
 		return deviceInfo.getDeviceID();
 	}
 	
@@ -76,6 +67,8 @@ public class CameraController {
 	 * 			camera can be read.
 	 */
 	public CaptureStream getCaptureStream() {
+		if(deviceInfo == null) return null;
+		
 		NativeCaptureSystemFactory captureFactory = new NativeCaptureSystemFactory();
 		CaptureSystem captureSystem;
 		try {
@@ -92,7 +85,7 @@ public class CameraController {
 	 * @return	A string representation of the camera controller.
 	 */
 	public String toString() {
-		return deviceInfo.getDescription();
+		return deviceDescription;
 	}
 	
 	/**
@@ -103,9 +96,9 @@ public class CameraController {
 	 * @param zPos	The z coordinate of the camera's position.
 	 */
 	public void setPosition(float xPos, float yPos, float zPos) {
-		this.xPos = xPos;
-		this.yPos = yPos;
-		this.zPos = zPos;
+		position.setxPos(xPos);
+		position.setyPos(yPos);
+		position.setzPos(zPos);
 	}
 	
 	/**
@@ -115,8 +108,8 @@ public class CameraController {
 	 * @param verOrientation	The vertical orientation of the camera.
 	 */
 	public void setOrientation(float horOrientation, float verOrientation) {
-		this.horOrientation = horOrientation;
-		this.verOrientation = verOrientation;
+		position.setHorOrientation(horOrientation);
+		position.setVerOrientation(verOrientation);
 	}
 	
 	/**
@@ -124,28 +117,28 @@ public class CameraController {
 	 * @param fov	The field of view (set in degrees)
 	 */
 	public void setFov(float fov) {
-		this.fov = fov;
+		position.setFov(fov);
 	}
 
 	/**
 	 * @return The x position coordinate of the camera
 	 */
 	public float getxPos() {
-		return xPos;
+		return position.getxPos();
 	}
 
 	/**
 	 * @return The y position coordinate of the camera
 	 */
 	public float getyPos() {
-		return yPos;
+		return position.getyPos();
 	}
 
 	/**
 	 * @return The z position coordinate of the camera
 	 */
 	public float getzPos() {
-		return zPos;
+		return position.getzPos();
 	}
 
 	/**
@@ -153,7 +146,7 @@ public class CameraController {
 	 * the x axis)
 	 */
 	public float getHorOrientation() {
-		return horOrientation;
+		return position.getHorOrientation();
 	}
 
 	/**
@@ -161,13 +154,21 @@ public class CameraController {
 	 * x axis)
 	 */
 	public float getVerOrientation() {
-		return verOrientation;
+		return position.getVerOrientation();
 	}
 
 	/**
 	 * @return The field of view of the camera
 	 */
 	public float getFov() {
-		return fov;
+		return position.getFov();
+	}
+	
+	/**
+	 * @return	The serializable CameraPosition object that stores all information
+	 * 			on this device's position, orientation, and FOV
+	 */
+	public CameraPosition getPosition() {
+		return position;
 	}
 }

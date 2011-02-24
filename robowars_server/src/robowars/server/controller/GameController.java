@@ -37,7 +37,7 @@ public class GameController implements Runnable, GameListener {
 	 * a STOP command will be sent instead (effectively sets what fraction of max
 	 * move speed is required to send a move command).
 	 */
-	public static final float STOP_THRESHOLD = 20;
+	public static final float STOP_THRESHOLD = 15;
 	
 	/** A list of all control pairs registered with this game */
 	private List<ControlPair> controlPairs;

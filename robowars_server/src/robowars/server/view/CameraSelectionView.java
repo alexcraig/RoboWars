@@ -2,6 +2,8 @@ package robowars.server.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -77,14 +79,13 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 		mediaSrc = mediaSource;
 		this.addWindowListener(this);
 		
-		JPanel sidePanel = new JPanel();
-		sidePanel.setLayout(new BorderLayout());
-		this.getContentPane().add(sidePanel, BorderLayout.EAST);
-		
 		// --- Source Selection Panel ---
 		JPanel selectionPanel = new JPanel();
 		selectionPanel.setBorder(BorderFactory.createTitledBorder("Source Selection"));
-		sidePanel.add(selectionPanel, BorderLayout.NORTH);
+		this.getContentPane().add(selectionPanel, BorderLayout.NORTH);
+		
+		JPanel selectionOptions = new JPanel();
+		selectionOptions.setLayout(new BoxLayout(selectionOptions, BoxLayout.Y_AXIS));
 		
 		availableCams = new DefaultComboBoxModel();
 		availableCams.addElement(NO_CAMERA);
@@ -122,7 +123,7 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 				updateDeviceList();
 			}
 		});
-		selectionPanel.add(detectDevices);
+		selectionOptions.add(detectDevices);
 		
 		JButton startPreview = new JButton("View Preview");
 		startPreview.addActionListener(new ActionListener() {
@@ -132,7 +133,7 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 				initVideoPlayer(CameraSelectionView.this);
 			}
 		});
-		selectionPanel.add(startPreview);
+		selectionOptions.add(startPreview);
 		
 		JButton startNetwork = new JButton("Start Network Stream");
 		startNetwork.addActionListener(new ActionListener() {
@@ -142,7 +143,7 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 				initVideoPlayer(null);
 			}
 		});
-		selectionPanel.add(startNetwork);
+		selectionOptions.add(startNetwork);
 		
 		JButton stopStream = new JButton("Stop Preview/Stream");
 		stopStream.addActionListener(new ActionListener() {
@@ -154,14 +155,15 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 				player.setVisible(false);
 			}
 		});
-		selectionPanel.add(stopStream);
+		selectionOptions.add(stopStream);
 		selectionPanel.add(camSelectBox);
+		selectionPanel.add(selectionOptions);
 		
 		// --- Position Settings panel ---
 		JPanel positionPanel = new JPanel();
 		positionPanel.setBorder(BorderFactory.createTitledBorder("Camera Settings"));
 		positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.Y_AXIS));
-		sidePanel.add(positionPanel, BorderLayout.CENTER);
+		this.getContentPane().add(positionPanel, BorderLayout.CENTER);
 		
 		xPos = generateTextEntryPanel("X Position: ", 10, positionPanel);
 		yPos = generateTextEntryPanel("Y Position: ", 10, positionPanel);
@@ -204,7 +206,8 @@ public class CameraSelectionView extends JFrame implements WindowListener, Captu
 		
 		// Camera Preview Frame
 		player = new ImageFrame("Camera Preview - " + windowTitle);
-		
+		player.setLocationRelativeTo(this);
+		player.setResizable(false);
 		
 		updateDeviceList();	
 		this.pack();

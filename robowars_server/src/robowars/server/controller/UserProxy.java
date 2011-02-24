@@ -38,8 +38,10 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The server lobby that manages the user */
 	private ServerLobby lobby;
 	
+	// TODO: UserProxy may need to fetch information from the mediaStreamer
+	// in order to notify clients of the position / orientation of the
+	// selected camera
 	/** The media server that streams video to the user */
-	// TODO: Either find a need for this or remove it
 	private MediaStreamer mediaStreamer;
 	
 	/** 
@@ -165,6 +167,15 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 * @param e	The event to send to the client
 	 */
 	public void sendEvent(EventObject event) {
+		// TODO: May want to find a better place to handle this processing
+		// If the outgoing event is a LobbyGameEvent, attach the information
+		// for the currently selected media device
+		if(event instanceof LobbyGameEvent) {
+			if(mediaStreamer.getActiveCamera() != null) {
+				((LobbyGameEvent)event).setCameraPosition(mediaStreamer.getActiveCamera().getPosition());
+			}
+		}
+		
 		synchronized(outputStream) {
 			try {
 				outputStream.writeObject(event);

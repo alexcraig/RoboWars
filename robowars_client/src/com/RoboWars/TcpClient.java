@@ -12,6 +12,7 @@ import robowars.server.controller.LobbyGameEvent;
 import robowars.server.controller.LobbyRobotEvent;
 import robowars.server.controller.LobbyUserEvent;
 import robowars.server.controller.ServerLobbyEvent;
+import robowars.shared.model.CameraPosition;
 import robowars.shared.model.GameEvent;
 import android.util.Log;
 
@@ -201,6 +202,13 @@ public class TcpClient extends Thread
 		// Game events
 		if(event instanceof LobbyGameEvent) {
 			LobbyGameEvent gameEvent = (LobbyGameEvent)event;
+			if(gameEvent.getCameraPosition() != null) {
+				CameraPosition cam = gameEvent.getCameraPosition();
+				model.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
+						+ "|Y:" + cam.getyPos() + "|X:" + cam.getzPos() +"|HorOrien:"
+						+ cam.getHorOrientation() + "|VerOrien:" + cam.getVerOrientation()
+						+ "|FOV:" + cam.getFov()+ ">");
+			}
 			model.printMessage(EVENT, event.toString());
 		}
 		
