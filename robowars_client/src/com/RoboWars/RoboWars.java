@@ -30,7 +30,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	 * to the server (all orientations are scaled to a range of -1 to 1 before
 	 * this comparison is applied).
 	 */
-	public static final float ORIENTATION_DELTA_THRESHOLD = (float)0.15;
+	public static final float ORIENTATION_DELTA_THRESHOLD = (float)0.10;
 	
 	/* Views invoked by the application. */
 	private TextView chat, users;
