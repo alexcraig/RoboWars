@@ -42,7 +42,7 @@ public abstract class GameModel implements Serializable{
 		this.listeners.add(listener);
 	}
 
-	public void notifyListeners(int eventID){
+	public synchronized void notifyListeners(int eventID){
 		for (GameListener l : listeners) {
 			l.gameStateChanged(new GameEvent(this, eventID));
 		}
