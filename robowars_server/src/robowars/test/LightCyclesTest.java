@@ -30,8 +30,8 @@ public class LightCyclesTest {
 	@Test
 	public void testGameModel(){
 		// TODO: Do something with these arbitrary sizes
-		model.addRobot(new GameRobot(25, 25, "Robot1"));
-		model.addRobot(new GameRobot(25, 25, "Robot2"));
+		//model.addRobot(new GameRobot(25, 25, "Robot1"));
+		//model.addRobot(new GameRobot(25, 25, "Robot2"));
 		model.startGame();
 		testCreatedRobots();
 		for(int i = 0; i <= 51; i++){
