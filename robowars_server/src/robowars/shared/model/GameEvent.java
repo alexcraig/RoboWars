@@ -2,7 +2,7 @@ package robowars.shared.model;
 
 import java.util.EventObject;
 
-public class GameEvent extends EventObject{
+public class GameEvent extends EventObject {
 
 	public static final int GAME_START = 0;
 	public static final int GAME_OVER = 1;

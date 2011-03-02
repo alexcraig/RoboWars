@@ -25,7 +25,7 @@ public class MediaClient {
 	/** 
 	 * The default address and port to use for a streaming media connection
 	 */
-	public static final String DEFAULT_MEDIA_ADDRESS = "192.168.0.100";
+	public static final String DEFAULT_MEDIA_ADDRESS = "10.0.2.2";
 	public static final int DEFAULT_MEDIA_PORT = 33331;
 	
 	/** The text display that status indications should be written to */

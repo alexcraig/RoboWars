@@ -39,8 +39,9 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	/** The time at which the reading of the orientation sensor was last updated */
 	private long lastOrientationUpdate;
 	
-	private LobbyModel model;		// General application model.
-	private TcpClient tcp;			// TCP controller.
+	private LobbyModel lobbyModel;		// Model for the lobby.
+	private GameModel gameModel;		// Model for the game.
+	private TcpClient tcp;				// TCP controller.
 	
 	private String userlist;		// Users currently in the lobby.
 	
@@ -97,9 +98,9 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     	tabHost.addTab(spec4);
     	
     	/* Instantiate the model and add the view as an observer. */
-    	model = new LobbyModel();
-    	model.addObserver(this);
-    	model.setVersion(getString(R.string.version));
+    	lobbyModel = new LobbyModel();
+    	lobbyModel.addObserver(this);
+    	lobbyModel.setVersion(getString(R.string.version));
     	
     	/* Reference to the application's widgets. */
     	chat 			= (TextView) findViewById(R.id.chat);
@@ -191,8 +192,8 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	        	view.setEnabled(false);
 	        	
 	        	// Establish connection.
-	        	model.setMyUser(new User(username));
-	        	tcp = new TcpClient(model);
+	        	lobbyModel.setMyUser(new User(username));
+	        	tcp = new TcpClient(lobbyModel, gameModel);
 	        	tcp.connect(address, portNumber);
 	        	
 				mediaClient.launchMediaStream(portNumber + 1);
@@ -240,15 +241,15 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	public void update(Observable observable, Object data)
 	{
 		// Check for new chat message.
-		if (model.newChatMessage())
+		if (lobbyModel.newChatMessage())
 		{
-			printMessage(model.getChatBuffer());
+			printMessage(lobbyModel.getChatBuffer());
 		}
 		
 		// Check for changes in the user list.
-		if (model.usersUpdated())
+		if (lobbyModel.usersUpdated())
 		{
-			userlist = model.getUsers();
+			userlist = lobbyModel.getUsers();
 			updateUsers();
 		}
 	}

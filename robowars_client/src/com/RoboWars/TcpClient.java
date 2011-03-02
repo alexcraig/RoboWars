@@ -29,7 +29,8 @@ public class TcpClient extends Thread
 	private static final int CHAT	= 1;
 	private static final int EVENT	= 2;
 	
-	private LobbyModel model;
+	private LobbyModel lobbyModel;
+	private GameModel gameModel;
 	
 	private String IPAddress;
 	private int port;
@@ -39,9 +40,10 @@ public class TcpClient extends Thread
     private ObjectOutputStream out;
     private boolean connected;
     
-	public TcpClient(LobbyModel model)
+	public TcpClient(LobbyModel lobbyModel, GameModel gameModel)
 	{
-		this.model = model;
+		this.lobbyModel = lobbyModel;
+		this.gameModel = gameModel;
 		this.connected = false;
 	}
 	
@@ -66,6 +68,7 @@ public class TcpClient extends Thread
         			handle((ServerLobbyEvent)response);
         		} else if (response instanceof GameEvent) {
         			Log.i("RoboWars", "Read game event.");
+        			handle((GameEvent)response);
         		}
         		
         		Thread.yield();
@@ -151,8 +154,8 @@ public class TcpClient extends Thread
 	 */
 	private boolean handshake()
 	{
-		String version = model.getVersion();
-		User user = model.getMyUser();
+		String version = lobbyModel.getVersion();
+		User user = lobbyModel.getMyUser();
 		if (user != null) {
 			sendUTFString(version);
 			sendUTFString(user.getName());
@@ -161,6 +164,16 @@ public class TcpClient extends Thread
 		else {
 			printMessage(ERROR, "No username set.");
 			return false;
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	private void handle(GameEvent event)
+	{
+		if (event.getEventType() == GameEvent.GAME_START) {
+			//gameModel.startGame();
 		}
 	}
 	
@@ -176,17 +189,17 @@ public class TcpClient extends Thread
 			switch(userEvent.getEventType()) {
 			case ServerLobbyEvent.EVENT_PLAYER_JOINED:
 				// Player joined
-				model.userJoined(userEvent.getUser().getUsername());
+				lobbyModel.userJoined(userEvent.getUser().getUsername());
 				printMessage(EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_LEFT:
 				// Player left
-				model.userLeft(userEvent.getUser().getUsername());
+				lobbyModel.userLeft(userEvent.getUser().getUsername());
 				printMessage(EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
 				// Player state changed
-				model.printMessage(EVENT, event.toString());
+				lobbyModel.printMessage(EVENT, event.toString());
 				return;
 			default:
 				return;
@@ -196,7 +209,7 @@ public class TcpClient extends Thread
 		// Robot events
 		if(event instanceof LobbyRobotEvent) {
 			LobbyRobotEvent robotEvent = (LobbyRobotEvent)event;
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 		
 		// Game events
@@ -204,23 +217,23 @@ public class TcpClient extends Thread
 			LobbyGameEvent gameEvent = (LobbyGameEvent)event;
 			if(gameEvent.getCameraPosition() != null) {
 				CameraPosition cam = gameEvent.getCameraPosition();
-				model.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
+				lobbyModel.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
 						+ "|Y:" + cam.getyPos() + "|X:" + cam.getzPos() +"|HorOrien:"
 						+ cam.getHorOrientation() + "|VerOrien:" + cam.getVerOrientation()
 						+ "|FOV:" + cam.getFov()+ ">");
 			}
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 		
 		// Chat events
 		if(event instanceof LobbyChatEvent) {
 			LobbyChatEvent chatEvent = (LobbyChatEvent)event;
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 	}
 	
 	private void printMessage(int type, String message)
 	{
-		model.printMessage(type, message);
+		lobbyModel.printMessage(type, message);
 	}
 }
