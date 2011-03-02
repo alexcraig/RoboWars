@@ -172,8 +172,23 @@ public class TcpClient extends Thread
 	 */
 	private void handle(GameEvent event)
 	{
-		if (event.getEventType() == GameEvent.GAME_START) {
-			//gameModel.startGame();
+		switch (event.getEventType()) {
+			case GameEvent.GAME_START:
+				gameModel.startGame();
+				break;
+				//TODO: Start up the OpenGL engine and start the game.
+				
+			case GameEvent.GAME_OVER:
+				gameModel.endGame();
+				break;
+				//TODO: End the game, show the winner.
+			
+			case GameEvent.ROBOT_MOVED:
+				break;
+				//TODO: Which robot moved? Update appropriate position.
+				
+			default:
+				// Unhandled GameEvent.
 		}
 	}
 	
