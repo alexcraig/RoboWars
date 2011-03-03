@@ -25,7 +25,7 @@ public class LobbyModel extends Observable
 	
 	/**
 	 * Get the local user.
-	 * @return
+	 * @return	The user Object of the client.
 	 */
 	public User getMyUser() { return myUser; }
 	
