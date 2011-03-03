@@ -18,28 +18,38 @@ import android.util.Log;
 
 /**
  * @author Steve Legere
- * @version 5/11/2010
+ * @author Alex Craig
+ * @version 03/03/2011
  * 
  * Handles TCP connection to the server.
  * @see robowars.server.controller
  */
 public class TcpClient extends Thread
 {
-	private static final int ERROR	= 0;
-	private static final int CHAT	= 1;
-	private static final int EVENT	= 2;
+	/* Class constants. Define the colour of message to print. */
+	public static final int ERROR	= 0;	// Red
+	public static final int CHAT	= 1;	// White
+	public static final int EVENT	= 2;	// Green
+	public static final int ADMIN	= 3;	// Blue
 	
+	/* Models modified by incoming packets from server. */
 	private LobbyModel lobbyModel;
 	private GameModel gameModel;
 	
+	/* Server information. */
 	private String IPAddress;
 	private int port;
-	
 	private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean connected;
     
+    /**
+     * Default constructor.
+     * 
+     * @param lobbyModel	The current state of the lobby.
+     * @param gameModel		The current state of the game.
+     */
 	public TcpClient(LobbyModel lobbyModel, GameModel gameModel)
 	{
 		this.lobbyModel = lobbyModel;
@@ -77,6 +87,7 @@ public class TcpClient extends Thread
         } catch (ClassNotFoundException e) { printMessage(ERROR, "Could not deserialize message from server."); 
         } finally {
         	try {
+        		// Send disconnection message, then close socket.
         		sendClientCommand(new ClientCommand(ClientCommand.DISCONNECT));
 				out.close();
 				in.close();
@@ -88,6 +99,12 @@ public class TcpClient extends Thread
         }
     }
 	
+	/**
+	 * Connect to the server's IP and port over TCP.
+	 * 
+	 * @param IPAddress		IPv4 address of the server (ie "127.0.0.1").
+	 * @param port			The port to connect to (by default 33330).
+	 */
 	public void connect(String IPAddress, int port)
 	{
 		this.IPAddress = IPAddress;
@@ -118,6 +135,7 @@ public class TcpClient extends Thread
 	 * for the connection handshake (protocol string and username), as all
 	 * further communication should used RoboWars protocol 
 	 * (Serialized ServerLobbyEvents and ClientCommands).
+	 * 
 	 * @param message	The string to be sent to the server.
 	 */
 	public void sendUTFString(String message)
@@ -135,6 +153,12 @@ public class TcpClient extends Thread
 		}
 	}
 	
+	/**
+	 * Sends a command to the server via TCP.
+	 * 
+	 * @param cmd	The ClientCommand being sent.
+	 * @see robowars.server.controller.ClientCommand
+	 */
 	public void sendClientCommand(ClientCommand cmd) {
 		if (connected) {
 			synchronized(out) {
@@ -168,7 +192,9 @@ public class TcpClient extends Thread
 	}
 	
 	/**
+	 * Handles TCP packets as they arrive regarding game events.
 	 * 
+	 * @param event		The EventObject being passed in.
 	 */
 	private void handle(GameEvent event)
 	{
@@ -221,8 +247,9 @@ public class TcpClient extends Thread
 	}
 	
 	/**
-	 * @param message
-	 * Determines what to do, given an input message.
+	 * Handles TCP packets as they arrive regarding lobby events.
+	 * 
+	 * @param event		The EventObject being passed in.
 	 */
 	private void handle(ServerLobbyEvent event)
 	{
@@ -275,6 +302,12 @@ public class TcpClient extends Thread
 		}
 	}
 	
+	/**
+	 * Prints a message on the client lobby terminal.
+	 * 
+	 * @param type		The type of message (defined in this class).
+	 * @param message	The message String.
+	 */
 	private void printMessage(int type, String message)
 	{
 		lobbyModel.printMessage(type, message);
