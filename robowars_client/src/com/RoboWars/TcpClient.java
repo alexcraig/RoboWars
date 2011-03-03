@@ -175,20 +175,48 @@ public class TcpClient extends Thread
 		switch (event.getEventType()) {
 			case GameEvent.GAME_START:
 				gameModel.startGame();
-				break;
 				//TODO: Start up the OpenGL engine and start the game.
-				
+				break;
+								
 			case GameEvent.GAME_OVER:
 				gameModel.endGame();
-				break;
 				//TODO: End the game, show the winner.
+				break;
+				
+			case GameEvent.COLLISION_DETECTED:
+				//TODO: Probably nothing here; handled by the server.
+				break;
+				
+			case GameEvent.PROJECTILE_FIRED:
+				//TODO: Get location, direction, speed of projectile.
+				//TODO: Draw the projectile in OpenGL.
+				break;
+				
+			case GameEvent.PROJECTILE_HIT:
+				//TODO: Get location of projectile.
+				//TODO: Remove from OpenGL view.
+				break;
+				
+			case GameEvent.PLAYER_1_WINS:
+				//TODO: Display which player wins, clear the map, ask for another game.
+				//TODO: Handle user decision.
+				break;
+				
+			case GameEvent.PLAYER_2_WINS:
+				//TODO: Re-use method call from above, display player 2 winning.
 			
 			case GameEvent.ROBOT_MOVED:
+				//TODO: Which robot moved? Update appropriate position and OpenGL.
 				break;
-				//TODO: Which robot moved? Update appropriate position.
+				
+			case GameEvent.MAP_CHANGED:
+				//TODO: Compare the passed model to the current model and make
+				//		the appropriate changes.
+				break;
 				
 			default:
 				// Unhandled GameEvent.
+				printMessage(ERROR, "Unhandled GameEvent received.");
 		}
 	}
 	
