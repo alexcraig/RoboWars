@@ -38,9 +38,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The server lobby that manages the user */
 	private ServerLobby lobby;
 	
-	// TODO: UserProxy may need to fetch information from the mediaStreamer
-	// in order to notify clients of the position / orientation of the
-	// selected camera
 	/** The media server that streams video to the user */
 	private MediaStreamer mediaStreamer;
 	
@@ -102,6 +99,11 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			user = new User(name, userSocket.getInetAddress());
 			log.debug("Client username: " + user.getUsername());
 			sendMessage(user.getUsername() + " connected to: " + lobby.getServerName());
+			
+			// If a game is in progress, send a game launch event to the client
+			// (so that camera information can be determined)
+			sendEvent(new LobbyGameEvent(lobby, 
+					ServerLobbyEvent.EVENT_GAME_LAUNCH, lobby.getCurrentGameType()));
 			
 			if (lobby.addUserProxy(this)) {
 				// Read strings from socket until connection is terminated
@@ -343,21 +345,6 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		return;
 		
 	}
-	
-	/**
-	 * Clamps an input value between a provided minimum and maximum, and returns
-	 * the value (this is primarily used to ensure that vector input is in the
-	 * 1 to -1 range).
-	 * @param input	The input value
-	 * @param min	The minimum output value
-	 * @param max	The maximum output value
-	 * @return	The input value, clamped to the provided minimum and maximum
-	 */
-	private float clamp(float input, float min, float max) {
-		if(input > max) return max;
-		if(input < min) return min;
-		return input;
-	}
 
 	@Override
 	/** @see ServerLobbyListener#userStateChanged(LobbyUserEvent) */
@@ -381,5 +368,20 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/** @see ServerLobbyListener#lobbyChatMessage(LobbyChatEvent) */
 	public void lobbyChatMessage(LobbyChatEvent event) {
 		sendEvent(event);
+	}
+	
+	/**
+	 * Clamps an input value between a provided minimum and maximum, and returns
+	 * the value (this is primarily used to ensure that vector input is in the
+	 * 1 to -1 range).
+	 * @param input	The input value
+	 * @param min	The minimum output value
+	 * @param max	The maximum output value
+	 * @return	The input value, clamped to the provided minimum and maximum
+	 */
+	private float clamp(float input, float min, float max) {
+		if(input > max) return max;
+		if(input < min) return min;
+		return input;
 	}
 }

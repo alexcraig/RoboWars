@@ -144,6 +144,11 @@ public class MediaClient {
 			
 			while(!terminationFlag) {
 				
+				if(mediaSocket == null) {
+					Thread.yield();
+					continue;
+				}
+				
 				DatagramPacket recvPacket = new DatagramPacket(packetBuffer, packetBuffer.length);
 				
 				try {
@@ -208,9 +213,9 @@ public class MediaClient {
 								mediaView.setImage(image);
 							}
 						}
-						
-						Thread.yield();
 					}
+					
+					Thread.yield();
 				} catch (IOException e) {
 					Log.e("RoboWars", "Error reading incoming media packet, skipping.");
 					error = true;
