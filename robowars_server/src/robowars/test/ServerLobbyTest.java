@@ -1,9 +1,12 @@
 package robowars.test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.EventObject;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,6 +33,8 @@ public class ServerLobbyTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		// Use log4j config file "log_config.properties"
+		PropertyConfigurator.configure("config/log_config.properties");
 	}
 
 	@AfterClass
@@ -153,17 +158,15 @@ public class ServerLobbyTest {
 	public void testRegisterRobot() {
 		ArrayList<RobotProxy> testRobots = new ArrayList<RobotProxy>();
 		for(int i = 0; i < TEST_MAX_ROBOTS + 1; i++) {
-			RobotProxy testRobot = new TestRobotProxy(testLobby, "Robot" + Integer.toString(i));
+			RobotProxy testRobot = new TestRobotProxy(testLobby, "RegisterRobot" + Integer.toString(i));
 			testRobots.add(testRobot);
-		}
-		
-		// Test valid registration
-		for(int i = 0; i < TEST_MAX_ROBOTS; i++) {
-			testLobby.registerRobot(testRobots.get(i));
-			assertEquals(testRobots.get(i), 
-					testListener.getLastRobotEvent().getRobot());
-			assertEquals(ServerLobbyEvent.EVENT_ROBOT_REGISTERED,
-					testListener.getLastRobotEvent().getEventType());
+			// Test valid registration (test proxies call register upon creation)
+			if(i < TEST_MAX_ROBOTS) {
+				assertEquals(testRobots.get(i), 
+						testListener.getLastRobotEvent().getRobot());
+				assertEquals(ServerLobbyEvent.EVENT_ROBOT_REGISTERED,
+						testListener.getLastRobotEvent().getEventType());
+			}
 		}
 		
 		// Test registration over maximum and null registration
@@ -183,7 +186,7 @@ public class ServerLobbyTest {
 	public void testUnregisterRobot() {
 		RobotProxy testRobot = new TestRobotProxy(testLobby, "RegisteredRobot");
 		RobotProxy testRobot2 = new TestRobotProxy(testLobby, "UnregisteredRobot");
-		testLobby.registerRobot(testRobot);
+		testLobby.unregisterRobot(testRobot2);
 		
 		testListener.clearNumEvents();
 		
@@ -248,7 +251,6 @@ public class ServerLobbyTest {
 
 	@Test
 	public void testGameInProgress() {
-		
 		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
 		user.getUser().setReady(true);
 		RobotProxy robot = new TestRobotProxy(testLobby, "test:mac:addr");
@@ -256,49 +258,159 @@ public class ServerLobbyTest {
 		testLobby.addUserProxy(user);
 		testLobby.registerRobot(robot);
 		
-		assertEquals(testLobby.gameInProgress(), false);
+		assertEquals(false, testLobby.gameInProgress());
 		
 		testLobby.launchGame();
 		
-		assertEquals(testLobby.gameInProgress(), true);
+		assertEquals(true, testLobby.gameInProgress());
 		
 		testLobby.endCurrentGame();
 		
-		assertEquals(testLobby.gameInProgress(), false);
+		// Add a delay to ensure termination completes (separate thread)
+		try { Thread.sleep(200); } catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		assertEquals(false, testLobby.gameInProgress());
 		
 		testLobby.removeUserProxy(user);
 		testLobby.unregisterRobot(robot);
-		
 	}
 
 	@Test
 	public void testGetCurrentGame() {
-		fail("Not yet implemented");
+		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
+		user.getUser().setReady(true);
+		RobotProxy robot = new TestRobotProxy(testLobby, "test:mac:addr");
+		
+		testLobby.addUserProxy(user);
+		testLobby.registerRobot(robot);
+		
+		assertEquals(null, testLobby.getCurrentGame());
+		
+		testLobby.launchGame();
+		
+		assertTrue(testLobby.getCurrentGame() != null);
+		
+		testLobby.endCurrentGame();
+		
+		// Add a delay to ensure termination completes (separate thread)
+		try { Thread.sleep(200); } catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		assertEquals(null, testLobby.getCurrentGame());
+		
+		testLobby.removeUserProxy(user);
+		testLobby.unregisterRobot(robot);
 	}
 
 	@Test
 	public void testGetCurrentGameType() {
 		assertEquals(GameType.getDefault(), testLobby.getCurrentGameType());
-		
+		testLobby.setGameType(GameType.FREETEST);
+		assertEquals(GameType.FREETEST, testLobby.getCurrentGameType());
+		testLobby.setGameType(GameType.LIGHTCYCLES);
+		assertEquals(GameType.LIGHTCYCLES, testLobby.getCurrentGameType());
 	}
 
 	@Test
 	public void testGetServerName() {
-		assertEquals(testLobby.getServerName(), "Test Server");
+		assertEquals("Test Server", testLobby.getServerName());
+	}
+	
+	@Test
+	public void testGetRobotProxy() {
+		RobotProxy testRobot = new TestRobotProxy(testLobby, "Registered");
+		assertEquals(null, testLobby.getRobotProxy("NotRegistered"));
+		assertEquals(testRobot, testLobby.getRobotProxy("Registered"));
+		assertEquals(null, testLobby.getRobotProxy(null));
+	}
+	
+	@Test
+	public void testIsUsernameRegistered() {
+		TestUserProxy user = new TestUserProxy(testLobby, "RegisteredName");
+		testLobby.addUserProxy(user);
+		
+		assertEquals(true, testLobby.isUsernameRegistered("RegisteredName"));
+		assertEquals(false, testLobby.isUsernameRegistered("NotRegistered"));
+		assertEquals(false, testLobby.isUsernameRegistered(null));
 	}
 
 	@Test
 	public void testLaunchGame() {
-		fail("Not yet implemented");
+		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
+		testLobby.addUserProxy(user);
+		user.getUser().setReady(true);
+		testLobby.setGameType(GameType.FREETEST);
+		
+		// Assert that game will not start with no robot registered
+		testLobby.launchGame();
+		assertEquals(false, testLobby.gameInProgress());
+		
+		// Assert that the game will not start with no readied players
+		RobotProxy robot = new TestRobotProxy(testLobby, "test:mac:addr");
+		user.getUser().setReady(false);
+		testLobby.launchGame();
+		assertEquals(false, testLobby.gameInProgress());
+		
+		// Assert that the game will not start with less than the minimum
+		// players connected
+		testLobby.setGameType(GameType.TANK_SIMULATION);
+		RobotProxy robot2 = new TestRobotProxy(testLobby, "test:mac:addr2");
+		user.getUser().setReady(true);
+		testLobby.launchGame();
+		assertEquals(false, testLobby.gameInProgress());
+		
+		// Assert that the game will not start when not all upcoming players are
+		// readied
+		TestUserProxy user2 = new TestUserProxy(testLobby, "Test User 2");
+		testLobby.addUserProxy(user2);
+		user2.getUser().setReady(false);
+		testLobby.launchGame();
+		assertEquals(false, testLobby.gameInProgress());
+		
+		// Assert that game will not start if a pure spectator would be
+		// required to play
+		user2.getUser().setReady(true);
+		user2.getUser().setPureSpectator(true);
+		testLobby.launchGame();
+		assertEquals(false, testLobby.gameInProgress());
+		
+		
+		// Assert that game starts when all players are ready and no players
+		// are spectators, and that a game launch event was generated
+		user2.getUser().setPureSpectator(false);
+		testLobby.launchGame();
+		assertEquals(true, testLobby.gameInProgress());
+		assertEquals(ServerLobbyEvent.EVENT_GAME_LAUNCH,
+				testListener.getLastGameEvent().getEventType());
+
+		testLobby.endCurrentGame();
 	}
 
 	@Test
 	public void testEndCurrentGame() {
-	}
-
-	@Test
-	public void testServerShutdown() {
-		fail("Not yet implemented");
+		TestUserProxy user = new TestUserProxy(testLobby, "Test User");
+		user.getUser().setReady(true);
+		RobotProxy robot = new TestRobotProxy(testLobby, "test:mac:addr");
+		
+		testLobby.addUserProxy(user);
+		testLobby.registerRobot(robot);
+		testLobby.launchGame();
+		
+		// Ensure a game is running
+		assertTrue(testLobby.getCurrentGame() != null);
+		
+		testLobby.endCurrentGame();
+		// Add a delay to ensure termination completes (separate thread)
+		try { Thread.sleep(200); } catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		// Ensure the game terminated, and that a game termination event was
+		// generated
+		assertEquals(null, testLobby.getCurrentGame());
+		assertEquals(ServerLobbyEvent.EVENT_GAME_OVER,
+				testListener.getLastGameEvent().getEventType());	
 	}
 
 	/**
@@ -382,5 +494,11 @@ public class ServerLobbyTest {
 		 * network socket.
 		 */
 		public void sendMessage(String message) {}
+		
+		/**
+		 * Overrides the actual sendEvent method to avoid using the
+		 * network socket.
+		 */
+		public void sendEvent(EventObject event) {}
 	}
 }

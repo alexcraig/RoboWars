@@ -58,16 +58,17 @@ public class TestRobotProxy extends RobotProxy {
 					testMotorA.updateTachoValue();
 					testMotorB.updateTachoValue();
 					
-					
 					// Report the new position to the game controller (if it exists)
+
+					// KLUDGE: Need to make a fresh copy of the Pose or the
+					// model logic will break
+					Pose newPos = new Pose();
+					Point newLoc = new Point((float)navigator.getPose().getLocation().getX(), 
+							(float)navigator.getPose().getLocation().getY());
+					newPos.setLocation(newLoc);
+					newPos.setHeading(navigator.getPose().getHeading());
+					
 					if(getGameController() != null) {
-						// KLUDGE: Need to make a fresh copy of the Pose or the
-						// model logic will break
-						Pose newPos = new Pose();
-						Point newLoc = new Point((float)navigator.getPose().getLocation().getX(), 
-								(float)navigator.getPose().getLocation().getY());
-						newPos.setLocation(newLoc);
-						newPos.setHeading(navigator.getPose().getHeading());
 						getGameController().updateRobotPosition(TestRobotProxy.this, 
 								newPos);
 					}

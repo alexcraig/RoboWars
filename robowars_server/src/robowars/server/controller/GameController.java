@@ -388,7 +388,10 @@ public class GameController implements Runnable, GameListener {
 		log.debug("Got robot position update:\n\tRobot: " + robot.getIdentifier()
 				+ "\n\tX: " + newPose.getX() + "\tY: " + newPose.getY() + "\tHeading: "
 				+ newPose.getHeading());
-		model.updateRobotPosition(robot.getIdentifier(), newPose);
+		
+		if(model != null) {
+			model.updateRobotPosition(robot.getIdentifier(), newPose);
+		}
 	}
 	
 	public GameModel getGameModel(){
