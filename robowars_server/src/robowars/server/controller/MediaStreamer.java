@@ -6,6 +6,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,17 @@ import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
 public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObserver {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(MediaStreamer.class);
+	
+	/** 
+	 * Toggle this flag to set whether a testing media client should be generated
+	 * on initialization.
+	 */
+	public static boolean ENABLE_TEST_CLIENT = true;
+	
+	/**
+	 * The IP address to use for the test client.
+	 */
+	public static String TEST_CLIENT_HOSTNAME = "192.168.1.106";
 	
 	/** The minimum interval (in ms) between frame transmissions to the network */
 	public static long IMAGE_WRITE_INTERVAL = 100;
@@ -99,6 +112,17 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 		observer = this;
 		lastImageWrite = System.currentTimeMillis();
 		nextSeqNum = 0;
+		
+		if(ENABLE_TEST_CLIENT) {
+			try {
+				addUser(new User("MediaTestClient", InetAddress.getByName(TEST_CLIENT_HOSTNAME)));
+				log.info("Media Test client established. Serving media stream to: "
+						+ InetAddress.getByName(TEST_CLIENT_HOSTNAME).getHostAddress()
+						+ ":" + getPort());
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
