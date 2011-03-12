@@ -12,6 +12,10 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
@@ -35,6 +39,10 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	/* Views invoked by the application. */
 	private TextView chat, users;
 	private EditText entry, server, port, user;
+	private Button	 launch;
+	
+	/* Check if we're ready/spectator. */
+	private boolean spectator, ready;
 	
 	/** The time at which the reading of the orientation sensor was last updated */
 	private long lastOrientationUpdate;
@@ -109,11 +117,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     	server 			= (EditText) findViewById(R.id.server);
     	port 			= (EditText) findViewById(R.id.port);
     	user			= (EditText) findViewById(R.id.username);
-    	
-    	/* The x,y,z coordinates of the orientation of the phone. */
-    	mTextViewAcc = (TextView) findViewById(R.id.textAcc);
-        mTextViewMag = (TextView) findViewById(R.id.textMag);
-        mTextViewOri = (TextView) findViewById(R.id.textOri);
+    	launch			= (Button)	 findViewById(R.id.launchButton);
         
         /* Setup the sensor manager. */
         
@@ -142,6 +146,10 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     	
     	/* Initially blank user list. */
     	userlist = "";
+    	
+    	/* Initially not ready and not spectator. */
+    	ready = spectator = false;
+    	launch.setClickable(false);
     }
     
     /**
@@ -178,6 +186,8 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
      */
     public void buttonClicked(View view)
     {
+    	ClientCommand cmd;
+    	
     	switch (view.getId())
     	{
     		/* Connect (to TCP server) button. */
@@ -208,14 +218,61 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
         		
         		// Try to generate a client command, send the string as a
         		// chat message if command generation fails
-        		ClientCommand cmd = ClientCommand.parse(message);
-        		if(cmd == null) {
-        			cmd = new ClientCommand(ClientCommand.CHAT_MESSAGE);
-        			cmd.setStringData(message);
+        		//ClientCommand cmd = ClientCommand.parse(message);
+        		if (tcp != null)
+        		{
+	        		cmd = new ClientCommand(ClientCommand.CHAT_MESSAGE);
+	        		cmd.setStringData(message);
+	        		tcp.sendClientCommand(cmd);
         		}
-        		tcp.sendClientCommand(cmd);
-        		
         		break;
+        	
+        	/* Spectator checkbox. If there is a TCP connection, inform the server
+        	 * of the status change. */
+    		case (R.id.spectatorCheckBox):
+    			
+    			if (spectator == true) spectator = false;
+    			else spectator = true;
+    			
+    			if (tcp != null)
+    			{
+    				cmd = new ClientCommand(ClientCommand.SPECTATOR_STATUS);
+    				cmd.setBoolData(spectator);
+    				tcp.sendClientCommand(cmd);
+    			}
+    			break;
+    			
+    		/* Ready checkbox. If there is a TCP connection, inform the server
+        	 * of the status change.*/
+    		case (R.id.readyCheckBox):
+    			
+    			if (ready) {
+    				ready = false;
+    				launch.setClickable(false);
+    			}
+    			else {
+    				ready = true;
+    				launch.setClickable(true);
+    			}
+    		
+	    		if (tcp != null)
+				{
+					cmd = new ClientCommand(ClientCommand.READY_STATUS);
+					cmd.setBoolData(ready);
+					tcp.sendClientCommand(cmd);
+				}
+    			break;
+        		
+    		/* Launch button. */
+    		case (R.id.launchButton):
+    		
+			if (tcp != null)
+			{
+				cmd = new ClientCommand(ClientCommand.LAUNCH_GAME);
+				cmd.setBoolData(true);
+				tcp.sendClientCommand(cmd);
+			}
+    		break;
 	        	
 	        default:
 	        	printMessage("Unknown button pressed.");
