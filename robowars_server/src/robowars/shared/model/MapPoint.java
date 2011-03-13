@@ -1,27 +1,16 @@
 package robowars.shared.model;
-
 public class MapPoint {
-	private int x,y,r,g,b;
+	private int x,y,color;
 	public MapPoint(){
-		this(-1,-1,-1,-1,-1);
+		this(-1,-1,-1);
 	}
-	public MapPoint(int x, int y, int r, int g, int b) {
+	public MapPoint(int x, int y, int color) {
 		this.x=x;
 		this.y=y;
-		this.r=r;
-		this.g=g;
-		this.b=b;
+		this.color=color;
 	}
-	public int getR() {
-		return r;
-	}
-
-	public int getB() {
-		return b;
-	}
-
-	public int getG() {
-		return g;
+	public int getColor() {
+		return color;
 	}
 
 	public int getX() {
@@ -35,13 +24,17 @@ public class MapPoint {
 		String s="[";
 		s+="x:"+x+"|";
 		s+="y:"+y+"|";
-		s+="r:"+r+"|";
-		s+="g:"+g+"|";
-		s+="b:"+b;
+		s+="c:"+color;
 		s+="]";
 		return s;
 	}
-
-
+	public String toOutputString(){
+		String s ="[";
+		s+=x+"|";
+		s+=y+"|";
+		s+=color;
+		s+="]";
+		return s;
+	}
 }
 

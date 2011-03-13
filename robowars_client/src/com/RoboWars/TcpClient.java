@@ -225,11 +225,10 @@ public class TcpClient extends Thread
 				
 			case GameEvent.PLAYER_1_WINS:
 				//TODO: Display which player wins, clear the map, ask for another game.
-				//TODO: Handle user decision.
 				break;
 				
 			case GameEvent.PLAYER_2_WINS:
-				//TODO: Re-use method call from above, display player 2 winning.
+				//TODO: Display which player wins, clear the map, ask for another game.
 			
 			case GameEvent.ROBOT_MOVED:
 				//TODO: Which robot moved? Update appropriate position and OpenGL.

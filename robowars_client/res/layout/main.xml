@@ -24,28 +24,35 @@
 		    android:paddingTop="100px">
 		    
 		    <TextView
-		    	android:id="@+id/textAcc"
+		    	android:id="@+id/tab1Text"
 		    	android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
-		    	android:text="Accelerometer: x,y,z"
-		    	android:lines="1"/>
+		    	android:text="Game settings and launch:"/>
+		    
+		    <CheckBox
+		    	android:id="@+id/spectatorCheckBox"
+ 				android:text="Spectator?"
+ 				android:layout_width="wrap_content"
+ 				android:layout_height="wrap_content"
+ 				android:layout_below="@id/tab1Text"
+ 				android:onClick="buttonClicked"/>
 		    	
-		    <TextView
-		    	android:id="@+id/textMag"
+		    <CheckBox
+		    	android:id="@+id/readyCheckBox"
 		    	android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
-		    	android:layout_below="@id/textAcc"
-		    	android:text="Compass: x,y,z"
-		    	android:lines="1"/>
+		    	android:layout_below="@id/spectatorCheckBox"
+		    	android:onClick="buttonClicked"
+		    	android:text="Ready?"/>
 		    	
-		    <TextView
-		    	android:id="@+id/textOri"
+		    <Button
+		    	android:id="@+id/launchButton"
 		    	android:layout_width="wrap_content"
 		    	android:layout_height="wrap_content"
-		    	android:layout_below="@id/textMag"
-		    	android:text="Orientation: x,y,z"
-		    	android:lines="4"/>
-		    		    
+		    	android:layout_below="@id/readyCheckBox"
+		    	android:onClick="buttonClicked"
+		    	android:text="Launch!"/>
+	
 		</RelativeLayout>
 	    
 	    <TableLayout
@@ -58,7 +65,7 @@
 				    <TextView
 				    	android:layout_column="1"
 				        android:id="@+id/chat"
-				        android:layout_width="300px"
+				        android:layout_width="575px"
 				        android:layout_height="wrap_content"
 				        android:text=""
 				        android:scrollbars="vertical"
@@ -109,7 +116,7 @@
 	        android:text="Username: "/>
 	    <EditText
 	        android:id="@+id/username"
-	        android:layout_width="200px"
+	        android:layout_width="300px"
 	        android:layout_height="wrap_content"
 	        android:background="@android:drawable/editbox_background"
 	        android:layout_toRightOf="@id/userText"
@@ -128,7 +135,7 @@
 	        android:text="Server: "/>
 	    <EditText
 	        android:id="@+id/server"
-	        android:layout_width="150px"
+	        android:layout_width="300px"
 	        android:layout_height="wrap_content"
 	        android:background="@android:drawable/editbox_background"
 	        android:layout_below="@id/gap1"
@@ -138,7 +145,7 @@
 	        android:maxLength="15"/>
 	    <EditText
 	        android:id="@+id/port"
-	        android:layout_width="100px"
+	        android:layout_width="200px"
 	        android:layout_height="wrap_content"
 	        android:background="@android:drawable/editbox_background"
 	        android:layout_toRightOf="@id/server"

@@ -1,9 +1,11 @@
 package robowars.robot;
+
 /** 
  * RoboMovement.java
  * Thread safe controller for the mindstorm robot
  * @author mwright
  */
+
 
 import robowars.shared.model.RobotCommand;
 import lejos.nxt.LCD;
@@ -16,12 +18,12 @@ public class RobotMovement {
 	private RoboWarsNavigator navigator;
 	private final static float MINDSTORM_WIDTH=11;
 	private final static float WHEEL_HEIGHT=(float) 4.3;
-	private final static int SPEED=75;
-	int count=0;
+	private final static float MAX_SPEED=75;
+	private static final float STEER_MAX = (float)200;
 	
 	public RobotMovement(){
 		pilot=new RoboWarsTachoPilot(WHEEL_HEIGHT,MINDSTORM_WIDTH, Motor.C, Motor.A, true);
-		pilot.setSpeed(SPEED);
+		pilot.setSpeed((int) MAX_SPEED);
 		navigator=new RoboWarsNavigator(pilot);
 	}
 	
@@ -45,10 +47,13 @@ public class RobotMovement {
 		navigator.rotate(-f);
 	}
 	public synchronized void rollingTurn(RobotCommand command){
-		count++;
-		LCD.drawString("RC:"+count, 0,4);
-		navigator.setMoveSpeed(command.getThrottle());
-		navigator.steer(command.getTurnBearing(), command.getThrottle());
+		float turnBearing=command.getTurnBearing();
+		float throttle=command.getThrottle();
+		if(turnBearing>STEER_MAX||turnBearing<-STEER_MAX)turnBearing=turnBearing/(Math.abs(turnBearing)/STEER_MAX);
+		if(throttle>STEER_MAX||throttle<-STEER_MAX)throttle=MAX_SPEED;
+		navigator.setMoveSpeed(throttle);
+		navigator.setTurnSpeed((Math.abs(command.getTurnBearing())/STEER_MAX)*MAX_SPEED);
+		navigator.steer(turnBearing, throttle);
 	}
 	public synchronized void speedUp(){
 		if(pilot.getMoveSpeed()<pilot.getMoveMaxSpeed())navigator.setMoveSpeed((pilot.getMoveSpeed()*(float)1.1));
