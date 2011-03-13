@@ -54,7 +54,7 @@ public class SystemControl {
 				bluetooth);
 		
 		// TESTING
-		new TestRobotProxy(lobby, "TestRobot1");
+		//new TestRobotProxy(lobby, "TestRobot1");
 		// new TestRobotProxy(lobby, "TestRobot2");
 	}
 	

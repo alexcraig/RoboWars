@@ -10,6 +10,7 @@ import robowars.robot.LejosOutputStream;
 import robowars.shared.model.CommandType;
 import robowars.shared.model.GameRobot;
 import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 
 import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
@@ -224,6 +225,15 @@ public class RobotProxy {
 					log.error("Error closing input stream from robot: " + getIdentifier());
 				}
 			}
+		}
+	}
+
+	public void sendMap(RobotMap map) {
+		try {
+			outputStream.writeObject(map);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

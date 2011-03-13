@@ -17,8 +17,8 @@ public class SquareComponent extends JComponent{
 	public void paint(Graphics g){
       int height = 200;
       int width = 120;
-      g.setColor(new Color(r,gr,b));
-      g.drawRect(10,10,height,width);
+      g.setColor(new Color((int)r,(int)gr,(int)b));
+      g.fillRect(0,0,height,width);
     }
 }
 

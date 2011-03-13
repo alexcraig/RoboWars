@@ -1,5 +1,6 @@
 package robowars.server.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -16,6 +17,7 @@ import robowars.shared.model.GameModel;
 import robowars.shared.model.GameType;
 import robowars.shared.model.LightCycles;
 import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 import robowars.shared.model.TankSimulation;
 
 /**
@@ -151,13 +153,21 @@ public class GameController implements Runnable, GameListener {
 	 * Main loop of GameController (performs real-time physics updates on GameModel)
 	 */
 	public void run() {
+		RobotMap map=new RobotMap(new File("colorMap.txt"));
+		log.info("Map Recovered");
+		synchronized(controlPairs) {
+			for(int i=0; i<controlPairs.size(); i++){
+				RobotProxy proxy=controlPairs.get(i).getRobotProxy();
+				proxy.sendCommand(RobotCommand.setPosition(map.getStartPoint(i)));
+			}
+		}
+		log.info("Robot Map and starting points sent");
 		log.info("Game execution starting.");
 		lobby.broadcastMessage("<Server> Game launched.");
 		long gameStartTime = System.currentTimeMillis();
 		long lastUpdateTime = gameStartTime;
 		long timeElapsed = 0;
 		model.startGame();
-		
 		while(!terminateFlag) {
 			timeElapsed = System.currentTimeMillis() - lastUpdateTime;
 			lastUpdateTime = System.currentTimeMillis();
