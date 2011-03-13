@@ -149,7 +149,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     	
     	/* Initially not ready and not spectator. */
     	ready = spectator = false;
-    	launch.setClickable(false);
+    	launch.setEnabled(false);
     }
     
     /**
@@ -248,11 +248,11 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     			
     			if (ready) {
     				ready = false;
-    				launch.setClickable(false);
+    				launch.setEnabled(false);
     			}
     			else {
     				ready = true;
-    				launch.setClickable(true);
+    				launch.setEnabled(true);
     			}
     		
 	    		if (tcp != null)
