@@ -18,6 +18,7 @@ import robowars.server.controller.LobbyChatEvent;
 import robowars.server.controller.LobbyGameEvent;
 import robowars.server.controller.LobbyRobotEvent;
 import robowars.server.controller.LobbyUserEvent;
+import robowars.shared.model.GameEvent;
 
 /**
  * A command line configurable TCP connection simulator.
@@ -87,6 +88,7 @@ public class ClientSimulator {
 						while (true) {
 							incomingMessage = socketIn.readObject();
 							if(incomingMessage == null) break;
+							if(incomingMessage instanceof GameEvent) break;
 							
 							String msgText = "";
 							if(incomingMessage instanceof LobbyChatEvent) msgText = ((LobbyChatEvent)incomingMessage).toString();

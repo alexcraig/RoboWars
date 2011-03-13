@@ -18,30 +18,42 @@ import android.util.Log;
 
 /**
  * @author Steve Legere
- * @version 5/11/2010
+ * @author Alex Craig
+ * @version 03/03/2011
  * 
  * Handles TCP connection to the server.
  * @see robowars.server.controller
  */
 public class TcpClient extends Thread
 {
-	private static final int ERROR	= 0;
-	private static final int CHAT	= 1;
-	private static final int EVENT	= 2;
+	/* Class constants. Define the colour of message to print. */
+	public static final int ERROR	= 0;	// Red
+	public static final int CHAT	= 1;	// White
+	public static final int EVENT	= 2;	// Green
+	public static final int ADMIN	= 3;	// Blue
 	
-	private LobbyModel model;
+	/* Models modified by incoming packets from server. */
+	private LobbyModel lobbyModel;
+	private GameModel gameModel;
 	
+	/* Server information. */
 	private String IPAddress;
 	private int port;
-	
 	private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean connected;
     
-	public TcpClient(LobbyModel model)
+    /**
+     * Default constructor.
+     * 
+     * @param lobbyModel	The current state of the lobby.
+     * @param gameModel		The current state of the game.
+     */
+	public TcpClient(LobbyModel lobbyModel, GameModel gameModel)
 	{
-		this.model = model;
+		this.lobbyModel = lobbyModel;
+		this.gameModel = gameModel;
 		this.connected = false;
 	}
 	
@@ -66,6 +78,7 @@ public class TcpClient extends Thread
         			handle((ServerLobbyEvent)response);
         		} else if (response instanceof GameEvent) {
         			Log.i("RoboWars", "Read game event.");
+        			handle((GameEvent)response);
         		}
         		
         		Thread.yield();
@@ -74,6 +87,7 @@ public class TcpClient extends Thread
         } catch (ClassNotFoundException e) { printMessage(ERROR, "Could not deserialize message from server."); 
         } finally {
         	try {
+        		// Send disconnection message, then close socket.
         		sendClientCommand(new ClientCommand(ClientCommand.DISCONNECT));
 				out.close();
 				in.close();
@@ -85,6 +99,12 @@ public class TcpClient extends Thread
         }
     }
 	
+	/**
+	 * Connect to the server's IP and port over TCP.
+	 * 
+	 * @param IPAddress		IPv4 address of the server (ie "127.0.0.1").
+	 * @param port			The port to connect to (by default 33330).
+	 */
 	public void connect(String IPAddress, int port)
 	{
 		this.IPAddress = IPAddress;
@@ -115,6 +135,7 @@ public class TcpClient extends Thread
 	 * for the connection handshake (protocol string and username), as all
 	 * further communication should used RoboWars protocol 
 	 * (Serialized ServerLobbyEvents and ClientCommands).
+	 * 
 	 * @param message	The string to be sent to the server.
 	 */
 	public void sendUTFString(String message)
@@ -132,6 +153,12 @@ public class TcpClient extends Thread
 		}
 	}
 	
+	/**
+	 * Sends a command to the server via TCP.
+	 * 
+	 * @param cmd	The ClientCommand being sent.
+	 * @see robowars.server.controller.ClientCommand
+	 */
 	public void sendClientCommand(ClientCommand cmd) {
 		if (connected) {
 			synchronized(out) {
@@ -151,8 +178,8 @@ public class TcpClient extends Thread
 	 */
 	private boolean handshake()
 	{
-		String version = model.getVersion();
-		User user = model.getMyUser();
+		String version = lobbyModel.getVersion();
+		User user = lobbyModel.getMyUser();
 		if (user != null) {
 			sendUTFString(version);
 			sendUTFString(user.getName());
@@ -165,8 +192,63 @@ public class TcpClient extends Thread
 	}
 	
 	/**
-	 * @param message
-	 * Determines what to do, given an input message.
+	 * Handles TCP packets as they arrive regarding game events.
+	 * 
+	 * @param event		The EventObject being passed in.
+	 */
+	private void handle(GameEvent event)
+	{
+		switch (event.getEventType()) {
+			case GameEvent.GAME_START:
+				gameModel.startGame();
+				//TODO: Start up the OpenGL engine and start the game.
+				break;
+								
+			case GameEvent.GAME_OVER:
+				gameModel.endGame();
+				//TODO: End the game, show the winner.
+				break;
+				
+			case GameEvent.COLLISION_DETECTED:
+				//TODO: Probably nothing here; handled by the server.
+				break;
+				
+			case GameEvent.PROJECTILE_FIRED:
+				//TODO: Get location, direction, speed of projectile.
+				//TODO: Draw the projectile in OpenGL.
+				break;
+				
+			case GameEvent.PROJECTILE_HIT:
+				//TODO: Get location of projectile.
+				//TODO: Remove from OpenGL view.
+				break;
+				
+			case GameEvent.PLAYER_1_WINS:
+				//TODO: Display which player wins, clear the map, ask for another game.
+				break;
+				
+			case GameEvent.PLAYER_2_WINS:
+				//TODO: Display which player wins, clear the map, ask for another game.
+			
+			case GameEvent.ROBOT_MOVED:
+				//TODO: Which robot moved? Update appropriate position and OpenGL.
+				break;
+				
+			case GameEvent.MAP_CHANGED:
+				//TODO: Compare the passed model to the current model and make
+				//		the appropriate changes.
+				break;
+				
+			default:
+				// Unhandled GameEvent.
+				printMessage(ERROR, "Unhandled GameEvent received.");
+		}
+	}
+	
+	/**
+	 * Handles TCP packets as they arrive regarding lobby events.
+	 * 
+	 * @param event		The EventObject being passed in.
 	 */
 	private void handle(ServerLobbyEvent event)
 	{
@@ -176,17 +258,17 @@ public class TcpClient extends Thread
 			switch(userEvent.getEventType()) {
 			case ServerLobbyEvent.EVENT_PLAYER_JOINED:
 				// Player joined
-				model.userJoined(userEvent.getUser().getUsername());
+				lobbyModel.userJoined(userEvent.getUser().getUsername());
 				printMessage(EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_LEFT:
 				// Player left
-				model.userLeft(userEvent.getUser().getUsername());
+				lobbyModel.userLeft(userEvent.getUser().getUsername());
 				printMessage(EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
 				// Player state changed
-				model.printMessage(EVENT, event.toString());
+				lobbyModel.printMessage(EVENT, event.toString());
 				return;
 			default:
 				return;
@@ -196,7 +278,7 @@ public class TcpClient extends Thread
 		// Robot events
 		if(event instanceof LobbyRobotEvent) {
 			LobbyRobotEvent robotEvent = (LobbyRobotEvent)event;
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 		
 		// Game events
@@ -204,23 +286,29 @@ public class TcpClient extends Thread
 			LobbyGameEvent gameEvent = (LobbyGameEvent)event;
 			if(gameEvent.getCameraPosition() != null) {
 				CameraPosition cam = gameEvent.getCameraPosition();
-				model.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
+				lobbyModel.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
 						+ "|Y:" + cam.getyPos() + "|X:" + cam.getzPos() +"|HorOrien:"
 						+ cam.getHorOrientation() + "|VerOrien:" + cam.getVerOrientation()
 						+ "|FOV:" + cam.getFov()+ ">");
 			}
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 		
 		// Chat events
 		if(event instanceof LobbyChatEvent) {
 			LobbyChatEvent chatEvent = (LobbyChatEvent)event;
-			model.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(EVENT, event.toString());
 		}
 	}
 	
+	/**
+	 * Prints a message on the client lobby terminal.
+	 * 
+	 * @param type		The type of message (defined in this class).
+	 * @param message	The message String.
+	 */
 	private void printMessage(int type, String message)
 	{
-		model.printMessage(type, message);
+		lobbyModel.printMessage(type, message);
 	}
 }

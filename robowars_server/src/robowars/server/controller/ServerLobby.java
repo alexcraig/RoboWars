@@ -147,7 +147,7 @@ public class ServerLobby {
 	 */
 	public synchronized boolean registerRobot(RobotProxy robot) {
 		boolean addSuccess = false;
-		if(robots.size() < maxRobots) {
+		if(robots.size() < maxRobots && !robots.contains(robot)) {
 			robots.add(robot);
 			addSuccess = true;
 			log.debug("Robot: " + robot.getIdentifier() + " added to lobby.");
@@ -410,13 +410,5 @@ public class ServerLobby {
 		for(ServerLobbyListener listener : listeners) {
 			listener.lobbyGameStateChanged(new LobbyGameEvent(this, LobbyGameEvent.EVENT_GAME_OVER, selectedGameType));
 		}
-	}
-	
-	/**
-	 * Sends a shutdown message to all connected users and cleanly closes
-	 * connections with all users and robots connected to the server
-	 */
-	public void serverShutdown() {
-		// TODO: Implement
 	}
 }

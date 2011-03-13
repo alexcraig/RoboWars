@@ -14,27 +14,28 @@ public final class R {
         public static final int icon=0x7f020000;
     }
     public static final class id {
-        public static final int chat=0x7f050006;
-        public static final int connect=0x7f050011;
-        public static final int entry=0x7f050008;
-        public static final int gap1=0x7f05000d;
-        public static final int mediaStatus=0x7f050014;
-        public static final int mediaSurface=0x7f050013;
-        public static final int port=0x7f050010;
-        public static final int send=0x7f050009;
-        public static final int server=0x7f05000f;
-        public static final int serverText=0x7f05000e;
+        public static final int chat=0x7f050007;
+        public static final int connect=0x7f050012;
+        public static final int entry=0x7f050009;
+        public static final int gap1=0x7f05000e;
+        public static final int launchButton=0x7f050005;
+        public static final int mediaStatus=0x7f050015;
+        public static final int mediaSurface=0x7f050014;
+        public static final int port=0x7f050011;
+        public static final int readyCheckBox=0x7f050004;
+        public static final int send=0x7f05000a;
+        public static final int server=0x7f050010;
+        public static final int serverText=0x7f05000f;
+        public static final int spectatorCheckBox=0x7f050003;
         public static final int tab1=0x7f050001;
-        public static final int tab2=0x7f050005;
-        public static final int tab3=0x7f05000a;
-        public static final int tab4=0x7f050012;
+        public static final int tab1Text=0x7f050002;
+        public static final int tab2=0x7f050006;
+        public static final int tab3=0x7f05000b;
+        public static final int tab4=0x7f050013;
         public static final int tabHost=0x7f050000;
-        public static final int textAcc=0x7f050002;
-        public static final int textMag=0x7f050003;
-        public static final int textOri=0x7f050004;
-        public static final int userText=0x7f05000b;
-        public static final int username=0x7f05000c;
-        public static final int users=0x7f050007;
+        public static final int userText=0x7f05000c;
+        public static final int username=0x7f05000d;
+        public static final int users=0x7f050008;
     }
     public static final class layout {
         public static final int main=0x7f030000;
