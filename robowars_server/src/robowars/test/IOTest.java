@@ -1,5 +1,6 @@
 package robowars.test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,7 +31,7 @@ public class IOTest {
 			out.writeObject(RobotCommand.rollingTurn(100, 90));
 			out.writeObject(RobotCommand.setPosition(new Pose(1,2,3)));
 			out.writeObject(new Pose(0,(float)1.0,(float) 3.4));
-			out.writeObject(new RobotMap("colorMap.txt"));
+			out.writeObject(new RobotMap(new File("colorMap.txt")));
 			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
