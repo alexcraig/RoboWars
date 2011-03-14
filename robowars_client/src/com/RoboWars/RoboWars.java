@@ -328,10 +328,12 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		float roll = (clamp(event.values[1], -45, 45) / 45);	// Roll sensor standard range -180 to 180
 
 		// Set the text display on client side
+		/*
 		mTextViewOri.setText("Orientation:\n" 
 				+ "Azimuth:  " + azimuth + " (" + event.values[0] + ")\n" 
 				+ "Pitch:  " + pitch + " (" + event.values[2] + ")\n"
 				+ "Roll:  " + roll + " (" + event.values[1] + ")\n");
+		*/
 		
 		if(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MAXIMUM_INTERVAL_MS ||
 				(System.currentTimeMillis() - lastOrientationUpdate > ORIENTATION_MINIMUM_INTERVAL_MS

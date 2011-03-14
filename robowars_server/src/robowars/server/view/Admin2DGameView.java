@@ -22,6 +22,12 @@ import java.awt.image.BufferStrategy;
 public class Admin2DGameView extends JFrame implements GameListener{
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(Admin2DGameView.class);
+	
+	/** 
+	 * A scaling factor used to reconcile differences in the size of the
+	 * arena and the size of the 2D display window.
+	 */
+	private float scalingFactor;
 
 	private Canvas canvas;
 	private GameModel model;
@@ -34,6 +40,9 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		super("Admin Game View");
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		
+        // Note: This will crash if a arena of size 0 is ever used
+        this.scalingFactor = size / model.getArenaSize();
+        
 		this.model = model;
 		this.size = size;
 		this.setMinimumSize(new Dimension(size,size + 30));
@@ -101,17 +110,25 @@ public class Admin2DGameView extends JFrame implements GameListener{
 			//for (int i = 0; i < n; i++){
 			//	System.out.print("(" + x[i] + "," + y[i] + ")");
 			//}
-			//System.out.print("\n");
+			//System.out.print("/n");
+			
+			// Scaling factor implementation
+			for(int i = 0; i < n; i++) {
+				x[i] = (int)(x[i] * scalingFactor);
+				y[i] = (int)(y[i] * scalingFactor);
+			}
+			
 			g2d.setColor(Color.BLUE);
 			g2d.fillPolygon(x, y, n);
 			g2d.setColor(Color.ORANGE);
-			g2d.fillOval((int) e.getPose().getX(), (int) e.getPose().getY(), 5, 5);
+			g2d.fillOval((int)(e.getPose().getX() * scalingFactor), 
+					(int)(e.getPose().getY() * scalingFactor), 5, 5);
 		}
 	}
 	
 	private void drawCollision(Graphics2D g2d){
 		g2d.setColor(Color.RED);
-		g2d.fillOval(20, 480, 20, 20);
+		g2d.fillOval(20, 30, 20, 20);
 	}
 	
 	public void gameStateChanged(GameEvent e) {
