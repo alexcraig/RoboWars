@@ -40,6 +40,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	private TextView chat, users;
 	private EditText entry, server, port, user;
 	private Button	 launch;
+	private CheckBox spectatorButton, readyButton;
 	
 	/* Check if we're ready/spectator. */
 	private boolean spectator, ready;
@@ -118,6 +119,9 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
     	port 			= (EditText) findViewById(R.id.port);
     	user			= (EditText) findViewById(R.id.username);
     	launch			= (Button)	 findViewById(R.id.launchButton);
+    	spectatorButton = (CheckBox) findViewById(R.id.spectatorCheckBox);
+    	readyButton 	= (CheckBox) findViewById(R.id.readyCheckBox);
+    	
         
         /* Setup the sensor manager. */
         
@@ -156,7 +160,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
      * Print a message in the chat lobby.
      * @param msg
      */
-    public void printMessage(final String msg)
+    public void printMessage(final String msg, int type)
     {
     	this.runOnUiThread(new Runnable(){
     		public void run(){
@@ -271,11 +275,17 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 				cmd = new ClientCommand(ClientCommand.LAUNCH_GAME);
 				cmd.setBoolData(true);
 				tcp.sendClientCommand(cmd);
+				
+				ready = false;
+				spectator = false;
+				
+				spectatorButton.setChecked(false);
+				readyButton.setChecked(false);
 			}
     		break;
 	        	
 	        default:
-	        	printMessage("Unknown button pressed.");
+	        	printMessage("Unknown button pressed.", LobbyModel.ERROR);
     	}
     }
     
@@ -300,7 +310,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 		// Check for new chat message.
 		if (lobbyModel.newChatMessage())
 		{
-			printMessage(lobbyModel.getChatBuffer());
+			printMessage(lobbyModel.getChatBuffer(), lobbyModel.getChatBufferType());
 		}
 		
 		// Check for changes in the user list.

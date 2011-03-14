@@ -26,12 +26,6 @@ import android.util.Log;
  */
 public class TcpClient extends Thread
 {
-	/* Class constants. Define the colour of message to print. */
-	public static final int ERROR	= 0;	// Red
-	public static final int CHAT	= 1;	// White
-	public static final int EVENT	= 2;	// Green
-	public static final int ADMIN	= 3;	// Blue
-	
 	/* Models modified by incoming packets from server. */
 	private LobbyModel lobbyModel;
 	private GameModel gameModel;
@@ -72,7 +66,7 @@ public class TcpClient extends Thread
         		// Log.i("RoboWars", "Read object.");
         		if(response instanceof String) {
         			Log.i("RoboWars", "Read string: " + (String)response);
-        			printMessage(EVENT, (String)response);
+        			printMessage(LobbyModel.EVENT, (String)response);
         		} else if (response instanceof ServerLobbyEvent) {
         			Log.i("RoboWars", "Read lobby event.");
         			handle((ServerLobbyEvent)response);
@@ -83,8 +77,8 @@ public class TcpClient extends Thread
         		
         		Thread.yield();
         	}
-        } catch (IOException e) { printMessage(ERROR, "Lost connection to the server."); 
-        } catch (ClassNotFoundException e) { printMessage(ERROR, "Could not deserialize message from server."); 
+        } catch (IOException e) { printMessage(LobbyModel.ERROR, "Lost connection to the server."); 
+        } catch (ClassNotFoundException e) { printMessage(LobbyModel.ERROR, "Could not deserialize message from server."); 
         } finally {
         	try {
         		// Send disconnection message, then close socket.
@@ -92,9 +86,9 @@ public class TcpClient extends Thread
 				out.close();
 				in.close();
 				socket.close();
-				printMessage(EVENT, "Socket Disconnected!");
+				printMessage(LobbyModel.EVENT, "Socket Disconnected!");
 			} catch (IOException e) {
-				printMessage(ERROR, "Could not close socket.");
+				printMessage(LobbyModel.ERROR, "Could not close socket.");
 			}
         }
     }
@@ -110,7 +104,7 @@ public class TcpClient extends Thread
 		this.IPAddress = IPAddress;
 		this.port = port;
 		
-		printMessage(EVENT, "Connecting...");
+		printMessage(LobbyModel.EVENT, "Connecting...");
 		try {
             socket = new Socket(IPAddress, port);
             out = new ObjectOutputStream(socket.getOutputStream());
@@ -118,13 +112,13 @@ public class TcpClient extends Thread
             
             connected = true;
             
-            printMessage(EVENT, "Connected!");
+            printMessage(LobbyModel.EVENT, "Connected!");
         } catch (UnknownHostException e1) {
-            printMessage(ERROR, "Could not resolve host.");
-            printMessage(ERROR, "Address: " + IPAddress + ":" + port);
+            printMessage(LobbyModel.ERROR, "Could not resolve host.");
+            printMessage(LobbyModel.ERROR, "Address: " + IPAddress + ":" + port);
         } catch (IOException e2) {
-            printMessage(ERROR, "Could not get I/O for the connection.");
-            printMessage(ERROR, "Address: " + IPAddress + ":" + port);
+            printMessage(LobbyModel.ERROR, "Could not get I/O for the connection.");
+            printMessage(LobbyModel.ERROR, "Address: " + IPAddress + ":" + port);
         }
 		
         if (connected) this.start();
@@ -186,7 +180,7 @@ public class TcpClient extends Thread
 			return true;
 		}
 		else {
-			printMessage(ERROR, "No username set.");
+			printMessage(LobbyModel.ERROR, "No username set.");
 			return false;
 		}
 	}
@@ -241,7 +235,7 @@ public class TcpClient extends Thread
 				
 			default:
 				// Unhandled GameEvent.
-				printMessage(ERROR, "Unhandled GameEvent received.");
+				printMessage(LobbyModel.ERROR, "Unhandled GameEvent received.");
 		}
 	}
 	
@@ -259,16 +253,16 @@ public class TcpClient extends Thread
 			case ServerLobbyEvent.EVENT_PLAYER_JOINED:
 				// Player joined
 				lobbyModel.userJoined(userEvent.getUser().getUsername());
-				printMessage(EVENT, event.toString());
+				printMessage(LobbyModel.EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_LEFT:
 				// Player left
 				lobbyModel.userLeft(userEvent.getUser().getUsername());
-				printMessage(EVENT, event.toString());
+				printMessage(LobbyModel.EVENT, event.toString());
 				return;
 			case ServerLobbyEvent.EVENT_PLAYER_STATE_CHANGE:
 				// Player state changed
-				lobbyModel.printMessage(EVENT, event.toString());
+				lobbyModel.printMessage(LobbyModel.EVENT, event.toString());
 				return;
 			default:
 				return;
@@ -278,7 +272,7 @@ public class TcpClient extends Thread
 		// Robot events
 		if(event instanceof LobbyRobotEvent) {
 			LobbyRobotEvent robotEvent = (LobbyRobotEvent)event;
-			lobbyModel.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(LobbyModel.EVENT, event.toString());
 		}
 		
 		// Game events
@@ -286,18 +280,18 @@ public class TcpClient extends Thread
 			LobbyGameEvent gameEvent = (LobbyGameEvent)event;
 			if(gameEvent.getCameraPosition() != null) {
 				CameraPosition cam = gameEvent.getCameraPosition();
-				lobbyModel.printMessage(EVENT, "Got camera information: <X:" + cam.getxPos()
+				lobbyModel.printMessage(LobbyModel.EVENT, "Got camera information: <X:" + cam.getxPos()
 						+ "|Y:" + cam.getyPos() + "|X:" + cam.getzPos() +"|HorOrien:"
 						+ cam.getHorOrientation() + "|VerOrien:" + cam.getVerOrientation()
 						+ "|FOV:" + cam.getFov()+ ">");
 			}
-			lobbyModel.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(LobbyModel.EVENT, event.toString());
 		}
 		
 		// Chat events
 		if(event instanceof LobbyChatEvent) {
 			LobbyChatEvent chatEvent = (LobbyChatEvent)event;
-			lobbyModel.printMessage(EVENT, event.toString());
+			lobbyModel.printMessage(LobbyModel.EVENT, event.toString());
 		}
 	}
 	

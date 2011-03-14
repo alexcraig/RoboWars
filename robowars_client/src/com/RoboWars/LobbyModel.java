@@ -4,10 +4,17 @@ import java.util.Observable;
 
 public class LobbyModel extends Observable
 {	
+	/* Class constants. Define the colour of message to print. */
+	public static final int ERROR	= 0;	// Red
+	public static final int CHAT	= 1;	// White
+	public static final int EVENT	= 2;	// Green
+	public static final int ADMIN	= 3;	// Blue
+	
 	private User myUser;
 	private String version;
 	
 	private String chatBuffer;
+	private int chatBufferType;
 	private boolean newChatMessage;
 	
 	private String users;
@@ -17,6 +24,8 @@ public class LobbyModel extends Observable
 	{
 		myUser = null;
 		chatBuffer = null;
+		chatBufferType = 0;
+		
 		users = "";
 		
 		newChatMessage = false;
@@ -85,6 +94,7 @@ public class LobbyModel extends Observable
 	public void printMessage(int type, String message)
 	{
 		chatBuffer = message;
+		chatBufferType = type;
 		newChatMessage = true;
 		
 		setChanged();
@@ -118,5 +128,9 @@ public class LobbyModel extends Observable
 			setChanged();
 			notifyObservers();
 		}
+	}
+
+	public int getChatBufferType() {
+		return chatBufferType;
 	}
 }
