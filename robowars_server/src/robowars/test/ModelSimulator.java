@@ -35,7 +35,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 		model.addListener(this);
 		model.addRobot(new GameRobot("robot1"));
 		model.addRobot(new GameRobot("robot2", new Pose(400,400,180), 1));
-		model.addListener(new Admin2DGameView((int) GameModel.DEFAULT_ARENA_SIZE, model));
+		model.addListener(new Admin2DGameView(600, model));
 		
 		
 	}

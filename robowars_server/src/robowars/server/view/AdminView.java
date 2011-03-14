@@ -248,7 +248,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_LAUNCH) {
 			// addLineToMainChat(event.toString());
 			ServerLobby source = (ServerLobby) event.getSource();
-			Admin2DGameView view = new Admin2DGameView((int) GameModel.DEFAULT_ARENA_SIZE, source.getCurrentGame().getGameModel());
+			Admin2DGameView view = new Admin2DGameView(500, source.getCurrentGame().getGameModel());
 			source.getCurrentGame().getGameModel().addListener(view);
 		} else if (event.getEventType() == ServerLobbyEvent.EVENT_GAME_OVER) {
 			// addLineToMainChat(event.toString());
