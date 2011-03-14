@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import lejos.robotics.Pose;
+import java.io.Serializable;
+import java.util.Vector;
+
+import lejos.robotics.Pose;
 
 /**
  * Represents a command that should be passed to a remote robot. Several
@@ -37,7 +41,7 @@ public class RobotCommand implements Serializable{
 	private int priority;
 
 	/** The maximum value that should be sent in the moveSpeed parameter */
-	public static final float MAX_SPEED = 50; // This will need to be tweaked for the real hardware
+	public static final float MAX_SPEED = 75; // This will need to be tweaked for the real hardware
 
 	/**
 	 * Generates a new RobotCommand
@@ -84,12 +88,11 @@ public class RobotCommand implements Serializable{
 	
 	/**
 	 * Generates a STOP robot command
-	 * NOTE: Stop commands default to a priority of DEFAULT + 1
 	 * @return A STOP robot command
 	 */
 	public static RobotCommand stop() {
 		return new RobotCommand(CommandType.STOP, 0, 
-				0, null, null, DEFAULT_PRIORITY + 1);
+				0, null, null, DEFAULT_PRIORITY);
 	}
 	
 	/**
@@ -186,12 +189,13 @@ public class RobotCommand implements Serializable{
 		}
 		
 		if(newPos != null) {
-			returnStr += "|x:" + newPos.getX() + " y:" + newPos.getY()
-				+ " h:" + newPos.getHeading();
+			returnStr += "|" + newPos.getX() + "|" + newPos.getY()
+				+ "|" + newPos.getHeading();
 		} 
 		returnStr += "]";
 		
 		return returnStr;
 	}
+
 }
 

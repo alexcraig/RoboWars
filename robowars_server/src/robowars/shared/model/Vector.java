@@ -1,6 +1,7 @@
 package robowars.shared.model;
 
 import java.math.*;
+import lejos.robotics.Pose;
 
 public class Vector {
 	private float x;
@@ -16,23 +17,49 @@ public class Vector {
 	}
 	
 	public void unitVector(){
-		float magnitude = (float) Math.sqrt(x*x + y*y);
+		float magnitude = magnitude();
 		x /= magnitude;
 		y /= magnitude;
+	}
+	
+	public float magnitude(){
+		return (float) Math.sqrt(x*x + y*y);
+	}
+	
+	public static Vector createUnitVector(Pose pose){
+		Vector v = new Vector(1,0);
+		v.rotate(pose.getHeading());
+		return v;
+	}
+	
+	public void rotate(float angleDifference){
+		Vector.setPolarCoord(this);
+		setTheta(getTheta() + angleDifference);
+		System.out.println("In Polar: " + getX() + "," + getY());
+		Vector.setCartesianCoord(this);
+		System.out.println("In Cart: " + getX() + "," + getY());
 	}
 
 	public static void setPolarCoord(Vector p){
 		double X = (double) p.getX();
 		double Y = (double) p.getY();
-		p.setR((float) Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2)));
+		p.setR(p.magnitude());
 		p.setTheta((float) (Math.toDegrees(Math.atan2(Y, X))));
 	}
 	
 	public static void setCartesianCoord(Vector p){
 		double r = (double) p.getR();
 		double theta = (double) p.getTheta();
-		p.setX((float) (Math.cos(Math.toRadians(theta)) * r));
-		p.setY((float) (Math.sin(Math.toRadians(theta)) * r));
+		
+		if(theta == 90 || theta == -90)
+			p.setX(0);
+		else
+			p.setX((float) (Math.cos(Math.toRadians(theta)) * r));
+		
+		if(theta == 180)
+			p.setY(0);
+		else
+			p.setY((float) (Math.sin(Math.toRadians(theta)) * r));
 	}
 	
 	public float getX(){return x;}

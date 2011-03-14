@@ -1,28 +1,20 @@
 package robowars.shared.model;
 
-import java.util.Vector;
 import lejos.robotics.Pose;
 
 public class FreeTest extends GameModel{
-
-	private Obstacle theWall;
 	
 	public FreeTest() {
 		super.gameType = GameType.FREETEST;
 		super.initVariables();
-		Pose p = new Pose(600,500,0);
-		//theWall = new Obstacle(p,10,10,0,false,false,0);
-		//entities.add(theWall);
 	}
 	
 	public void updateGameState(long timeElapsed){	
-		for(GameEntity e : entities){
-			for(GameEntity t : entities){
-				if(!e.equals(t)){
-					if(e.checkCollision(t)){
-						for (GameListener l : listeners) {
-							l.gameStateChanged(new GameEvent(this, GameEvent.COLLISION_DETECTED));
-						}
+		for(GameRobot r : robots){
+			for(GameEntity e : entities){
+				if(!r.equals(e)){
+					if(r.checkCollision(e)){
+						notifyListeners(GameEvent.COLLISION_DETECTED);
 					}
 				}
 			}
@@ -32,6 +24,9 @@ public class FreeTest extends GameModel{
 	public boolean checkGameOver(){
 		return false;
 	}
+	
+	
+	public void generateProjectile(GameRobot robot){}
 	
 	public boolean isValidCommand(RobotCommand command){
 		return true;

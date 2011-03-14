@@ -34,8 +34,9 @@ public class ModelSimulator implements KeyListener, GameListener{
 		
 		model.addListener(this);
 		model.addRobot(new GameRobot("robot1"));
-		model.addRobot(new GameRobot("robot2", new Pose(400,400,180), 1));
-		model.addListener(new Admin2DGameView((int) GameModel.DEFAULT_ARENA_SIZE, model));
+		model.addRobot(new GameRobot("robot2", new Pose((0.8f * GameModel.DEFAULT_ARENA_SIZE),(0.8f * GameModel.DEFAULT_ARENA_SIZE),180), 1));
+		model.addListener(new Admin2DGameView(500, model));
+		model.startGame();
 		
 		
 	}
@@ -47,7 +48,10 @@ public class ModelSimulator implements KeyListener, GameListener{
 	
 	@Override
 	public void gameStateChanged(GameEvent e){
-		
+		if (e.getEventType() == GameEvent.GAME_OVER){
+			System.out.println("Game Over!");
+			System.exit(0);
+		}
 	}
 	
 	@Override
@@ -66,7 +70,10 @@ public class ModelSimulator implements KeyListener, GameListener{
 			Pose newPose = new Pose(model.getGameRobot("robot1").getPose().getX(),
 					model.getGameRobot("robot1").getPose().getY(),
 					model.getGameRobot("robot1").getPose().getHeading());
-			newPose.rotateUpdate(3);
+			if(model instanceof LightCycles)
+				newPose.rotateUpdate(90);
+			else
+				newPose.rotateUpdate(3);
 			model.updateRobotPosition("robot1", newPose);
 			model.updateGameState(1);
 		}
@@ -75,7 +82,10 @@ public class ModelSimulator implements KeyListener, GameListener{
 			Pose newPose = new Pose(model.getGameRobot("robot1").getPose().getX(),
 					model.getGameRobot("robot1").getPose().getY(),
 					model.getGameRobot("robot1").getPose().getHeading());
-			newPose.rotateUpdate(-3);
+			if(model instanceof LightCycles)
+				newPose.rotateUpdate(-90);
+			else
+				newPose.rotateUpdate(-3);;
 			model.updateRobotPosition("robot1", newPose);
 			model.updateGameState(1);
 		}
@@ -93,7 +103,10 @@ public class ModelSimulator implements KeyListener, GameListener{
 			Pose newPose = new Pose(model.getGameRobot("robot2").getPose().getX(),
 					model.getGameRobot("robot2").getPose().getY(),
 					model.getGameRobot("robot2").getPose().getHeading());
-			newPose.rotateUpdate(3);
+				if(model instanceof LightCycles)
+					newPose.rotateUpdate(90);
+				else
+					newPose.rotateUpdate(3);
 			model.updateRobotPosition("robot2", newPose);
 			model.updateGameState(1);
 		}
@@ -102,17 +115,27 @@ public class ModelSimulator implements KeyListener, GameListener{
 			Pose newPose = new Pose(model.getGameRobot("robot2").getPose().getX(),
 					model.getGameRobot("robot2").getPose().getY(),
 					model.getGameRobot("robot2").getPose().getHeading());
-			newPose.rotateUpdate(-3);
+			if(model instanceof LightCycles)
+				newPose.rotateUpdate(-90);
+			else
+				newPose.rotateUpdate(-3);
 			model.updateRobotPosition("robot2", newPose);
 			model.updateGameState(1);
 		}
+		
+		if(arg0.getKeyCode()==KeyEvent.VK_ENTER){
+			System.out.println("Fire!");
+			model.generateProjectile(model.getGameRobot("robot1"));
+		}
+		if(arg0.getKeyCode()==KeyEvent.VK_SPACE){
+			System.out.println("Fire!");
+			model.generateProjectile(model.getGameRobot("robot2"));
+		}
 		if(arg0.getKeyCode()==KeyEvent.VK_S){
 			System.out.println("Stop");
-			//dataOut.writeObject(RobotCommand.stop());
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_X){
 			System.out.println("Exit");
-			//dataOut.writeObject(RobotCommand.exit());
 			System.exit(0);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_DOWN){

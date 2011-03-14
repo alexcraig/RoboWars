@@ -47,14 +47,20 @@ public class SystemControl {
 		new Thread(tcpServer).start();
 		
 		// Start the NXT Bluetooth discovery server
-		BluetoothServer bluetooth = new BluetoothServer(lobby);
+		final BluetoothServer bluetooth = new BluetoothServer(lobby);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				bluetooth.initRobotDetection();
+			}
+		}).start();
 		
 		// Generate the administrator GUI
 		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer(),
 				bluetooth);
 		
 		// TESTING
-		new TestRobotProxy(lobby, "TestRobot1");
+		//new TestRobotProxy(lobby, "TestRobot1");
 		// new TestRobotProxy(lobby, "TestRobot2");
 	}
 	
