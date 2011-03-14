@@ -43,13 +43,13 @@ public class GameRobot extends GameEntity{
 	*/
 	public GameRobot(String identifier, Pose pose, int id) {
 		super(pose, null, id);
-		Vector shape[] = new Vector[6];
-		shape[0] = new Vector(10,10);
-		shape[1] = new Vector(-10,10);
-		shape[2] = new Vector(0,0);
-		shape[3] = new Vector(-10,-10);
-		shape[4] = new Vector(10,-10);
-		shape[5] = new Vector(20,0);	
+		Vector shape[] = new Vector[4];
+		shape[0] = new Vector(10,8);
+		shape[1] = new Vector(-10,8);
+		shape[2] = new Vector(-10,-8);
+		shape[3] = new Vector(10,-8);
+		//shape[3] = new Vector(10,-10);
+		//shape[5] = new Vector(20,0);
 		
 		super.setVertices(shape);
 
@@ -64,19 +64,19 @@ public class GameRobot extends GameEntity{
 	
 	
 	/**
-	* Generates a new robot with a position (0,0) and heading of 0 (looking 
+	* Generates a new robot with a position (10,10) and heading of 0 (looking 
 	* along positive x-axis), shaped as a 30x20 arrow, and it's id set to 0.
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
 	public GameRobot(String identifier) {
-		super(new Pose(0,0,0), null, 0);
-		Vector shape[] = new Vector[6];
-		shape[0] = new Vector(10,10);
-		shape[1] = new Vector(-10,10);
-		shape[2] = new Vector(0,0);
-		shape[3] = new Vector(-10,-10);
-		shape[4] = new Vector(10,-10);
-		shape[5] = new Vector(20,0);	
+		super(new Pose(10,10,0), null, 0);
+		Vector shape[] = new Vector[4];
+		shape[0] = new Vector(10,8);
+		shape[1] = new Vector(-10,8);
+		shape[2] = new Vector(-10,-8);
+		shape[3] = new Vector(10,-8);
+		//shape[3] = new Vector(10,-10);
+		//shape[5] = new Vector(20,0);	
 		
 		super.setVertices(shape);
 
@@ -114,6 +114,9 @@ public class GameRobot extends GameEntity{
 
 
 	public void decreaseHealth(int change){health-=change;}
+	
+	public int getHealth(){return health;}
+	
 	public String getRobotId(){return robotIdentifier;}
 
 	/**

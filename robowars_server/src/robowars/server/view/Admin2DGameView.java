@@ -101,7 +101,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
 			//for (int i = 0; i < n; i++){
 			//	System.out.print("(" + x[i] + "," + y[i] + ")");
 			//}
-			//System.out.print("/n");
+			//System.out.print("\n");
 			g2d.setColor(Color.BLUE);
 			g2d.fillPolygon(x, y, n);
 			g2d.setColor(Color.ORANGE);

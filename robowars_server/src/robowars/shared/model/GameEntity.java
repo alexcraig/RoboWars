@@ -28,9 +28,9 @@ public abstract class GameEntity implements Serializable{
 	
 	//TODO: This is general polygon collision detection with support for
 	//rotating structures, but an easy way to represent circles is still needed.
-	//Perhaps a shape with one vertice to represent radius?
+	//Perhaps a shape with one vertex to represent radius?
 	public boolean checkCollision(GameEntity target){
-		System.out.print("Checking collide... ");
+		//System.out.print("Checking collide... ");
 		Vector currentEdge;
 		for (int i = 0; i < edges.length + target.getEdges().length; i++){
 			if (i < edges.length) {
@@ -46,12 +46,12 @@ public abstract class GameEntity implements Serializable{
 	        projectToAxis(perpAxis, this.vertices,  intervalA);
 	        projectToAxis(perpAxis, target.getVertices(),  intervalB);
 	        if (intervalDistance(intervalA, intervalB) > 0){
-	        	System.out.println("None.");
+	        	//System.out.println("None.");
 	            return false;
 	        }
 
 		}
-		System.out.println("Collision between " + this.getId() + " and " + target.getId());
+		//System.out.println("Collision between " + this.getId() + " and " + target.getId());
 		return true;
 	}
 	
@@ -59,6 +59,7 @@ public abstract class GameEntity implements Serializable{
 		float headingDiff = pose.getHeading() - this.pose.getHeading();
 		float xDiff = pose.getX() - this.pose.getX();
 		float yDiff = pose.getY() - this.pose.getY();
+		System.out.println("Entity movement diffs: (" + xDiff + "," + yDiff + "," + headingDiff + ")");
 		this.pose = pose;
 		for (Vector v : vertices){
 			v.setX(v.getX() + xDiff);
@@ -78,11 +79,19 @@ public abstract class GameEntity implements Serializable{
 		generateEdges();
 	}
 	
+	public void setVertex(int index, Vector vector){
+		vertices[index] = vector;
+	}
+	
 	public void getCoordArrays(int x[], int y[]){
 		for(int i = 0; i < vertices.length; i++){
 			x[i] = (int) vertices[i].getX();
 			y[i] = (int) vertices[i].getY();
 		}
+	}
+	
+	public Pose clonePose(){
+		return new Pose(pose.getX(), pose.getY(), pose.getHeading());
 	}
 	
 	public Pose getPose(){
@@ -91,6 +100,10 @@ public abstract class GameEntity implements Serializable{
 	
 	public Vector[] getVertices(){
 		return vertices;
+	}
+	
+	public Vector getVertex(int index){
+		return vertices[index];
 	}
 	
 	public int getId(){return id;}
@@ -138,7 +151,7 @@ public abstract class GameEntity implements Serializable{
 	    }
 	}
 	
-	private void compensateForRotation(Vector points[], float angleDifference){
+	protected void compensateForRotation(Vector points[], float angleDifference){
 		for (Vector p : points){
 			p.setX(p.getX() - pose.getX());
 			p.setY(p.getY() - pose.getY());
