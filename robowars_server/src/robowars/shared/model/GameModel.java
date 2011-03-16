@@ -36,6 +36,7 @@ public abstract class GameModel implements Serializable{
 		robots = new ArrayList<GameRobot>();
 		minimumPlayers = gameType.getMinimumPlayers();
 		numRobots = 0;
+		entities.addAll(Obstacle.createArenaBoundary());
 	}
 
 	public void addListener(GameListener listener){
@@ -134,6 +135,12 @@ public abstract class GameModel implements Serializable{
 				return;
 			}
 		}
+	}
+	
+	public abstract void generateProjectile(GameRobot robot);
+	
+	public void addEntity(GameEntity e){
+		entities.add(e);
 	}
 
 	private byte[] serializeState() {

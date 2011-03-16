@@ -1,7 +1,6 @@
 package robowars.shared.model;
 
 import java.util.ArrayList;
-import java.util.Vector;
 import lejos.robotics.Pose;
 
 public class LightCycles extends GameModel {
@@ -39,6 +38,8 @@ public class LightCycles extends GameModel {
 	public boolean startGame(){
 		super.startGame();
 		if(inProgress){
+			//wallsOne.add(new Obstacle(robots.get(0).getPose()));
+			//wallsTwo.add(new Obstacle(robots.get(1).getPose()));
 			for (GameRobot r : robots){
 				r.setCommand(RobotCommand.moveContinuous(RobotCommand.MAX_SPEED));
 			}
@@ -55,28 +56,39 @@ public class LightCycles extends GameModel {
 			w2.passTime(timeElapsed);
 		}
 
-		Obstacle w1 = wallsOne.get(wallsOne.size() - 1);
-		Obstacle w2 = wallsTwo.get(wallsTwo.size() - 1);
-
-		if(w1.getTime() > wallFadeTime){
-			// TODO: Casting here may cause an overflow
-			w1.shrink((int)(w1.getTime() - wallFadeTime));
-			w1.passTime(wallFadeTime - w1.getTime());
-			if(w1.getLength() <= 0) {
-				wallsOne.remove(w1);
-				entities.remove(w1);
+		if(!wallsOne.isEmpty()){
+			Obstacle head = wallsOne.get(0);
+			Obstacle tail = wallsOne.get(wallsOne.size() - 1);
+			head.modifyLength((float) timeElapsed);
+			if(wallFadeTime != 0 && tail.getTime() > wallFadeTime){
+				// TODO: Casting here may cause an overflow
+				tail.modifyLength((float) (wallFadeTime - tail.getTime()));
+				tail.passTime(wallFadeTime - tail.getTime());
+				if(tail.getLength() <= 0) {
+					wallsOne.remove(tail);
+					entities.remove(tail);
+				}
 			}
 		}
-
-		if(w2.getTime() > wallFadeTime){
-			// TODO: Casting here may cause an overflow
-			w2.shrink((int)(w2.getTime() - wallFadeTime));
-			w2.passTime(wallFadeTime - w2.getTime());
-			if(w2.getLength() <= 0) {
-				wallsTwo.remove(w2);
-				entities.remove(w2);
+		
+		if(!wallsTwo.isEmpty()){
+			Obstacle head = wallsTwo.get(0);
+			Obstacle tail = wallsTwo.get(wallsTwo.size() - 1);
+			head.modifyLength((float) timeElapsed);
+			if(wallFadeTime != 0 && tail.getTime() > wallFadeTime){
+				// TODO: Casting here may cause an overflow
+				tail.modifyLength((float)(wallFadeTime - tail.getTime()));
+				tail.passTime(wallFadeTime - tail.getTime());
+				if(tail.getLength() <= 0) {
+					wallsTwo.remove(tail);
+					entities.remove(tail);
+				}
 			}
 		}
+		
+		
+
+		
 
 		if(checkGameOver()){
 			notifyListeners(GameEvent.GAME_OVER);
@@ -94,17 +106,17 @@ public class LightCycles extends GameModel {
 		if(robot == null)
 			return false;
 
-		if(robot.getPose().getHeading() != robot.getLastPose().getHeading()){
-			spawnNewWall(robot);
+		if(pose.getHeading() % 90 == 0 && pose.getHeading() != robot.getPose().getHeading()){
+			spawnNewWall(robot, pose);
 		}
 
 		return super.updateRobotPosition(identifier, pose);
 	}
 
-	public void spawnNewWall(GameRobot robot) {
-		Obstacle newWall = new Obstacle(robot.getPose(),0,wallWidth,1,false,false,0);
+	public void spawnNewWall(GameRobot robot,Pose pose) {
+		Obstacle newWall = new Obstacle(pose);
 		entities.add(newWall);
-		if(robot == super.robots.get(0)){
+		if(robot == robots.get(0)){
 			wallsOne.add(0, newWall);
 		}else{
 			wallsTwo.add(0, newWall);
@@ -112,24 +124,44 @@ public class LightCycles extends GameModel {
 	}
 
 	public boolean checkGameOver() {
-		for(GameEntity e : entities){
-			if (e instanceof Obstacle){
-				if(robots.get(0).checkCollision(e)) {
-					robots.get(0).setCommand(RobotCommand.stop());
-					notifyListeners(GameEvent.PLAYER_1_WINS);
-					inProgress = false;
-					return true;
-				}
-				if(robots.get(1).checkCollision(e)){
-					robots.get(1).setCommand(RobotCommand.stop());
-					notifyListeners(GameEvent.PLAYER_2_WINS);
-					inProgress = false;
-					return true;
-				}
+		
+		for(Obstacle o: wallsOne){
+			if(robots.get(0).checkCollision(o) && !o.equals(wallsOne.get(0))) {
+				robots.get(0).setCommand(RobotCommand.stop());
+				notifyListeners(GameEvent.PLAYER_2_WINS);
+				inProgress = false;
+				System.out.println("Collision between robot1 and wallsOne");
+				return true;
+			}
+			if(robots.get(1).checkCollision(o)) {
+				robots.get(1).setCommand(RobotCommand.stop());
+				notifyListeners(GameEvent.PLAYER_1_WINS);
+				inProgress = false;
+				System.out.println("Collision between robot2 and wallsOne");
+				return true;
+			}
+		}
+		
+		for(Obstacle o: wallsTwo){
+			if(robots.get(1).checkCollision(o) && !o.equals(wallsTwo.get(0))) {
+				robots.get(1).setCommand(RobotCommand.stop());
+				notifyListeners(GameEvent.PLAYER_1_WINS);
+				inProgress = false;
+				System.out.println("Collision between robot2 and wallsTwo");
+				return true;
+			}
+			if(robots.get(0).checkCollision(o)) {
+				robots.get(0).setCommand(RobotCommand.stop());
+				notifyListeners(GameEvent.PLAYER_2_WINS);
+				inProgress = false;
+				System.out.println("Collision between robot1 and wallsTwo");
+				return true;
 			}
 		}
 		return false;
 	}
+	
+	public void generateProjectile(GameRobot robot) {}
 
 	public void processCommand(RobotCommand command) {
 		super.processCommand(command);
