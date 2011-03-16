@@ -1,8 +1,4 @@
 package robowars.robot;
-
-/**
- 
-
 /**
  * LejosOutputStream.java
  * This Class is used to send objects from either the client or the mindstorm
@@ -12,8 +8,10 @@ package robowars.robot;
  */
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Vector;
 
-import robowars.shared.model.*;
+import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 import lejos.robotics.Pose;
 
 
@@ -49,6 +47,15 @@ public class LejosOutputStream {
 		else if(o instanceof RobotMap){
 			s="3";
 			s+=((RobotMap)o).toString();
+		}
+		else if(o instanceof Vector){
+			s="4[";
+			Vector v= (Vector) o;
+			for(int i=0; i<v.size(); i++){
+				s+=v.elementAt(i)+"|";
+			}
+			s=s.substring(0, s.length()-1);
+			s+="]";
 		}
 		else return;
 		byte[] bytes=getBytes(s);

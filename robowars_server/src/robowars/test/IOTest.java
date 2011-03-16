@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Vector;
 
 import lejos.robotics.Pose;
 
+import robowars.robot.ColorSensor;
 import robowars.robot.LejosInputStream;
 import robowars.robot.LejosOutputStream;
 import robowars.shared.model.RobotCommand;
@@ -20,18 +22,41 @@ public class IOTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		LejosOutputStream out;
+		RobotCommand mc =RobotCommand.moveContinuous(100);
+		RobotCommand stop = null;
+		RobotCommand exit =null;
+		RobotCommand leftt=null;
+		RobotCommand rightt=null;
+		LejosOutputStream out=null;
+		RobotCommand rollt=null;
+		RobotCommand setp=null;
+		Vector v=null;
+		Pose p=null;
+		RobotMap map=null;
 		try {
 			out = new LejosOutputStream(new FileOutputStream("iotest.txt"));
-			out.writeObject(RobotCommand.moveContinuous(100));
-			out.writeObject(RobotCommand.stop());
-			out.writeObject(RobotCommand.exit());
-			out.writeObject(RobotCommand.turnAngleLeft(90));
-			out.writeObject(RobotCommand.turnAngleRight(90));
-			out.writeObject(RobotCommand.rollingTurn(100, 90));
-			out.writeObject(RobotCommand.setPosition(new Pose(1,2,3)));
-			out.writeObject(new Pose(0,(float)1.0,(float) 3.4));
-			out.writeObject(new RobotMap(new File("colorMap.txt")));
+			out.writeObject(mc);
+			stop=RobotCommand.stop();
+			out.writeObject(stop);
+			exit=RobotCommand.exit();
+			out.writeObject(exit);
+			leftt=RobotCommand.turnAngleLeft(90);
+			out.writeObject(leftt);
+			rightt=RobotCommand.turnAngleRight(90);
+			out.writeObject(rightt);
+			rollt=RobotCommand.rollingTurn(90,100);
+			out.writeObject(rollt);
+			setp=RobotCommand.setPosition(new Pose(1,2,3));
+			out.writeObject(setp);
+			p=new Pose(0,(float)1.0,(float) 3.4);
+			out.writeObject(p);
+			v=new Vector();
+			v.addElement(1);
+			v.addElement(2);
+			v.addElement(3);
+			out.writeObject(v);
+			map=ColorSensor.generate();
+			out.writeObject(map);
 			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -43,17 +68,20 @@ public class IOTest {
 		LejosInputStream in;
 		try {
 			in = new LejosInputStream(new FileInputStream("iotest.txt"));
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			System.out.println(in.readObject());
-			//pose
-			Pose p=(Pose)in.readObject();
-			System.out.println("POSE: "+p.getX()+" "+p.getY()+" "+p.getHeading());
-			System.out.println("Robot Map:"+in.readObject());
+			System.out.println("MOVE CONTINUOUS: " + (mc.getThrottle()==((RobotCommand)in.readObject()).getThrottle()));
+			System.out.println("STOP: "+(stop.getThrottle()==((RobotCommand)in.readObject()).getThrottle()));
+			System.out.println("EXIT: "+(exit.getThrottle()==((RobotCommand)in.readObject()).getThrottle()));
+			System.out.println("LEFT TURN: "+(leftt.getTurnBearing()==((RobotCommand)in.readObject()).getTurnBearing()));
+			System.out.println("RIGHT CONTINUOUS: "+(rightt.getTurnBearing()==((RobotCommand)in.readObject()).getTurnBearing()));
+			Object rollC=in.readObject();
+			System.out.println("ROLLING TURN: "+(rollt.getTurnBearing()==((RobotCommand)rollC).getTurnBearing()&&rollt.getThrottle()==((RobotCommand)rollC).getThrottle()));
+			Pose testP=((RobotCommand)in.readObject()).getPos();
+			System.out.println("SET POSE: "+(setp.getPos().getX()==testP.getX()&&setp.getPos().getY()==testP.getY()&&setp.getPos().getHeading()==testP.getHeading()));
+			testP=(Pose) in.readObject();
+			System.out.println("POSE: "+(p.getX()==testP.getX()&&p.getY()==testP.getY()&&p.getHeading()==testP.getHeading()));
+			Vector testV=(Vector)in.readObject();
+			System.out.println("Color Vector:"+(v.get(0)==testV.get(0)&&v.get(1)==testV.get(1)&&v.get(2)==testV.get(2)));
+			System.out.println("ROBOT MAP:"+testMap((RobotMap) in.readObject(), map));
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -65,5 +93,12 @@ public class IOTest {
 
 
 	}
-
+	private static boolean testMap(RobotMap in, RobotMap test){
+		for(int i=0; i<in.getPoints().size(); i++){
+			for(int x=0; x<((Vector)in.getPoints().get(i)).size(); x++){
+				if(((Vector)in.getPoints().get(i)).get(x)!=((Vector)in.getPoints().get(i)).get(x))return false;
+			}
+		}
+		return true;
+	}
 }

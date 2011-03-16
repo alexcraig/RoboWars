@@ -27,7 +27,6 @@ public class BluetoothServer {
 	 */
 	public BluetoothServer(ServerLobby lobby) {
 		this.lobby = lobby;
-		initRobotDetection();
 	}
 	
 	/**

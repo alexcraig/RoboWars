@@ -27,7 +27,7 @@ public class Listener implements KeyListener{
 		if(arg0.getKeyCode()==KeyEvent.VK_UP){
 			try {
 				System.out.println("Up");
-				dataOut.writeObject(RobotCommand.moveContinuous(100));
+				dataOut.writeObject(RobotCommand.rollingTurn(100,0));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -71,10 +71,57 @@ public class Listener implements KeyListener{
 				e.printStackTrace();
 			}
 		}
-		
+		if(arg0.getKeyCode()==KeyEvent.VK_D){
+			try{
+					System.out.println("Rotate Right");
+					dataOut.writeObject(RobotCommand.rollingTurn(100, -100));
+					Thread.sleep(1000);
+					dataOut.writeObject(RobotCommand.stop());
+			}
+			catch(Exception e){
+				
+			}
+		}
+		if(arg0.getKeyCode()==KeyEvent.VK_A){
+			try{
+				System.out.println("Rotate left");
+				dataOut.writeObject(RobotCommand.rollingTurn(100, -100));
+				Thread.sleep(1000);
+				dataOut.writeObject(RobotCommand.stop());
+			}
+			catch(Exception e){
+				
+			}
+		}
+		if(arg0.getKeyCode()==KeyEvent.VK_W){
+			try{
+				System.out.println("Rotate forward");
+				dataOut.writeObject(RobotCommand.rollingTurn(100, 50));
+				Thread.sleep(1000);
+				dataOut.writeObject(RobotCommand.rollingTurn(-100, 50));
+				Thread.sleep(1000);
+				dataOut.writeObject(RobotCommand.stop());
+			}
+			catch(Exception e){
+				
+			}
+		}    
+		if(arg0.getKeyCode()==KeyEvent.VK_Z){
+			try{
+				System.out.println("Rotate back");
+				dataOut.writeObject(RobotCommand.rollingTurn(100, 50));
+				Thread.sleep(1000);
+				dataOut.writeObject(RobotCommand.rollingTurn(-100, 50));
+				Thread.sleep(1000);
+				dataOut.writeObject(RobotCommand.stop());
+			}
+			catch(Exception e){
+				
+			}
+		} 
 		if(arg0.getKeyCode()==KeyEvent.VK_DOWN){
 			try {
-				Date time = new Date();
+				/*Date time = new Date();
 				long millis = time.getTime();
 				for(int i = 0 ; i < 100; i++){
 					int neg;
@@ -97,7 +144,9 @@ public class Listener implements KeyListener{
 					//dataOut.writeObject(RobotCommand.stop());
 					//System.out.println("Stop " + i);
 				}
-				long diff = time.getTime() - millis;
+				long diff = time.getTime() - millis;*/
+				System.out.println("Down");
+				dataOut.writeObject(RobotCommand.rollingTurn(-100,0));
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

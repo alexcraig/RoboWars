@@ -1,10 +1,12 @@
 package robowars.shared.model;
+
 public class MapPoint {
-	private int x,y,color;
+	private int color;
+	private float x,y;
 	public MapPoint(){
 		this(-1,-1,-1);
 	}
-	public MapPoint(int x, int y, int color) {
+	public MapPoint(float x, float y, int color) {
 		this.x=x;
 		this.y=y;
 		this.color=color;
@@ -13,11 +15,11 @@ public class MapPoint {
 		return color;
 	}
 
-	public int getX() {
+	public float getX() {
 		return x;
 	}
 
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 	public String toString(){

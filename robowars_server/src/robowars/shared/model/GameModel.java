@@ -16,7 +16,7 @@ public abstract class GameModel implements Serializable{
 	protected int numRobots;
 	protected transient ArrayList<GameListener> listeners;
 
-	public static final float DEFAULT_ARENA_SIZE = 500;
+	public static final float DEFAULT_ARENA_SIZE = 140;
 
 	public static GameModel generateGameModel(GameType gameType){
 		if(gameType == GameType.LIGHTCYCLES)

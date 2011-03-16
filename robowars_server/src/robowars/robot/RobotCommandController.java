@@ -1,9 +1,9 @@
 package robowars.robot;
+
 import java.io.*;
 
 import robowars.shared.model.CommandType;
 import robowars.shared.model.RobotCommand;
-import robowars.shared.model.RobotMap;
 import lejos.nxt.LCD;
 import lejos.nxt.comm.*;
 import lejos.robotics.Pose;
@@ -14,24 +14,25 @@ public class RobotCommandController extends Thread{
 	private LejosInputStream dataIn;
 	private ColorSensor colorSensor;
 	
-	public RobotCommandController(RobotMovement movement){
+	public RobotCommandController(RobotMovement movement, boolean test){
 		 NXTConnection connection = Bluetooth.waitForConnection();
 		 LCD.drawString("Connected",0,0);
 		 dataOut=new LejosOutputStream(connection.openDataOutputStream());
 		 dataIn=new LejosInputStream(connection.openDataInputStream());
+		 LCD.drawString("Streams opened",0,1);
 		 this.move=movement;
-		 colorSensor=new ColorSensor(dataOut, move);
+		 LCD.drawString("Move created", 0, 3);
+		 colorSensor=new ColorSensor(dataOut, move, test);
+		 try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e2) {
+		}
 		 new Thread(new Runnable(){
 			private Pose previousPose, currentPose;
 			private final int IGNORE_THRESHOLD=5;
 			private int ignore=0;
 			public void run() {
-				while(colorSensor==null){
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-					}
-				}
+				LCD.drawString("PTStarted",0,5);
 				while(true){
 					if(move!=null){
 						try {
@@ -44,9 +45,7 @@ public class RobotCommandController extends Thread{
 							}
 							if(currentPose!=previousPose||ignore>IGNORE_THRESHOLD){
 								LCD.drawString("Position Updated"+currentPose,0,2);
-								if(colorSensor!=null){
-									dataOut.writeObject(currentPose);
-								}
+								dataOut.writeObject(currentPose);
 								previousPose=currentPose;
 								ignore=0;
 							}
@@ -64,17 +63,17 @@ public class RobotCommandController extends Thread{
 							System.exit(0);
 						}
 					}
-					try {
-						sleep(333);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-					
-					}
+					colorSensor.read();
 				}
 			} 
 		 }).start();
 	}
 	public void run(){
+		System.out.println("INSStarted");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e2) {
+		}
 		Object input=null;
 		try {
 			while((input=dataIn.readObject())!=null){
@@ -100,21 +99,6 @@ public class RobotCommandController extends Thread{
 					}
 					if(command.getType()==CommandType.EXIT){
 						System.exit(0);
-					}
-				}
-				else if(input instanceof RobotMap){
-					if(colorSensor==null){
-						System.out.println("Map Received");
-						colorSensor=new ColorSensor(dataOut, move);
-						System.out.println("Sensor Made");
-						colorSensor.start();
-						System.out.println("Sensor Started");
-					}
-					else{
-						System.out.println("Map 2 Received");
-						colorSensor.yield();
-						colorSensor=new ColorSensor(dataOut, move);
-						colorSensor.start();
 					}
 				}
 				else{
