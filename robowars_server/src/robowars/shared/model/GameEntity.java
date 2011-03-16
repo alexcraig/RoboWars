@@ -1,8 +1,6 @@
 package robowars.shared.model;
 
 import java.io.Serializable;
-import java.math.*;
-import lejos.robotics.Pose;
 
 /**
 *
@@ -13,15 +11,15 @@ public abstract class GameEntity implements Serializable{
 
 
 	private static final long serialVersionUID = 5016873544195577415L;
-	protected Pose pose;
+	protected Posture posture;
 	protected Vector vertices[];
 	protected Vector edges[];
 	protected int id;
 	
 
-	public GameEntity(Pose pose, Vector vertices[], int id){
+	public GameEntity(Posture posture, Vector vertices[], int id){
 		this.id=id;
-		this.pose = pose;
+		this.posture = posture;
 		if(vertices != null)
 			setVertices(vertices);
 	}
@@ -51,16 +49,16 @@ public abstract class GameEntity implements Serializable{
 	        }
 
 		}
-		//System.out.println("Collision between " + this.getId() + " and " + target.getId());
+		System.out.println("Collision between " + this.getId() + " and " + target.getId());
 		return true;
 	}
 	
-	public void setPose(Pose pose){
-		float headingDiff = pose.getHeading() - this.pose.getHeading();
-		float xDiff = pose.getX() - this.pose.getX();
-		float yDiff = pose.getY() - this.pose.getY();
+	public void setPosture(Posture Posture){
+		float headingDiff = Posture.getHeading() - this.posture.getHeading();
+		float xDiff = Posture.getX() - this.posture.getX();
+		float yDiff = Posture.getY() - this.posture.getY();
 		System.out.println("Entity movement diffs: (" + xDiff + "," + yDiff + "," + headingDiff + ")");
-		this.pose = pose;
+		this.posture = Posture;
 		for (Vector v : vertices){
 			v.setX(v.getX() + xDiff);
 			v.setY(v.getY() + yDiff);
@@ -72,10 +70,10 @@ public abstract class GameEntity implements Serializable{
 	public void setVertices(Vector vertices[]){
 		this.vertices = vertices;
 		for (Vector v : this.vertices){
-			v.setX(v.getX() + pose.getX());
-			v.setY(v.getY() + pose.getY());
+			v.setX(v.getX() + posture.getX());
+			v.setY(v.getY() + posture.getY());
 		}
-		compensateForRotation(this.vertices, pose.getHeading());
+		compensateForRotation(this.vertices, posture.getHeading());
 		generateEdges();
 	}
 	
@@ -90,12 +88,12 @@ public abstract class GameEntity implements Serializable{
 		}
 	}
 	
-	public Pose clonePose(){
-		return new Pose(pose.getX(), pose.getY(), pose.getHeading());
+	public Posture clonePosture(){
+		return new Posture(posture.getX(), posture.getY(), posture.getHeading());
 	}
 	
-	public Pose getPose(){
-		return pose;
+	public Posture getPosture(){
+		return posture;
 	}
 	
 	public Vector[] getVertices(){
@@ -153,13 +151,13 @@ public abstract class GameEntity implements Serializable{
 	
 	protected void compensateForRotation(Vector points[], float angleDifference){
 		for (Vector p : points){
-			p.setX(p.getX() - pose.getX());
-			p.setY(p.getY() - pose.getY());
+			p.setX(p.getX() - posture.getX());
+			p.setY(p.getY() - posture.getY());
 			Vector.setPolarCoord(p);
 			p.setTheta(p.getTheta() + angleDifference);
 			Vector.setCartesianCoord(p);
-			p.setX(p.getX() + pose.getX());
-			p.setY(p.getY() + pose.getY());
+			p.setX(p.getX() + posture.getX());
+			p.setY(p.getY() + posture.getY());
 		}
 	}
 }

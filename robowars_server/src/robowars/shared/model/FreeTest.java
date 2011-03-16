@@ -1,6 +1,5 @@
 package robowars.shared.model;
 
-import lejos.robotics.Pose;
 
 public class FreeTest extends GameModel{
 	

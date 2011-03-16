@@ -1,8 +1,5 @@
 package robowars.shared.model;
 
-import lejos.robotics.Pose;
-import lejos.geom.Point;
-
 public class GameRobot extends GameEntity{
 
 	/**
@@ -14,8 +11,8 @@ public class GameRobot extends GameEntity{
 
 	private int health;
 	private int startingHealth;
-	private Point initLocation;
-	private Pose lastPose;
+	private Vector initLocation;
+	private Posture lastPosture;
 	private String robotIdentifier;
 	private RobotCommand command;
 	
@@ -25,12 +22,12 @@ public class GameRobot extends GameEntity{
 	/** Lock object to ensure mutual exclusion when accessing the last valid command */
 	private final Object lastCommandLock = new Object();
 
-	public GameRobot(Pose pose, Vector shape[], int id, int health, String robotId) {
-		super(pose, shape, id);
+	public GameRobot(Posture Posture, Vector shape[], int id, int health, String robotId) {
+		super(Posture, shape, id);
 		this.startingHealth=health;
 		this.health=health;
-		this.initLocation=pose.getLocation();
-		this.lastPose = pose;
+		this.initLocation=Posture.getLocation();
+		this.lastPosture = Posture;
 		this.robotIdentifier=robotId;
 		command = null;
 		setLastCommand(null);
@@ -41,8 +38,8 @@ public class GameRobot extends GameEntity{
 	* as a 30x20 arrow, and it's id set to 0.
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
-	public GameRobot(String identifier, Pose pose, int id) {
-		super(pose, null, id);
+	public GameRobot(String identifier, Posture posture, int id) {
+		super(posture, null, id);
 		Vector shape[] = new Vector[4];
 		shape[0] = new Vector(10,8);
 		shape[1] = new Vector(-10,8);
@@ -55,8 +52,8 @@ public class GameRobot extends GameEntity{
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
-		this.initLocation=pose.getLocation();
-		this.lastPose = pose;
+		this.initLocation = posture.getLocation();
+		this.lastPosture = posture;
 
 		robotIdentifier = identifier;
 		command = null;
@@ -69,7 +66,7 @@ public class GameRobot extends GameEntity{
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
 	public GameRobot(String identifier) {
-		super(new Pose(10,10,0), null, 0);
+		super(new Posture(10,10,0), null, 0);
 		Vector shape[] = new Vector[4];
 		shape[0] = new Vector(10,8);
 		shape[1] = new Vector(-10,8);
@@ -82,8 +79,8 @@ public class GameRobot extends GameEntity{
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
-		this.initLocation=pose.getLocation();
-		this.lastPose = pose;
+		this.initLocation= posture.getLocation();
+		this.lastPosture = posture;
 
 		robotIdentifier = identifier;
 		command = null;
@@ -95,13 +92,13 @@ public class GameRobot extends GameEntity{
 		return RobotCommand.returnToStart();
 	}
 
-	public Pose getLastPose(){
-		return lastPose;
+	public Posture getLastPosture(){
+		return lastPosture;
 	}
 
-	public void setPose(Pose newPose){
-		lastPose = super.getPose();
-		super.setPose(newPose);
+	public void setPosture(Posture newPosture){
+		lastPosture = super.getPosture();
+		super.setPosture(newPosture);
 	}
 	
 	public void setCommand(RobotCommand command){

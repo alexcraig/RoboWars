@@ -1,9 +1,7 @@
 package robowars.shared.model;
 
 import java.io.Serializable;
-import java.util.Vector;
 import java.util.ArrayList;
-import lejos.robotics.Pose;
 
 public abstract class GameModel implements Serializable{
 
@@ -66,7 +64,7 @@ public abstract class GameModel implements Serializable{
 
 	public abstract void updateGameState(long timeElapsed);
 
-	public boolean updateRobotPosition(String identifier, Pose pose) {
+	public boolean updateRobotPosition(String identifier, Posture Posture) {
 		GameRobot robot = null;
 
 		for(GameRobot r : robots){
@@ -77,7 +75,7 @@ public abstract class GameModel implements Serializable{
 		if(robot == null)
 			return false;//error, robot with specified identifier doesn't exist.
 
-		robot.setPose(pose);
+		robot.setPosture(Posture);
 		notifyListeners(GameEvent.ROBOT_MOVED);
 		return true;
 	}

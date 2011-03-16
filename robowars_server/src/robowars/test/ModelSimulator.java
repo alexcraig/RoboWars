@@ -7,8 +7,6 @@ import java.util.Date;
 
 import javax.swing.JFrame;
 
-import lejos.robotics.Pose;
-
 import robowars.robot.Listener;
 import robowars.server.view.Admin2DGameView;
 import robowars.shared.model.*;
@@ -34,7 +32,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 		
 		model.addListener(this);
 		model.addRobot(new GameRobot("robot1"));
-		model.addRobot(new GameRobot("robot2", new Pose((0.8f * GameModel.DEFAULT_ARENA_SIZE),(0.8f * GameModel.DEFAULT_ARENA_SIZE),180), 1));
+		model.addRobot(new GameRobot("robot2", new Posture((0.8f * GameModel.DEFAULT_ARENA_SIZE),(0.8f * GameModel.DEFAULT_ARENA_SIZE),180), 1));
 		model.addListener(new Admin2DGameView(500, model));
 		model.startGame();
 		
@@ -58,68 +56,68 @@ public class ModelSimulator implements KeyListener, GameListener{
 	public void keyPressed(KeyEvent arg0) {
 		if(arg0.getKeyCode()==KeyEvent.VK_UP){
 			System.out.println("Forward");
-			Pose newPose = new Pose(model.getGameRobot("robot1").getPose().getX(),
-					model.getGameRobot("robot1").getPose().getY(),
-					model.getGameRobot("robot1").getPose().getHeading());
-			newPose.moveUpdate(3);
-			model.updateRobotPosition("robot1", newPose);
+			Posture newPosture = new Posture(model.getGameRobot("robot1").getPosture().getX(),
+					model.getGameRobot("robot1").getPosture().getY(),
+					model.getGameRobot("robot1").getPosture().getHeading());
+			newPosture.moveUpdate(3);
+			model.updateRobotPosition("robot1", newPosture);
 			model.updateGameState(1);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_LEFT){
 			System.out.println("Left");
-			Pose newPose = new Pose(model.getGameRobot("robot1").getPose().getX(),
-					model.getGameRobot("robot1").getPose().getY(),
-					model.getGameRobot("robot1").getPose().getHeading());
+			Posture newPosture = new Posture(model.getGameRobot("robot1").getPosture().getX(),
+					model.getGameRobot("robot1").getPosture().getY(),
+					model.getGameRobot("robot1").getPosture().getHeading());
 			if(model instanceof LightCycles)
-				newPose.rotateUpdate(90);
+				newPosture.rotateUpdate(90);
 			else
-				newPose.rotateUpdate(3);
-			model.updateRobotPosition("robot1", newPose);
+				newPosture.rotateUpdate(3);
+			model.updateRobotPosition("robot1", newPosture);
 			model.updateGameState(1);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_RIGHT){	
 			System.out.println("Right");
-			Pose newPose = new Pose(model.getGameRobot("robot1").getPose().getX(),
-					model.getGameRobot("robot1").getPose().getY(),
-					model.getGameRobot("robot1").getPose().getHeading());
+			Posture newPosture = new Posture(model.getGameRobot("robot1").getPosture().getX(),
+					model.getGameRobot("robot1").getPosture().getY(),
+					model.getGameRobot("robot1").getPosture().getHeading());
 			if(model instanceof LightCycles)
-				newPose.rotateUpdate(-90);
+				newPosture.rotateUpdate(-90);
 			else
-				newPose.rotateUpdate(-3);;
-			model.updateRobotPosition("robot1", newPose);
+				newPosture.rotateUpdate(-3);;
+			model.updateRobotPosition("robot1", newPosture);
 			model.updateGameState(1);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_W){
 			System.out.println("Forward");
-			Pose newPose = new Pose(model.getGameRobot("robot2").getPose().getX(),
-					model.getGameRobot("robot2").getPose().getY(),
-					model.getGameRobot("robot2").getPose().getHeading());
-			newPose.moveUpdate(3);
-			model.updateRobotPosition("robot2", newPose);
+			Posture newPosture = new Posture(model.getGameRobot("robot2").getPosture().getX(),
+					model.getGameRobot("robot2").getPosture().getY(),
+					model.getGameRobot("robot2").getPosture().getHeading());
+			newPosture.moveUpdate(3);
+			model.updateRobotPosition("robot2", newPosture);
 			model.updateGameState(1);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_A){
 			System.out.println("Right");
-			Pose newPose = new Pose(model.getGameRobot("robot2").getPose().getX(),
-					model.getGameRobot("robot2").getPose().getY(),
-					model.getGameRobot("robot2").getPose().getHeading());
+			Posture newPosture = new Posture(model.getGameRobot("robot2").getPosture().getX(),
+					model.getGameRobot("robot2").getPosture().getY(),
+					model.getGameRobot("robot2").getPosture().getHeading());
 				if(model instanceof LightCycles)
-					newPose.rotateUpdate(90);
+					newPosture.rotateUpdate(90);
 				else
-					newPose.rotateUpdate(3);
-			model.updateRobotPosition("robot2", newPose);
+					newPosture.rotateUpdate(3);
+			model.updateRobotPosition("robot2", newPosture);
 			model.updateGameState(1);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_D){
 			System.out.println("Left");
-			Pose newPose = new Pose(model.getGameRobot("robot2").getPose().getX(),
-					model.getGameRobot("robot2").getPose().getY(),
-					model.getGameRobot("robot2").getPose().getHeading());
+			Posture newPosture = new Posture(model.getGameRobot("robot2").getPosture().getX(),
+					model.getGameRobot("robot2").getPosture().getY(),
+					model.getGameRobot("robot2").getPosture().getHeading());
 			if(model instanceof LightCycles)
-				newPose.rotateUpdate(-90);
+				newPosture.rotateUpdate(-90);
 			else
-				newPose.rotateUpdate(-3);
-			model.updateRobotPosition("robot2", newPose);
+				newPosture.rotateUpdate(-3);
+			model.updateRobotPosition("robot2", newPosture);
 			model.updateGameState(1);
 		}
 		

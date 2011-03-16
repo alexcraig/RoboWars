@@ -1,8 +1,6 @@
 package robowars.shared.model;
 
 import java.util.ArrayList;
-import lejos.robotics.Pose;
-import lejos.geom.Point;
 
 public class Obstacle extends GameEntity{
 
@@ -12,16 +10,16 @@ public class Obstacle extends GameEntity{
 	private boolean destroyOnContact;
 	private boolean destroyByProjectile;
 
-	public Obstacle(Pose pose, Vector shape[], int strength, boolean destroyOnContact, boolean destroyByProjectile, int id) {
-		super(pose, shape, id);
+	public Obstacle(Posture Posture, Vector shape[], int strength, boolean destroyOnContact, boolean destroyByProjectile, int id) {
+		super(Posture, shape, id);
 		this.strength=strength;
 		this.destroyByProjectile=destroyByProjectile;
 		this.destroyOnContact=destroyOnContact;
 		lifeTime = 0;
 	}
 
-	public Obstacle(Pose pose, Vector shape[]) {
-		super(pose, shape, 0);
+	public Obstacle(Posture Posture, Vector shape[], int id) {
+		super(Posture, shape, id);
 		this.strength=0;
 		this.destroyByProjectile=false;
 		this.destroyOnContact=false;
@@ -32,10 +30,10 @@ public class Obstacle extends GameEntity{
 	 * This Obstacle constructor is for use by the Light Cycles game mode.
 	 * It creates an obstacle of a rectangular shape with width 10 and length 0.
 	 * Obstacle destruction is set to false.
-	 * @param pose The pose where this obstacle will be centred.
+	 * @param Posture The Posture where this obstacle will be centred.
 	 */
-	public Obstacle(Pose pose) {
-		super(pose, new Vector[] {new Vector(0,5), 
+	public Obstacle(Posture Posture) {
+		super(Posture, new Vector[] {new Vector(0,5), 
 				new Vector(0,-5), 
 				new Vector(0,-5), 
 				new Vector(0,5)}, 1);
@@ -46,7 +44,7 @@ public class Obstacle extends GameEntity{
 
 	public void modifyLength(float amount){
 		//TODO: This functionality is only useful for the Lightcycles game mode. Should probably move this code to Lightcycles.java.
-		Vector unitV = Vector.createUnitVector(getPose());
+		Vector unitV = Vector.createUnitVector(getPosture());
 		Vector v1, v2;
 		if(amount >= 1){
 			v1 = getVertex(0);
@@ -85,32 +83,32 @@ public class Obstacle extends GameEntity{
 			Vector shape[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-			boundary.add(new Obstacle(new Pose(0,0,0), shape));
+			boundary.add(new Obstacle(new Posture(0,0,0), shape));
 		}
-		boundary.get(1).setPose(new Pose(GameModel.DEFAULT_ARENA_SIZE, 0, 90));
-		boundary.get(2).setPose(new Pose(GameModel.DEFAULT_ARENA_SIZE, GameModel.DEFAULT_ARENA_SIZE, 90));
-		boundary.get(3).setPose(new Pose(0, GameModel.DEFAULT_ARENA_SIZE, 90));
+		boundary.get(1).setPosture(new Posture(GameModel.DEFAULT_ARENA_SIZE, 0, 90));
+		boundary.get(2).setPosture(new Posture(GameModel.DEFAULT_ARENA_SIZE, GameModel.DEFAULT_ARENA_SIZE, 90));
+		boundary.get(3).setPosture(new Posture(0, GameModel.DEFAULT_ARENA_SIZE, 90));
 		*/
 		
 		Vector shape0[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-		boundary.add(new Obstacle(new Pose(0,0,0), shape0));
+		boundary.add(new Obstacle(new Posture(0,0,0), shape0, 100));
 		
 		Vector shape1[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-		boundary.add(new Obstacle(new Pose(GameModel.DEFAULT_ARENA_SIZE-10, 0, 90), shape1));
+		boundary.add(new Obstacle(new Posture(GameModel.DEFAULT_ARENA_SIZE-10, 0, 90), shape1, 101));
 		
 		Vector shape2[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-		boundary.add(new Obstacle(new Pose(GameModel.DEFAULT_ARENA_SIZE, GameModel.DEFAULT_ARENA_SIZE, 180), shape2));
+		boundary.add(new Obstacle(new Posture(GameModel.DEFAULT_ARENA_SIZE, GameModel.DEFAULT_ARENA_SIZE, 180), shape2, 102));
 		
 		Vector shape3[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-		boundary.add(new Obstacle(new Pose(0, GameModel.DEFAULT_ARENA_SIZE, -90), shape3));
+		boundary.add(new Obstacle(new Posture(0, GameModel.DEFAULT_ARENA_SIZE, -90), shape3, 103));
 		return boundary;
 	}
 	

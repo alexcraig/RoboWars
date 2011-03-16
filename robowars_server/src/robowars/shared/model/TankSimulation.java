@@ -1,7 +1,6 @@
 package robowars.shared.model;
 
 import java.util.ArrayList;
-import lejos.robotics.Pose;
 
 public class TankSimulation extends GameModel {
 	
@@ -49,10 +48,20 @@ public class TankSimulation extends GameModel {
 		
 		for(GameRobot r1 : robots){
 			for(GameRobot r2 : robots){
-				if(r1.checkCollision(r2)){
-					r1.setCommand(RobotCommand.stop());
-					r2.setCommand(RobotCommand.stop());
-				}
+				if(!r1.equals(r2))
+					if(r1.checkCollision(r2)){
+						r1.setCommand(RobotCommand.stop());
+						r2.setCommand(RobotCommand.stop());
+					}
+			}
+		}
+		
+		for(GameRobot r : robots){
+			for(GameEntity e : entities){
+				if(!r.equals(e) && !projectiles.contains(e))
+					if(r.checkCollision(e)){
+						r.setCommand(RobotCommand.stop());
+					}
 			}
 		}
 		
@@ -83,9 +92,9 @@ public class TankSimulation extends GameModel {
 	}
 	
 	public void generateProjectile(GameRobot robot) {
-		Pose projectilePose = robot.clonePose();
-		projectilePose.moveUpdate(10);
-		Projectile newProjectile = new Projectile(projectilePose,projectileSpeed, 0);
+		Posture projectilePosture = robot.clonePosture();
+		projectilePosture.moveUpdate(10);
+		Projectile newProjectile = new Projectile(projectilePosture,projectileSpeed, 0);
 		entities.add(newProjectile);
 		projectiles.add(newProjectile);
 	}

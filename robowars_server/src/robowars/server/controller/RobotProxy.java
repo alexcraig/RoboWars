@@ -11,6 +11,7 @@ import robowars.shared.model.CommandType;
 import robowars.shared.model.GameRobot;
 import robowars.shared.model.RobotCommand;
 import robowars.shared.model.RobotMap;
+import robowars.shared.model.Posture;
 
 import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
@@ -166,7 +167,7 @@ public class RobotProxy {
 		}
 		
 		if(command.getType() == CommandType.SET_POSITION) {
-			getRobot().setPose(command.getPos());
+			getRobot().setPosture(new Posture(command.getPos()));
 		}
 	}
 
@@ -198,7 +199,7 @@ public class RobotProxy {
 					if(readObj == null) break;
 					
 				    if (readObj instanceof Pose) {
-				    	Pose newPos = (Pose)readObj;
+				    	Posture newPos = new Posture((Pose)readObj);
 
 				    	if(controller != null) {
 				    		// If the robot is currently active in a game,
@@ -210,7 +211,7 @@ public class RobotProxy {
 				    		// robot instance (position updates to inactive
 				    		// robots do not need to be propagated and do
 				    		// not need to pass through the game controller)
-				    		getRobot().setPose(newPos);
+				    		getRobot().setPosture(newPos);
 				    	}
 				    }
 				}

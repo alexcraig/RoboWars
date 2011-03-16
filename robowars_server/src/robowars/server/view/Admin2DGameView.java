@@ -100,7 +100,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
 	
 	private void drawEntities(Graphics2D g2d){
 		for(GameEntity e : model.getEntities()){
-			System.out.println("Centre: (" + e.getPose().getX() + "," + e.getPose().getY() + "," + e.getPose().getHeading() + ")");
+			System.out.println("Centre: (" + e.getPosture().getX() + "," + e.getPosture().getY() + "," + e.getPosture().getHeading() + ")");
 			
 			int n = e.getVertices().length;
 			int x[] = new int[n];
@@ -121,8 +121,8 @@ public class Admin2DGameView extends JFrame implements GameListener{
 			g2d.setColor(Color.BLUE);
 			g2d.fillPolygon(x, y, n);
 			g2d.setColor(Color.ORANGE);
-			g2d.fillOval((int)(e.getPose().getX() * scalingFactor), 
-					(int)(e.getPose().getY() * scalingFactor), 5, 5);
+			g2d.fillOval((int)(e.getPosture().getX() * scalingFactor), 
+					(int)(e.getPosture().getY() * scalingFactor), 5, 5);
 		}
 	}
 	

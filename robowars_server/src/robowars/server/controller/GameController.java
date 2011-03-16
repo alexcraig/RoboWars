@@ -19,6 +19,7 @@ import robowars.shared.model.LightCycles;
 import robowars.shared.model.RobotCommand;
 import robowars.shared.model.RobotMap;
 import robowars.shared.model.TankSimulation;
+import robowars.shared.model.Posture;
 
 /**
  * Manages communication with an instance of GameModel. This classes 
@@ -394,13 +395,13 @@ public class GameController implements Runnable, GameListener {
 	 * @param robot	The proxy providing the position data
 	 * @param newPose	The new pose of the robot (position and heading)
 	 */
-	public void updateRobotPosition(RobotProxy robot, Pose newPose) {
+	public void updateRobotPosition(RobotProxy robot, Posture newPosture) {
 		log.debug("Got robot position update:\n\tRobot: " + robot.getIdentifier()
-				+ "\n\tX: " + newPose.getX() + "\tY: " + newPose.getY() + "\tHeading: "
-				+ newPose.getHeading());
+				+ "\n\tX: " + newPosture.getX() + "\tY: " + newPosture.getY() + "\tHeading: "
+				+ newPosture.getHeading());
 		
 		if(model != null) {
-			model.updateRobotPosition(robot.getIdentifier(), newPose);
+			model.updateRobotPosition(robot.getIdentifier(), newPosture);
 		}
 	}
 	

@@ -1,12 +1,6 @@
 package robowars.shared.model;
 
 import java.io.Serializable;
-import java.util.Vector;
-
-import lejos.robotics.Pose;
-import java.io.Serializable;
-import java.util.Vector;
-
 import lejos.robotics.Pose;
 
 /**

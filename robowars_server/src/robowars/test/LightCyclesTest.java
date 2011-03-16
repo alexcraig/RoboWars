@@ -50,10 +50,10 @@ public class LightCyclesTest {
 				robots.add((GameRobot) e);
 		}
 			assertEquals(2, num);
-			assertTrue(robots.get(0).getPose().getX() == 0);
-			assertTrue(robots.get(0).getPose().getY() == 0);
-			assertTrue(robots.get(0).getPose().getX() == model.DEFAULT_ARENA_SIZE);
-			assertTrue(robots.get(0).getPose().getY() == model.DEFAULT_ARENA_SIZE);
+			assertTrue(robots.get(0).getPosture().getX() == 0);
+			assertTrue(robots.get(0).getPosture().getY() == 0);
+			assertTrue(robots.get(0).getPosture().getX() == model.DEFAULT_ARENA_SIZE);
+			assertTrue(robots.get(0).getPosture().getY() == model.DEFAULT_ARENA_SIZE);
 			
 	}
 	

@@ -1,7 +1,6 @@
 package robowars.shared.model;
 
 import java.math.*;
-import lejos.robotics.Pose;
 
 public class Vector {
 	private float x;
@@ -26,9 +25,9 @@ public class Vector {
 		return (float) Math.sqrt(x*x + y*y);
 	}
 	
-	public static Vector createUnitVector(Pose pose){
+	public static Vector createUnitVector(Posture posture){
 		Vector v = new Vector(1,0);
-		v.rotate(pose.getHeading());
+		v.rotate(posture.getHeading());
 		return v;
 	}
 	

@@ -11,6 +11,9 @@ import org.apache.log4j.Logger;
 import robowars.server.controller.RobotProxy;
 import robowars.server.controller.ServerLobby;
 import robowars.shared.model.RobotCommand;
+import robowars.shared.model.Posture;
+import robowars.shared.model.Vector;
+
 
 /**
  * A version of RobotProxy will all actual network interaction
@@ -62,8 +65,8 @@ public class TestRobotProxy extends RobotProxy {
 
 					// KLUDGE: Need to make a fresh copy of the Pose or the
 					// model logic will break
-					Pose newPos = new Pose();
-					Point newLoc = new Point((float)navigator.getPose().getLocation().getX(), 
+					Posture newPos = new Posture();
+					Vector newLoc = new Vector((float)navigator.getPose().getLocation().getX(), 
 							(float)navigator.getPose().getLocation().getY());
 					newPos.setLocation(newLoc);
 					newPos.setHeading(navigator.getPose().getHeading());

@@ -1,6 +1,5 @@
 package robowars.shared.model;
 
-import lejos.robotics.Pose;
 
 public class Projectile extends GameEntity{
 
@@ -11,8 +10,8 @@ public class Projectile extends GameEntity{
 	private float speed;
 	private float distanceTraveled;
 
-	public Projectile(Pose pose, int speed, int id) {
-		super(pose, null, id);
+	public Projectile(Posture Posture, int speed, int id) {
+		super(Posture, null, id);
 		Vector shape[] = new Vector[] {new Vector(1,1), new Vector(-1,1), 
 				new Vector(-1,-1), new Vector(1,-1)};
 		setVertices(shape);
@@ -22,12 +21,12 @@ public class Projectile extends GameEntity{
 	
 	public void updatePosition(int timeElapsed){
 		float change=speed*timeElapsed;
-		//Vector v = Vector.createUnitVector(getPose());
+		//Vector v = Vector.createUnitVector(getPosture());
 		//v.setX(v.getX() * change);
 		//v.setY(v.getY() * change);
-		Pose newPose = clonePose();
-		newPose.moveUpdate(change);
-		setPose(newPose);
+		Posture newPosture = clonePosture();
+		newPosture.moveUpdate(change);
+		setPosture(newPosture);
 		distanceTraveled += change;
 	}
 	

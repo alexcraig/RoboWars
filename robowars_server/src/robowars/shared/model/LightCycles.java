@@ -1,7 +1,6 @@
 package robowars.shared.model;
 
 import java.util.ArrayList;
-import lejos.robotics.Pose;
 
 public class LightCycles extends GameModel {
 
@@ -38,8 +37,8 @@ public class LightCycles extends GameModel {
 	public boolean startGame(){
 		super.startGame();
 		if(inProgress){
-			//wallsOne.add(new Obstacle(robots.get(0).getPose()));
-			//wallsTwo.add(new Obstacle(robots.get(1).getPose()));
+			//wallsOne.add(new Obstacle(robots.get(0).getPosture()));
+			//wallsTwo.add(new Obstacle(robots.get(1).getPosture()));
 			for (GameRobot r : robots){
 				r.setCommand(RobotCommand.moveContinuous(RobotCommand.MAX_SPEED));
 			}
@@ -96,7 +95,7 @@ public class LightCycles extends GameModel {
 
 	}
 
-	public boolean updateRobotPosition(String identifier, Pose pose) {
+	public boolean updateRobotPosition(String identifier, Posture Posture) {
 		GameRobot robot = null;
 		for(GameRobot r : robots){
 			if(r.getRobotId() == identifier)
@@ -106,15 +105,15 @@ public class LightCycles extends GameModel {
 		if(robot == null)
 			return false;
 
-		if(pose.getHeading() % 90 == 0 && pose.getHeading() != robot.getPose().getHeading()){
-			spawnNewWall(robot, pose);
+		if(Posture.getHeading() % 90 == 0 && Posture.getHeading() != robot.getPosture().getHeading()){
+			spawnNewWall(robot, Posture);
 		}
 
-		return super.updateRobotPosition(identifier, pose);
+		return super.updateRobotPosition(identifier, Posture);
 	}
 
-	public void spawnNewWall(GameRobot robot,Pose pose) {
-		Obstacle newWall = new Obstacle(pose);
+	public void spawnNewWall(GameRobot robot,Posture Posture) {
+		Obstacle newWall = new Obstacle(Posture);
 		entities.add(newWall);
 		if(robot == robots.get(0)){
 			wallsOne.add(0, newWall);
