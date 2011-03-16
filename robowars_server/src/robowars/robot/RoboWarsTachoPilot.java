@@ -1,7 +1,7 @@
 package robowars.robot;
 
-
 import lejos.nxt.Battery;
+import lejos.nxt.LCD;
 import lejos.robotics.TachoMotor;
 import lejos.robotics.navigation.Pilot;
 
@@ -430,7 +430,8 @@ public class RoboWarsTachoPilot implements Pilot {
 	 *         tacho count;
 	 */
 	public float getAngle() {
-		return _parity
+		float gearRatio=(float) 3.39;
+		return _parity * gearRatio
 				* ((_right.getTachoCount() / _rightTurnRatio) - (_left
 						.getTachoCount() / _leftTurnRatio)) / 2.0f;
 	}
@@ -462,9 +463,10 @@ public class RoboWarsTachoPilot implements Pilot {
 	 * @return distance traveled since last reset of tacho count.
 	 **/
 	public float getTravelDistance() {
+		float _gearRatio=(float) 3.39;
 		float left = _left.getTachoCount() / _leftDegPerDistance;
 		float right = _right.getTachoCount() / _rightDegPerDistance;
-		return _parity * (left + right) / 2.0f;
+		return _parity * _gearRatio *(left + right) / 2.0f;
 	}
 
 	/**
@@ -549,12 +551,12 @@ public class RoboWarsTachoPilot implements Pilot {
 		if (angle == Float.POSITIVE_INFINITY) // no limit angle for turn
 		{
 			if (_parity == 1) {
-				outside.forward();
+				outside.backward();
 			} else {
 				outside.backward();
 			}
 			if (_parity * steerRatio > 0) {
-				inside.forward();
+				inside.backward();
 			} else {
 				inside.backward();
 			}
@@ -562,7 +564,7 @@ public class RoboWarsTachoPilot implements Pilot {
 		}
 		float rotAngle = angle * _trackWidth * 2
 				/ (_leftWheelDiameter * (1 - steerRatio));
-		inside.rotate(_parity * (int) (rotAngle * steerRatio), true);
+		inside.rotate(_parity * (int) (rotAngle * steerRatio),immediateReturn);
 		outside.rotate(_parity * (int) rotAngle, immediateReturn);
 		if (immediateReturn) {
 			return;
@@ -657,12 +659,17 @@ public class RoboWarsTachoPilot implements Pilot {
 													// changes to float for
 													// angle, get rid of (int)
 	}
-
+	public int getParity(){
+		return _parity;
+	}
 	public void robowarsSteer(float turnBearing, float throttle) {
-		if(throttle<0)_parity=-1;
-		else _parity=1;
-		
+		if(throttle<0)_parity=1;
+		else _parity=-1;
 		steer(turnBearing);
-		
+	}
+
+	public void toggleParity() {
+		if(_parity==1)_parity=-1;
+		else _parity=1;	
 	}
 }

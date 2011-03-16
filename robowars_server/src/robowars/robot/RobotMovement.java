@@ -16,9 +16,11 @@ import lejos.robotics.navigation.*;
 public class RobotMovement {
 	private RoboWarsTachoPilot pilot;
 	private RoboWarsNavigator navigator;
-	private final static float MINDSTORM_WIDTH=11;
-	private final static float WHEEL_HEIGHT=(float) 4.3;
-	private final static float MAX_SPEED=75;
+	private final static float MINDSTORM_WIDTH=(float)15.62;
+	//actual width is 4.19cm adjusted for gear ratio
+	//private final static float WHEEL_HEIGHT=(float) 14.20;
+	private final static float WHEEL_HEIGHT=(float)4.19;
+	private final static float MAX_SPEED=200;
 	private static final float STEER_MAX = (float)200;
 	
 	public RobotMovement(){
@@ -50,7 +52,7 @@ public class RobotMovement {
 		float turnBearing=command.getTurnBearing();
 		float throttle=command.getThrottle();
 		if(turnBearing>STEER_MAX||turnBearing<-STEER_MAX)turnBearing=turnBearing/(Math.abs(turnBearing)/STEER_MAX);
-		if(throttle>STEER_MAX||throttle<-STEER_MAX)throttle=MAX_SPEED;
+		if(throttle>MAX_SPEED||throttle<-MAX_SPEED)throttle=(throttle/Math.abs(throttle))*MAX_SPEED;
 		navigator.setMoveSpeed(throttle);
 		navigator.setTurnSpeed((Math.abs(command.getTurnBearing())/STEER_MAX)*MAX_SPEED);
 		navigator.steer(turnBearing, throttle);
@@ -74,6 +76,6 @@ public class RobotMovement {
 
 	public synchronized void moveContinuous(RobotCommand command) {
 		navigator.updatePosition();
-		navigator.steer(0);
+		navigator.steer(0, command.getThrottle());
 	}
 }

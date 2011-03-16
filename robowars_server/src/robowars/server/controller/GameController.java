@@ -9,6 +9,7 @@ import lejos.robotics.Pose;
 
 import org.apache.log4j.Logger;
 
+import robowars.robot.ColorSensor;
 import robowars.shared.model.ControlType;
 import robowars.shared.model.FreeTest;
 import robowars.shared.model.GameEvent;
@@ -154,8 +155,7 @@ public class GameController implements Runnable, GameListener {
 	 * Main loop of GameController (performs real-time physics updates on GameModel)
 	 */
 	public void run() {
-		RobotMap map=new RobotMap(new File("colorMap.txt"));
-		log.info("Map Recovered");
+		RobotMap map=ColorSensor.generate();
 		synchronized(controlPairs) {
 			for(int i=0; i<controlPairs.size(); i++){
 				RobotProxy proxy=controlPairs.get(i).getRobotProxy();

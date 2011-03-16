@@ -17,12 +17,13 @@ public class MapBuilder {
 		try {
 			LejosOutputStream out=new LejosOutputStream(new FileOutputStream("colorMap.txt"));
 			RobotMap map=new RobotMap();
-			for(int r=20; r>-1; r--){
-				for(int c=20; c>-1; c--){
-					if(r%2==0&&c%2==0)map.addPoint(new MapPoint(c*2, r*2, lejos.robotics.Colors.BLUE));
-					else if(r%2==1&&c%2==0)map.addPoint(new MapPoint(c*2, r*2, lejos.robotics.Colors.RED));
-					else if(r%2==0&&c%2==1)map.addPoint(new MapPoint(c*2, r*2, lejos.robotics.Colors.YELLOW));
-					else if(r%2==1&&c%2==1)map.addPoint(new MapPoint(c*2, r*2, lejos.robotics.Colors.GREEN));
+			float space=(float) 6.35;
+			for(int r=21; r>1; r--){
+				for(int c=21; c>1; c--){
+					if(r%2==0&&c%2==0)map.addPoint(new MapPoint(c*space, r*space, lejos.robotics.Colors.BLUE));
+					else if(r%2==1&&c%2==0)map.addPoint(new MapPoint(c*space, r*space, lejos.robotics.Colors.RED));
+					else if(r%2==0&&c%2==1)map.addPoint(new MapPoint(c*space, r*space, lejos.robotics.Colors.YELLOW));
+					else if(r%2==1&&c%2==1)map.addPoint(new MapPoint(c*space, r*space, lejos.robotics.Colors.GREEN));
 				}
 			}
 			out.writeObject(map);

@@ -1,5 +1,4 @@
 package robowars.robot;
-
 /**
  * LejosInputStream.java
  * 
@@ -11,9 +10,6 @@ package robowars.robot;
  */
 import java.io.*;
 import java.util.Vector;
-
-import robowars.shared.model.*;
-
 import lejos.robotics.Pose;
 /**
  * LejosInputStream.java
@@ -26,6 +22,11 @@ import lejos.robotics.Pose;
  */
 import java.io.*;
 import java.util.Vector;
+
+import robowars.shared.model.CommandType;
+import robowars.shared.model.MapPoint;
+import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
 
 import lejos.nxt.LCD;
 import lejos.robotics.Pose;
@@ -128,23 +129,35 @@ public class LejosInputStream {
 			String s="";
 			while((input=in.read())!=-1&&input!=0){
 				s+=(char)input;
+				if((char)input==']'&&s.charAt(s.length()-2)==(char)input)break;
 			}
 			s=s.substring(1);
 			s=s.substring(1, s.length()-1);
-			System.out.println("Points Generating");
 			Vector points=getPoints(s,'[');
-			System.out.println("Points Generated"+points.size());
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
 			RobotMap map=new RobotMap();
 			for(int i=0; i<points.size(); i++){
-				LCD.drawInt(i,0,0);
 				map.addPoint((MapPoint) points.elementAt(i));
 			}
-			System.out.println("Map Generated");
 			return map;
+		}
+		//color vector
+		else if((char) input=='4'){
+			String s="";
+			while((input=in.read())!=-1&&input!=0){
+				s+=(char)input;
+				if((char)input==']')break;
+			}
+			s=s.substring(1,s.length()-1);
+			String x=s.substring(0,s.indexOf("|"));
+			s=s.substring(s.indexOf("|")+1);
+			String y=s.substring(0,s.indexOf("|"));
+			s=s.substring(s.indexOf("|")+1);
+			String h=s;
+			Vector v=new Vector();
+			v.addElement(Integer.parseInt(x));
+			v.addElement(Integer.parseInt(y));
+			v.addElement(Integer.parseInt(h));
+			return v;
 		}
 		
 		System.out.println("READ TYPE UNRECOGNIZED");
@@ -164,7 +177,7 @@ public class LejosInputStream {
 		String y=s.substring(0,s.indexOf("|"));
 		s=s.substring(s.indexOf("|")+1);
 		String color=s;
-		return new MapPoint(Integer.parseInt(x),Integer.parseInt(y),Integer.parseInt(color));
+		return new MapPoint(Float.parseFloat(x),Float.parseFloat(y),Integer.parseInt(color));
 		
 	}
 	/**

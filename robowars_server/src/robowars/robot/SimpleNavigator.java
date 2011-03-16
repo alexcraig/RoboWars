@@ -1,5 +1,10 @@
 package robowars.robot;
 
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import lejos.nxt.LCD;
 import lejos.robotics.Pose;
 import lejos.geom.Point;
 import lejos.robotics.*;
@@ -14,7 +19,7 @@ import lejos.robotics.navigation.TachoPilot;
 /**
  * The SimpleNavigator class uses dead reckoning to  keep track of its robot pose (the location in the plane
  * and its heading -  the direction in which it moves).  While dead reckoning is relatively
- * easy to implement and very quick to caolculate,  its disadvantage
+ * easy to implement and very quick to calculate,  its disadvantage
  * is that errors in the estimated pose accumulate.<br>
  * SimpleNavigator can perform  three elementary movements  in a plane:  trvel in  a straignt line,
  * move in the arc of a circle, and a rotate  in place.  The movement commands
@@ -327,30 +332,35 @@ public float getAngle()
   }
 
     public void updatePose()
-  {
-      if(_current) return;
-    float distance = pilot.getTravelDistance() - _distance0;
-    float turnAngle = pilot.getAngle() - _angle0;
-    double dx = 0;
-    double dy = 0;
-    double headingRad = (Math.toRadians(_pose.getHeading()));
-    if (Math.abs(turnAngle) > .5)
-    {
-      double turnRad = Math.toRadians(turnAngle);
-      double radius = distance / turnRad;
-      dy = radius * (Math.cos(headingRad) - Math.cos(headingRad + turnRad));
-      dx = radius * (Math.sin(headingRad + turnRad) - Math.sin(headingRad));
-    } else if (Math.abs(distance) > .01)
-    {
-      dx = distance * (float) Math.cos(headingRad);
-      dy = distance * (float) Math.sin(headingRad);
-    }
-    _pose.translate((float) dx, (float) dy);
-    _pose.rotateUpdate(turnAngle);
-    _angle0 = pilot.getAngle();
-    _distance0 = pilot.getTravelDistance();
-  }
-
+	{
+	    if(_current) return;
+	    float turnAngle=0, distance=0;
+    	distance = pilot.getTravelDistance() - _distance0;
+    	turnAngle = pilot.getAngle() - _angle0;
+	    double dx = 0;
+	    double dy = 0;
+	    double headingRad = (Math.toRadians(_pose.getHeading()));
+	    if (Math.abs(turnAngle) > .5)
+	    {
+	    	double turnRad = Math.toRadians(turnAngle);
+	    	double radius = distance / turnRad;
+	    	dy = radius * (Math.cos(headingRad) - Math.cos(headingRad + turnRad));
+	    	dx = radius * (Math.sin(headingRad + turnRad) - Math.sin(headingRad));
+	    } else if (Math.abs(distance) > .01)
+	    {
+	    	dx = distance * (float) Math.cos(headingRad);
+	    	dy = distance * (float) Math.sin(headingRad);
+	    }
+	    if(((RoboWarsTachoPilot)pilot).getParity()==1){
+	    	dx*=-1;
+	    	dy*=-1;
+	    	turnAngle*=-1;
+	    }
+	    _pose.translate((float) dx, (float) dy);
+	    _pose.rotateUpdate(turnAngle);
+	    _angle0 = pilot.getAngle();
+	    _distance0 = pilot.getTravelDistance();
+	}
     /**
      * Starts  the NXT robot moving in a circular path with a specified radius; <br>
      * The center of the turning circle is on the left side of the robot if parameter radius is positive
@@ -508,8 +518,8 @@ public float getAngle()
    */
   public void steer(int turnRate, int angle, boolean immediateReturn)
   {
-    updatePose();
-    _current = false;
+	updatePose();
+	_current = false;
     pilot.steer(turnRate, angle, immediateReturn);
   }
   public RoboWarsTachoPilot getPilot(){
@@ -519,9 +529,9 @@ public float getAngle()
 	  _current=curr;
   }
         // orientation and co-ordinate data
-    private Pose _pose = new Pose();
-    private float _distance0 = 0;
-    private float _angle0 = 0;
+    public Pose _pose = new Pose();
+    public float _distance0 = 0;
+    public float _angle0 = 0;
     private boolean _current = false; //prevent unnecessary pose updates
     private Pilot pilot;
 }

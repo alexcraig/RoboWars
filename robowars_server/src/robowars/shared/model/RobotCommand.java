@@ -35,7 +35,7 @@ public class RobotCommand implements Serializable{
 	private int priority;
 
 	/** The maximum value that should be sent in the moveSpeed parameter */
-	public static final float MAX_SPEED = 75; // This will need to be tweaked for the real hardware
+	public static final float MAX_SPEED = 2000; // This will need to be tweaked for the real hardware
 
 	/**
 	 * Generates a new RobotCommand

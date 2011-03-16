@@ -1,19 +1,15 @@
 package robowars.shared.model;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Vector;
-
-import lejos.robotics.Pose;
-import robowars.robot.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
 
+import robowars.robot.LejosInputStream;
+
 import lejos.nxt.LCD;
+import lejos.robotics.Pose;
 
 public class RobotMap {
 	private Vector gPoints;
@@ -94,7 +90,7 @@ public class RobotMap {
 	}
 	public void addPoint(MapPoint p){
 		if(p!=null){
-			LCD.drawInt(p.getColor(), 0, 1);
+			//LCD.drawInt(p.getColor(), 0, 1);
 			if(p.getColor()==lejos.robotics.Colors.RED)rPoints.addElement(p);
 			else if(p.getColor()==lejos.robotics.Colors.BLUE)bPoints.addElement(p);
 			else if(p.getColor()==lejos.robotics.Colors.YELLOW)yPoints.addElement(p);
@@ -121,8 +117,8 @@ public class RobotMap {
 		
 		return null;
 	}
-	public int findBiggestX(){
-		int biggest=-1;
+	public float findBiggestX(){
+		float biggest=-1;
 		for( int i=0; i<points.size(); i++){
 			for(int x=0; x<((Vector)points.elementAt(i)).size(); x++){
 				if(((MapPoint)((Vector)points.elementAt(i)).elementAt(x)).getX()>biggest){
@@ -132,8 +128,8 @@ public class RobotMap {
 		}
 		return biggest;
 	}
-	public int findBiggestY(){
-		int smallest=999999;
+	public float findBiggestY(){
+		float smallest=999999;
 		for( int i=0; i<points.size(); i++){
 			for(int x=0; x<((Vector)points.elementAt(i)).size(); x++){
 				if(((MapPoint)((Vector)points.elementAt(i)).elementAt(x)).getX()<smallest){
@@ -144,4 +140,3 @@ public class RobotMap {
 		return smallest;
 	}
 }
-
