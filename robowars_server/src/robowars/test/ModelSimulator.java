@@ -61,7 +61,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 					model.getGameRobot("robot1").getPosture().getHeading());
 			newPosture.moveUpdate(3);
 			model.updateRobotPosition("robot1", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_LEFT){
 			System.out.println("Left");
@@ -73,7 +73,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 			else
 				newPosture.rotateUpdate(3);
 			model.updateRobotPosition("robot1", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_RIGHT){	
 			System.out.println("Right");
@@ -85,7 +85,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 			else
 				newPosture.rotateUpdate(-3);;
 			model.updateRobotPosition("robot1", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_W){
 			System.out.println("Forward");
@@ -94,7 +94,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 					model.getGameRobot("robot2").getPosture().getHeading());
 			newPosture.moveUpdate(3);
 			model.updateRobotPosition("robot2", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_A){
 			System.out.println("Right");
@@ -106,7 +106,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 				else
 					newPosture.rotateUpdate(3);
 			model.updateRobotPosition("robot2", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		if(arg0.getKeyCode()==KeyEvent.VK_D){
 			System.out.println("Left");
@@ -118,7 +118,7 @@ public class ModelSimulator implements KeyListener, GameListener{
 			else
 				newPosture.rotateUpdate(-3);
 			model.updateRobotPosition("robot2", newPosture);
-			model.updateGameState(1);
+			model.updateGameState(50);
 		}
 		
 		if(arg0.getKeyCode()==KeyEvent.VK_ENTER){

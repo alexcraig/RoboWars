@@ -1,8 +1,9 @@
 package robowars.shared.model;
 
 import java.math.*;
+import java.io.Serializable;
 
-public class Vector {
+public class Vector implements Serializable{
 	private float x;
 	private float y;
 	

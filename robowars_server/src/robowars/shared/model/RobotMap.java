@@ -109,10 +109,10 @@ public class RobotMap {
 	}
 	public Pose getStartPoint(int index){
 		if(index==0){
-			return new Pose((float)(findBiggestX()*.5),(float) (findBiggestY()*.25), (float)90);
+			return new Pose((float)(findBiggestX()*.5),(float) (30), (float)90);
 		}
 		if(index==1){
-			return new Pose((float)(findBiggestX()*.5),(float) (findBiggestY()*.75), (float)270);
+			return new Pose((float)(findBiggestX()*.5),(float) (findBiggestY()*.75), (float)-90);
 		}
 		
 		return null;

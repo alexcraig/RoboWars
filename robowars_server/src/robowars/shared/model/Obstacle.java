@@ -1,8 +1,9 @@
 package robowars.shared.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Obstacle extends GameEntity{
+public class Obstacle extends GameEntity implements Serializable{
 
 	private static final long serialVersionUID = 2354988184568266965L;
 	private int strength;
@@ -98,7 +99,7 @@ public class Obstacle extends GameEntity{
 		Vector shape1[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,0)};
-		boundary.add(new Obstacle(new Posture(GameModel.DEFAULT_ARENA_SIZE-10, 0, 90), shape1, 101));
+		boundary.add(new Obstacle(new Posture(GameModel.DEFAULT_ARENA_SIZE, 0, 90), shape1, 101));
 		
 		Vector shape2[] = new Vector[] {new Vector(0,0), new Vector(0,5), 
 				new Vector(GameModel.DEFAULT_ARENA_SIZE,5),

@@ -18,7 +18,7 @@ public class LightCycles extends GameModel {
 	*/
 	public LightCycles() {
 		this.wallWidth = 10;
-		this.wallFadeTime = 100;
+		this.wallFadeTime = 5000;
 		wallsOne = new ArrayList<Obstacle>();
 		wallsTwo = new ArrayList<Obstacle>();
 		super.gameType = GameType.LIGHTCYCLES;
@@ -90,7 +90,7 @@ public class LightCycles extends GameModel {
 		
 
 		if(checkGameOver()){
-			notifyListeners(GameEvent.GAME_OVER);
+			//notifyListeners(null, GameEvent.GAME_OVER);
 		}
 
 	}
@@ -127,14 +127,14 @@ public class LightCycles extends GameModel {
 		for(Obstacle o: wallsOne){
 			if(robots.get(0).checkCollision(o) && !o.equals(wallsOne.get(0))) {
 				robots.get(0).setCommand(RobotCommand.stop());
-				notifyListeners(GameEvent.PLAYER_2_WINS);
+				//notifyListeners(null, GameEvent.PLAYER_2_WINS);
 				inProgress = false;
 				System.out.println("Collision between robot1 and wallsOne");
 				return true;
 			}
 			if(robots.get(1).checkCollision(o)) {
 				robots.get(1).setCommand(RobotCommand.stop());
-				notifyListeners(GameEvent.PLAYER_1_WINS);
+				//notifyListeners(null, GameEvent.PLAYER_1_WINS);
 				inProgress = false;
 				System.out.println("Collision between robot2 and wallsOne");
 				return true;
@@ -144,14 +144,14 @@ public class LightCycles extends GameModel {
 		for(Obstacle o: wallsTwo){
 			if(robots.get(1).checkCollision(o) && !o.equals(wallsTwo.get(0))) {
 				robots.get(1).setCommand(RobotCommand.stop());
-				notifyListeners(GameEvent.PLAYER_1_WINS);
+				//notifyListeners(null ,GameEvent.PLAYER_1_WINS);
 				inProgress = false;
 				System.out.println("Collision between robot2 and wallsTwo");
 				return true;
 			}
 			if(robots.get(0).checkCollision(o)) {
 				robots.get(0).setCommand(RobotCommand.stop());
-				notifyListeners(GameEvent.PLAYER_2_WINS);
+				//notifyListeners(null, GameEvent.PLAYER_2_WINS);
 				inProgress = false;
 				System.out.println("Collision between robot1 and wallsTwo");
 				return true;

@@ -1,8 +1,9 @@
 package robowars.shared.model;
 
 import lejos.robotics.Pose;
+import java.io.Serializable;
 
-public class Posture {
+public class Posture implements Serializable{
 	
 	protected  Vector _location;
 	protected  float _heading;
@@ -30,7 +31,8 @@ public class Posture {
 	 * @param pose the pose
 	 */
 	public Posture(Pose pose){
-		
+		_location = new Vector(pose.getX(), pose.getY());
+		_heading = pose.getHeading();
 	}
 	/**
 	 * Allocate a new posture at location (x,y) with specified heading in degrees.

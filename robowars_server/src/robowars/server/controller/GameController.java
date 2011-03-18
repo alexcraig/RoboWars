@@ -194,10 +194,12 @@ public class GameController implements Runnable, GameListener {
 			}
 			
 			// TESTING - 60 Second Limit
+			/*
 			if(lastUpdateTime - gameStartTime >= 60000) {
 				terminateFlag = true;
 				lobby.broadcastMessage("<Server> 60 Second testing duration expired.");
 			}
+			*/
 			
 			Thread.yield();
 		}
@@ -305,9 +307,15 @@ public class GameController implements Runnable, GameListener {
 					+ buttons + ">");
 		}
 		
+		RobotProxy pairedRobot = getPairedRobot(player);
+		
+		// Generate a projectile if required
+		if(model != null && buttons.contains("f")) {
+			model.generateProjectile(pairedRobot.getRobot());
+		}
+		
 		// If a game is in session and a robot is currently paired to the player
 		// supplying input, generate a command and send it to the paired robot
-		RobotProxy pairedRobot = getPairedRobot(player);
 		if(pairedRobot != null && model != null) {
 			RobotCommand command = null;
 			

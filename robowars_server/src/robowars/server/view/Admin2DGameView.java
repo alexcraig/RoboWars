@@ -6,6 +6,9 @@ import robowars.shared.model.GameModel;
 import robowars.shared.model.GameRobot;
 import robowars.shared.model.GameEntity;
 import robowars.shared.model.Obstacle;
+import robowars.shared.model.Posture;
+
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -34,6 +37,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
 	private Graphics2D buffedG2D;
 	private int size;
 	private boolean collisionFlag;
+	private ArrayList<Posture> hitMarkers;
 	
 	//NOTE: Currently the view and the model itself only supports square arenas.
 	public Admin2DGameView(int size, GameModel model){
@@ -45,6 +49,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
         
 		this.model = model;
 		this.size = size;
+		this.hitMarkers = new ArrayList<Posture>();
 		this.setMinimumSize(new Dimension(size,size + 30));
 		this.canvas = new Canvas();
 		this.getContentPane().add(canvas);
@@ -87,8 +92,7 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		if(collisionFlag){
 			drawCollision(buffedG2D);
 		}
-		//drawPlayers(buffedG2D);
-		//drawWalls(buffedG2D);
+		drawMarkers(buffedG2D);
 		
 		// Restore original transform matrix
 		buffedG2D.setTransform(saveAT);
@@ -131,8 +135,21 @@ public class Admin2DGameView extends JFrame implements GameListener{
 		g2d.fillOval(20, 30, 20, 20);
 	}
 	
+	private void drawMarkers(Graphics2D g2d){
+		g2d.setColor(Color.YELLOW);
+		for(Posture m : hitMarkers){
+			g2d.fillOval((int)(m.getLocation().getX() * scalingFactor), 
+					(int)(m.getLocation().getY() * scalingFactor), 10, 10);
+		}
+	}
+	
 	public void gameStateChanged(GameEvent e) {
 		drawState();
+		
+		if(e.getEventType() == GameEvent.PROJECTILE_HIT){
+			//hitMarkers.add(e.getEventCause().clonePosture());
+		}
+		
 		if(e.getEventType() == GameEvent.COLLISION_DETECTED){
 			collisionFlag = true;
 		}else{

@@ -9,14 +9,14 @@ public class TankSimulation extends GameModel {
 	private int initialObstacles;
 	private ArrayList<Projectile> projectiles;
 	
-	public static int projectileSpeed = 20;
+	public static final int projectileSpeed = 1;
 
 	/**
 	* Default Constructor with test values for initialisation.
 	*/
 	public TankSimulation() {
 		this.initialHealth = 1;
-		this.projectileRange = 150;
+		this.projectileRange = 40;
 		this.initialObstacles = 0;
 		gameType = GameType.TANK_SIMULATION;
 		projectiles = new ArrayList<Projectile>();
@@ -32,19 +32,29 @@ public class TankSimulation extends GameModel {
 	}
 
 	public void updateGameState(long timeElapsed) {
+		ArrayList<Projectile> removedProjectiles = new ArrayList<Projectile>();
 		for(Projectile p : projectiles){
 			p.updatePosition((int) timeElapsed);
-			if(p.getDistanceTraveled() > projectileRange){
-				projectiles.remove(p);
-				entities.remove(p);
-			}
 			
-			for(GameRobot r : robots){
-				if(p.checkCollision(r)){
-					r.decreaseHealth(1);
+			for(GameEntity e : entities){
+				if(!(e instanceof Projectile)){
+					if(p.checkCollision(e)){
+						if(e instanceof GameRobot){
+							GameRobot r = (GameRobot) e;
+							r.decreaseHealth(1);
+						}
+						notifyListeners(GameEvent.PROJECTILE_HIT);
+						removedProjectiles.add(p);
+				}
 				}
 			}	
+			
+			if(p.getDistanceTraveled() > projectileRange){
+				removedProjectiles.add(p);
+			}
 		}
+		projectiles.removeAll(removedProjectiles);
+		entities.removeAll(removedProjectiles);
 		
 		for(GameRobot r1 : robots){
 			for(GameRobot r2 : robots){
@@ -64,6 +74,9 @@ public class TankSimulation extends GameModel {
 					}
 			}
 		}
+		
+		System.out.println("Robot1 Health: " + robots.get(0).getHealth());
+		System.out.println("Robot2 Health: " + robots.get(1).getHealth());
 		
 		
 		
@@ -93,10 +106,11 @@ public class TankSimulation extends GameModel {
 	
 	public void generateProjectile(GameRobot robot) {
 		Posture projectilePosture = robot.clonePosture();
-		projectilePosture.moveUpdate(10);
+		projectilePosture.moveUpdate(15);
 		Projectile newProjectile = new Projectile(projectilePosture,projectileSpeed, 0);
 		entities.add(newProjectile);
 		projectiles.add(newProjectile);
+		notifyListeners(GameEvent.PROJECTILE_FIRED);
 	}
 	
 	public ControlType getControlType() {

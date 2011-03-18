@@ -1,6 +1,7 @@
 package robowars.shared.model;
+import java.io.Serializable;
 
-public class GameRobot extends GameEntity{
+public class GameRobot extends GameEntity implements Serializable{
 
 	/**
 	*
@@ -66,7 +67,7 @@ public class GameRobot extends GameEntity{
 	* @param identifier The identifier of the robot (MAC address?);
 	*/
 	public GameRobot(String identifier) {
-		super(new Posture(10,10,0), null, 0);
+		super(new Posture(20,20,0), null, 0);
 		Vector shape[] = new Vector[4];
 		shape[0] = new Vector(10,8);
 		shape[1] = new Vector(-10,8);

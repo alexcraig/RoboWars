@@ -6,6 +6,8 @@ public class FreeTest extends GameModel{
 	public FreeTest() {
 		super.gameType = GameType.FREETEST;
 		super.initVariables();
+		
+		
 	}
 	
 	public void updateGameState(long timeElapsed){	
@@ -14,6 +16,7 @@ public class FreeTest extends GameModel{
 				if(!r.equals(e)){
 					if(r.checkCollision(e)){
 						notifyListeners(GameEvent.COLLISION_DETECTED);
+						r.setCommand(RobotCommand.stop());
 					}
 				}
 			}
