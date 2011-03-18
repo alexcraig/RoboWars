@@ -175,12 +175,12 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab4"
 		    android:orientation="vertical"
-		    android:paddingTop="105px">
+		    android:paddingTop="95px">
 		    
 		    <com.RoboWars.ImageStreamView
         		android:id="@+id/mediaSurface"
-        		android:layout_width="320px"
-        		android:layout_height="240px"
+        		android:layout_width="480px"
+        		android:layout_height="360px"
         		android:layout_centerHorizontal="true"
         		/>
 	        	
