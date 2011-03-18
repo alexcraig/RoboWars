@@ -22,7 +22,7 @@ public class KeyController {
 			//nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.USB);
 			//nxtComm.open(nxtComm.search("NXT", NXTCommFactory.USB)[0]);
 			nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
-			nxtComm.open(nxtComm.search("NXT", NXTCommFactory.BLUETOOTH)[0]);
+			nxtComm.open(nxtComm.search("NXT2", NXTCommFactory.BLUETOOTH)[0]);
 		} catch (NXTCommException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -45,7 +45,7 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	/**
 	 * The IP address to use for the test client.
 	 */
-	public static String TEST_CLIENT_HOSTNAME = "192.168.1.66";
+	public static String TEST_CLIENT_HOSTNAME = "192.168.1.1";
 	
 	/** The minimum interval (in ms) between frame transmissions to the network */
 	public static long IMAGE_WRITE_INTERVAL = 100;

@@ -14,6 +14,7 @@ import robowars.server.controller.LobbyUserEvent;
 import robowars.server.controller.ServerLobbyEvent;
 import robowars.shared.model.CameraPosition;
 import robowars.shared.model.GameEvent;
+import robowars.shared.model.GameModel;
 import android.util.Log;
 
 /**
@@ -28,15 +29,15 @@ public class TcpClient extends Thread
 {
 	/* Models modified by incoming packets from server. */
 	private LobbyModel lobbyModel;
-	private GameModel gameModel;
+	private ClientGameModel gameModel;
 	
 	/* Server information. */
-	private String IPAddress;
-	private int port;
 	private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private boolean connected;
+	private String IPAddress;
+	private int port;
     
     /**
      * Default constructor.
@@ -44,7 +45,7 @@ public class TcpClient extends Thread
      * @param lobbyModel	The current state of the lobby.
      * @param gameModel		The current state of the game.
      */
-	public TcpClient(LobbyModel lobbyModel, GameModel gameModel)
+	public TcpClient(LobbyModel lobbyModel, com.RoboWars.ClientGameModel gameModel)
 	{
 		this.lobbyModel = lobbyModel;
 		this.gameModel = gameModel;
@@ -72,7 +73,7 @@ public class TcpClient extends Thread
         			handle((ServerLobbyEvent)response);
         		} else if (response instanceof GameEvent) {
         			Log.i("RoboWars", "Read game event.");
-        			handle((GameEvent)response);
+        			//handle((GameEvent)response);
         		}
         		
         		Thread.yield();
@@ -192,51 +193,21 @@ public class TcpClient extends Thread
 	 */
 	private void handle(GameEvent event)
 	{
-		switch (event.getEventType()) {
-			case GameEvent.GAME_START:
-				gameModel.startGame();
-				//TODO: Start up the OpenGL engine and start the game.
-				break;
-								
-			case GameEvent.GAME_OVER:
-				gameModel.endGame();
-				//TODO: End the game, show the winner.
-				break;
-				
-			case GameEvent.COLLISION_DETECTED:
-				//TODO: Probably nothing here; handled by the server.
-				break;
-				
-			case GameEvent.PROJECTILE_FIRED:
-				//TODO: Get location, direction, speed of projectile.
-				//TODO: Draw the projectile in OpenGL.
-				break;
-				
-			case GameEvent.PROJECTILE_HIT:
-				//TODO: Get location of projectile.
-				//TODO: Remove from OpenGL view.
-				break;
-				
-			case GameEvent.PLAYER_1_WINS:
-				//TODO: Display which player wins, clear the map, ask for another game.
-				break;
-				
-			case GameEvent.PLAYER_2_WINS:
-				//TODO: Display which player wins, clear the map, ask for another game.
-			
-			case GameEvent.ROBOT_MOVED:
-				//TODO: Which robot moved? Update appropriate position and OpenGL.
-				break;
-				
-			case GameEvent.MAP_CHANGED:
-				//TODO: Compare the passed model to the current model and make
-				//		the appropriate changes.
-				break;
-				
-			default:
-				// Unhandled GameEvent.
-				printMessage(LobbyModel.ERROR, "Unhandled GameEvent received.");
+		if (!gameModel.gameInProgress()) 
+		{
+			gameModel.startGame((GameModel)event.getSource());
+			Log.e("RoboWars", "Got a Game_START event!");
 		}
+		else if (event.getEventType() == GameEvent.GAME_OVER)
+		{
+			gameModel.endGame((GameModel)event.getSource());
+		}
+		else
+		{
+			gameModel.updateModel((GameModel)event.getSource());
+			Log.e("RoboWars", "Got a normal update event.");
+		}
+		
 	}
 	
 	/**

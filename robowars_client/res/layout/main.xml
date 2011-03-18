@@ -52,6 +52,14 @@
 		    	android:layout_below="@id/readyCheckBox"
 		    	android:onClick="buttonClicked"
 		    	android:text="Launch!"/>
+		    	
+		    <Button
+		    	android:id="@+id/goOpenGL"
+		    	android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_below="@id/launchButton"
+		    	android:onClick="buttonClicked"
+		    	android:text="Go OpenGL!"/>
 	
 		</RelativeLayout>
 	    
@@ -109,57 +117,57 @@
 		    android:id="@+id/tab3"
 		    android:orientation="vertical"
 		    android:paddingTop="100px">
-	    <TextView
-	        android:id="@+id/userText"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="Username: "/>
-	    <EditText
-	        android:id="@+id/username"
-	        android:layout_width="300px"
-	        android:layout_height="wrap_content"
-	        android:background="@android:drawable/editbox_background"
-	        android:layout_toRightOf="@id/userText"
-	        android:maxLines="1"/>
-	    <TextView
-	        android:id="@+id/gap1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="30px"
-	        android:layout_below="@id/userText"
-	        android:text=""/>
-	    <TextView
-	        android:id="@+id/serverText"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_below="@id/gap1"
-	        android:text="Server: "/>
-	    <EditText
-	        android:id="@+id/server"
-	        android:layout_width="300px"
-	        android:layout_height="wrap_content"
-	        android:background="@android:drawable/editbox_background"
-	        android:layout_below="@id/gap1"
-	        android:layout_alignLeft="@id/username"
-	        android:digits="1234567890."
-	        android:maxLines="1"
-	        android:maxLength="15"/>
-	    <EditText
-	        android:id="@+id/port"
-	        android:layout_width="200px"
-	        android:layout_height="wrap_content"
-	        android:background="@android:drawable/editbox_background"
-	        android:layout_toRightOf="@id/server"
-	        android:layout_alignTop="@id/server"
-	        android:maxLines="1"/>
-        <Button
-	        android:id="@+id/connect"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_below="@id/server"
-	        android:layout_alignParentLeft="true"
-	        android:layout_marginLeft="10dip"
-	        android:onClick="buttonClicked"
-	        android:text="Connect" />
+		    <TextView
+		        android:id="@+id/userText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Username: "/>
+		    <EditText
+		        android:id="@+id/username"
+		        android:layout_width="300px"
+		        android:layout_height="wrap_content"
+		        android:background="@android:drawable/editbox_background"
+		        android:layout_toRightOf="@id/userText"
+		        android:maxLines="1"/>
+		    <TextView
+		        android:id="@+id/gap1"
+		        android:layout_width="wrap_content"
+		        android:layout_height="30px"
+		        android:layout_below="@id/userText"
+		        android:text=""/>
+		    <TextView
+		        android:id="@+id/serverText"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_below="@id/gap1"
+		        android:text="Server: "/>
+		    <EditText
+		        android:id="@+id/server"
+		        android:layout_width="300px"
+		        android:layout_height="wrap_content"
+		        android:background="@android:drawable/editbox_background"
+		        android:layout_below="@id/gap1"
+		        android:layout_alignLeft="@id/username"
+		        android:digits="1234567890."
+		        android:maxLines="1"
+		        android:maxLength="15"/>
+		    <EditText
+		        android:id="@+id/port"
+		        android:layout_width="200px"
+		        android:layout_height="wrap_content"
+		        android:background="@android:drawable/editbox_background"
+		        android:layout_toRightOf="@id/server"
+		        android:layout_alignTop="@id/server"
+		        android:maxLines="1"/>
+	        <Button
+		        android:id="@+id/connect"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_below="@id/server"
+		        android:layout_alignParentLeft="true"
+		        android:layout_marginLeft="10dip"
+		        android:onClick="buttonClicked"
+		        android:text="Connect" />
 		</RelativeLayout>
 		
 		<RelativeLayout
@@ -167,12 +175,13 @@
 		    android:layout_height="wrap_content"
 		    android:id="@+id/tab4"
 		    android:orientation="vertical"
-		    android:paddingTop="100px">
+		    android:paddingTop="105px">
 		    
 		    <com.RoboWars.ImageStreamView
         		android:id="@+id/mediaSurface"
         		android:layout_width="320px"
         		android:layout_height="240px"
+        		android:layout_centerHorizontal="true"
         		/>
 	        	
 	        <TextView
@@ -182,6 +191,7 @@
 		    	android:layout_below="@id/mediaSurface"
 		    	android:layout_marginLeft="10dip"
 		    	android:text="Status: Disabled"
+		    	android:layout_centerHorizontal="true"
 		    	android:lines="3"/>
 		</RelativeLayout>
 	</FrameLayout>

@@ -1,5 +1,6 @@
 package com.RoboWars;
 
+import robowars.shared.model.GameRobot;
 import android.graphics.Point;
 
 /**
@@ -18,15 +19,18 @@ public class Player
 	private int health, ammo;
 	private Point location;
 	
+	private GameRobot mRobot;
+	
 	/**
 	 * Default constructor. All values set to default values.
 	 */
-	public Player()
+	public Player(GameRobot robot)
 	{
 		name		= DEFAULT_NAME;
 		health 		= DEFAULT_HEALTH;
 		ammo 		= DEFAULT_AMMO;
 		location	= DEFAULT_POINT;
+		mRobot = robot;
 	}
 	
 	/**
@@ -35,12 +39,13 @@ public class Player
 	 * 
 	 * @param name	The name of the created player.
 	 */
-	public Player (String name)
+	public Player (String name, GameRobot robot)
 	{
 		this.name	= name;
 		health 		= DEFAULT_HEALTH;
 		ammo 		= DEFAULT_AMMO;
 		location	= DEFAULT_POINT;
+		mRobot = robot;
 	}
 	
 	/**
