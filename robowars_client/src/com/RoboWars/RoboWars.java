@@ -242,7 +242,7 @@ public class RoboWars extends Activity implements SensorEventListener, Observer
 	        	tcp = new TcpClient(lobbyModel, gameModel);
 	        	tcp.connect(address, portNumber);
 	        	
-				//mediaClient.launchMediaStream(portNumber + 1);
+				mediaClient.launchMediaStream(portNumber + 1);
 	        	break;
 	        
 	        /* Send button. */
