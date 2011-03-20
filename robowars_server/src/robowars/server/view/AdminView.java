@@ -158,12 +158,7 @@ public class AdminView extends JFrame implements GameListener, ServerLobbyListen
         detectRobots.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                	new Thread(new Runnable() {
-						@Override
-						public void run() {
-							bluetooth.initRobotDetection();
-						}
-                	}).start();
+					bluetooth.initRobotDetection();
                 }
         });
         robotsMenu.add(detectRobots);
