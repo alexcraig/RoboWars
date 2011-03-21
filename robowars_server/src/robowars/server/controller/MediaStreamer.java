@@ -32,7 +32,7 @@ import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
  * all available cameras, and manages the selection of a currently active
  * camera.
  */
-public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObserver {
+public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 	/** The logger used by this class */
 	private static Logger log = Logger.getLogger(MediaStreamer.class);
 	
@@ -40,7 +40,7 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	 * Toggle this flag to set whether a testing media client should be generated
 	 * on initialization.
 	 */
-	public static boolean ENABLE_TEST_CLIENT = true;
+	public static boolean ENABLE_TEST_CLIENT = false;
 	
 	/**
 	 * The IP address to use for the test client.
@@ -123,6 +123,16 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 				e.printStackTrace();
 			}
 		}
+		
+		try {
+			// Establish the datagram socket.
+			serverSocket = new DatagramSocket(mediaPort);
+			log.info("MediaServer initialized and waiting at port: " + mediaPort);
+		} catch (IOException e) {
+			log.error("Socket error in media listen thread, video streaming will not be supported.");
+			e.printStackTrace();
+			serverSocket = null;
+		}
 	}
 	
 	/**
@@ -130,37 +140,6 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 	 */
 	public int getPort() {
 		return mediaPort;
-	}
-	
-	/**
-	 * Opens a listening socket, and creates a new MediaClientRecord whenever
-	 * a new connection is received.
-	 */
-	public void waitForConnections() {
-		byte[] incomingBuffer = new byte[INC_BUFFER_SIZE];
-		
-		try {
-			// Establish the datagram socket.
-			serverSocket = new DatagramSocket(mediaPort);
-			log.info("MediaServer initialized and waiting at port: " + mediaPort);
-			
-			// Process incoming UDP packets
-			// TODO: Figure out what needs to be done here once multiple client
-			// support is implemented
-			while (true) {}
-		} catch (IOException e) {
-			log.error("Socket error in media listen thread, terminating thread.");
-			e.printStackTrace();
-			return;
-		}
-	}
-	
-	@Override
-	/**
-	 * Launches the media server
-	 */
-	public void run() {
-		this.waitForConnections();
 	}
 	
 	/**
@@ -494,9 +473,11 @@ public class MediaStreamer implements Runnable, ServerLobbyListener, CaptureObse
 				user.getAddress(), mediaPort);
 		
 		try {
-			serverSocket.send(outputPacket);
-			// log.info("Sent data packet to: " + user.getAddress().getHostAddress() 
-			//		+ ":" + mediaPort);
+			if(serverSocket != null) {
+				serverSocket.send(outputPacket);
+				log.info("Sent data packet to: " + user.getAddress().getHostAddress() 
+						+ ":" + mediaPort);
+			}
 		} catch (IOException e) {
 			log.error("Error sending image frame to client: " + user.getAddress().getHostAddress()
 					+ ":" + mediaPort);

@@ -59,7 +59,6 @@ public class TcpServer implements Runnable {
 		mediaStreamer = new MediaStreamer(port + 1);
 		lobby.addLobbyStateListener(mediaStreamer);
 		mediaStreamer.updateDeviceList();
-		new Thread(mediaStreamer).start();
 	}
 
 	/**
