@@ -24,12 +24,6 @@ public class MediaClient {
 	public static int PACKET_BUFFER_SIZE = 8192;
 
 	/**
-	 * The default address and port to use for a streaming media connection
-	 */
-	public static final String DEFAULT_MEDIA_ADDRESS = "192.168.1.101";
-	public static final int DEFAULT_MEDIA_PORT = 33331;
-
-	/**
 	 * Reference to the Android view to draw the video stream
 	 */
 	private final RoboWars view;

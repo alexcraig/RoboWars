@@ -33,22 +33,27 @@ public class BluetoothServer {
 	 * Initiates a single search for new robots to connect.
 	 */
 	public void initRobotDetection() {
-		try {
-			NXTComm nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
-			String[] nxtName={"NXT", "NXT2"};
-			for(int i=0;i<nxtName.length; i++){
-				NXTInfo[] allNxts = nxtComm.search(nxtName[i], NXTCommFactory.BLUETOOTH);
-				
-				for(NXTInfo nxt : allNxts) {
-					if(lobby.getRobotProxy(nxt.name) == null) {
-						log.info("Discovered NXT: " + nxt.name);
-						new RobotProxy(lobby, nxt);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					NXTComm nxtComm = NXTCommFactory.createNXTComm(NXTCommFactory.BLUETOOTH);
+					String[] nxtName={"NXT", "NXT2"};
+					for(int i=0;i<nxtName.length; i++){
+						NXTInfo[] allNxts = nxtComm.search(nxtName[i], NXTCommFactory.BLUETOOTH);
+						
+						for(NXTInfo nxt : allNxts) {
+							if(lobby.getRobotProxy(nxt.name) == null) {
+								log.info("Discovered NXT: " + nxt.name);
+								new RobotProxy(lobby, nxt);
+							}
+						}
 					}
+				} catch (NXTCommException e) {
+					log.error("Bluetooth device could not be found. Robot registration will not be supported.");
+					return;
 				}
 			}
-		} catch (NXTCommException e) {
-			log.error("Bluetooth device could not be found. Robot registration will not be supported.");
-			return;
-		}
+		}).start();
 	}
 }

@@ -100,12 +100,14 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			log.debug("Client username: " + user.getUsername());
 			sendMessage(user.getUsername() + " connected to: " + lobby.getServerName());
 			
-			// If a game is in progress, send a game launch event to the client
-			// (so that camera information can be determined)
-			sendEvent(new LobbyGameEvent(lobby, 
-					ServerLobbyEvent.EVENT_GAME_LAUNCH, lobby.getCurrentGameType()));
-			
 			if (lobby.addUserProxy(this)) {
+				// If a game is in progress, send a game launch event to the client
+				// (so that camera information can be determined)
+				if(lobby.gameInProgress()) {
+					sendEvent(new LobbyGameEvent(lobby, 
+							ServerLobbyEvent.EVENT_GAME_LAUNCH, lobby.getCurrentGameType()));
+				}
+				
 				// Read strings from socket until connection is terminated
 				Object incomingMessage;
 				try {

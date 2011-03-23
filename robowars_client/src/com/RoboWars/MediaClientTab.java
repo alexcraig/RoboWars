@@ -22,12 +22,6 @@ public class MediaClientTab {
 	/** Size of the buffer used for individual incoming packets (in bytes) */
 	public static int PACKET_BUFFER_SIZE = 8192;
 	
-	/** 
-	 * The default address and port to use for a streaming media connection
-	 */
-	public static final String DEFAULT_MEDIA_ADDRESS = "192.168.1.101";
-	public static final int DEFAULT_MEDIA_PORT = 33331;
-	
 	/** The text display that status indications should be written to */
 	private TextView statusView;
 	
@@ -45,7 +39,7 @@ public class MediaClientTab {
 	 * @param mediaView	The view that images read from the network should be rendered to
 	 * @param addressField	The field that the server IP should be read from
 	 * @param portField		The field that the server port should be read from
-	 * @param statusView	The text display for status indiciation to be written to
+	 * @param statusView	The text display for status indication to be written to
 	 */
 	public MediaClientTab(ImageStreamView mediaView, TextView statusView) {
 		this.mediaView = mediaView;
@@ -72,12 +66,13 @@ public class MediaClientTab {
 		
 		try {
 			mediaSocket = new DatagramSocket(port);
+			statusView.setText("Streaming player awaiting packets on port: " + port + "");
 		} catch (IOException e) {
 			Log.e("RoboWars", "Could not bind media socket, video stream will not be supported.");
 			statusView.setText("Could not bind media socket, video stream will not be supported.");
 			mediaSocket = null;
 		}
-		statusView.setText("Streaming player awaiting packets on port: " + port + "");
+		
 		if(decodeThread != null) {
 			decodeThread.terminate();
 			decodeThread = null;
