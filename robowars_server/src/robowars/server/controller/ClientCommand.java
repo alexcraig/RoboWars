@@ -213,6 +213,9 @@ public class ClientCommand implements Serializable {
 					// Error reading orientation values, return null
 					return null;
 				}
+			} else {
+				gameplayCmd.setOrientation(0, 0, 0);
+				commandString = commandString.substring(2);
 			}
 			
 			// If any string was supplied beyond the orientation string, add it to the generated command
