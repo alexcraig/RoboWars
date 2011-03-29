@@ -1,10 +1,8 @@
-package robowars.test;
+package robowars.server.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.EventObject;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
@@ -13,17 +11,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import robowars.server.controller.LobbyChatEvent;
-import robowars.server.controller.LobbyGameEvent;
-import robowars.server.controller.LobbyRobotEvent;
-import robowars.server.controller.LobbyUserEvent;
-import robowars.server.controller.RobotProxy;
-import robowars.server.controller.ServerLobby;
-import robowars.server.controller.ServerLobbyEvent;
-import robowars.server.controller.ServerLobbyListener;
-import robowars.server.controller.UserProxy;
 import robowars.shared.model.GameType;
-import robowars.shared.model.User;
+import robowars.test.TestLobbyListener;
+import robowars.test.TestRobotProxy;
+import robowars.test.TestUserProxy;
 
 public class ServerLobbyTest {
 	public static int TEST_MAX_PLAYERS = 4;

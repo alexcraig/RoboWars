@@ -111,6 +111,10 @@ public abstract class GameModel implements Serializable{
 
 	public abstract ControlType getControlType();
 	
+	public GameType getGameType() {
+		return gameType;
+	}
+	
 	public float getArenaSize(){
 		return arenaSize;
 	}

@@ -9,10 +9,14 @@ import robowars.shared.model.User;
 /**
  * Testing user proxy with network components disabled.
  */
-class TestUserProxy extends UserProxy {
+public class TestUserProxy extends UserProxy {
+	/** The last EventObject received by this proxy */
+	EventObject lastEvent;
+	
 	public TestUserProxy(ServerLobby lobby, String username) {
 		super(null, lobby, null);
 		setUser(new User(username, null));
+		lastEvent = null;
 	}
 
 	/**
@@ -23,7 +27,16 @@ class TestUserProxy extends UserProxy {
 	
 	/**
 	 * Overrides the actual sendEvent method to avoid using the
-	 * network socket.
+	 * network socket, and records the event.
 	 */
-	public void sendEvent(EventObject event) {}
+	public void sendEvent(EventObject event) {
+		lastEvent = event;
+	}
+	
+	/**
+	 * @return	The last event received by this proxy.
+	 */
+	public EventObject getLastEvent() {
+		return lastEvent;
+	}
 }

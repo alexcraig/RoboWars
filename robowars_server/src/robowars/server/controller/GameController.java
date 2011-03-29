@@ -76,10 +76,15 @@ public class GameController implements Runnable, GameListener {
 	
 	/**
 	 * Generates a control pair from the provided user and robot proxy.
+	 * Performs no action if the player or robot is null.
 	 * @param player	The user to issue remote commands
 	 * @param robot	The robot to be controlled
 	 */
 	public void addPlayer(UserProxy player, RobotProxy robot) {
+		if(player == null || robot == null) {
+			return;
+		}
+		
 		synchronized(controlPairs) {
 			controlPairs.add(new ControlPair(player, robot));
 			player.setGameController(this);
@@ -96,6 +101,8 @@ public class GameController implements Runnable, GameListener {
 	 * @param player	The player to spectate
 	 */
 	public void addSpectator(UserProxy player) {
+		if(player == null) return;
+		
 		synchronized(spectators) {
 			spectators.add(player);
 		}
@@ -109,6 +116,21 @@ public class GameController implements Runnable, GameListener {
 		synchronized(controlPairs) {
 			for(ControlPair pair : controlPairs) {
 				if(pair.getUserProxy() == player) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @param player The player proxy to check against
+	 * @return	True if the passed player proxy is registered as a spectator
+	 */
+	public boolean isSpectator(UserProxy spectator) {
+		synchronized(spectators) {
+			for(UserProxy spec : spectators) {
+				if(spec == spectator) {
 					return true;
 				}
 			}
@@ -174,7 +196,13 @@ public class GameController implements Runnable, GameListener {
 			lastUpdateTime = System.currentTimeMillis();
 			
 			// Update game physics
-			model.updateGameState(timeElapsed);
+			try {
+				model.updateGameState(timeElapsed);
+			} catch (NullPointerException e) {
+				log.error("Error in model physics, terminating game.");
+				terminateFlag = true;
+				break;
+			}
 			
 			// Fetch and send any required commands to robots
 			synchronized(controlPairs) {
@@ -240,6 +268,7 @@ public class GameController implements Runnable, GameListener {
 			pair.getRobotProxy().clearGameController();
 			model.removeRobot(pair.getRobotProxy().getIdentifier());
 		}
+		
 		controlPairs.clear();
 		controlPairs = null;
 		spectators.clear();
@@ -347,11 +376,15 @@ public class GameController implements Runnable, GameListener {
 	 * @param orientation	The orientation of the client's gyroscope (3D Vector)
 	 * @param buttons	The buttons pressed by the client
 	 * @param controlType	The orientation of the client's device 
-	 * 						3D Vector - <Azimuth, Pitch, Roll>
+	 * 						3D Vector - <Azimuth, Pitch, Roll>. These values
+	 * 						must be scaled to the range [-1, 1]
 	 * @return	A valid RobotCommand, or null if no command should be issued.
 	 */
-	private RobotCommand generateCommand(Vector<Float> orientation, String buttons, 
+	public RobotCommand generateCommand(Vector<Float> orientation, String buttons, 
 			ControlType controlType) {
+		if(buttons == null) {
+			buttons = "";
+		}
 		
 		switch(controlType) {
 		case TANK:
@@ -367,7 +400,12 @@ public class GameController implements Runnable, GameListener {
 			}
 			
 			// Scale vector input
-			if(orientation != null) {
+			if(orientation != null && orientation.size() == 3) {
+				if(orientation.get(1) > 1 || orientation.get(1) < -1
+						|| orientation.get(2) < -1 || orientation.get(2) > 1) {
+					return null;
+				}
+				
 				float moveSpeed = orientation.get(1) * PITCH_SCALING_FACTOR;
 				int turnRate = (int)(orientation.get(2) * ROLL_SCALING_FACTOR);
 				
