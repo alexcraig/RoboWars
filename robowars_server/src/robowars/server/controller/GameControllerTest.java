@@ -19,6 +19,11 @@ import robowars.shared.model.GameType;
 import robowars.shared.model.RobotCommand;
 import robowars.test.*;
 
+/**
+ * Unit tests for GameController
+ * 
+ * @author Alexander Craig
+ */
 public class GameControllerTest {
 	
 	private GameController testController;
@@ -27,14 +32,6 @@ public class GameControllerTest {
 	private TestUserProxy user2;
 	private TestRobotProxy robot1;
 	private TestRobotProxy robot2;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -109,43 +106,45 @@ public class GameControllerTest {
 
 	@Test
 	public void testRun() {
-		// Ensure the game starts and stops correctly
-		
 		testController.addPlayer(user1, robot1);
+		testController.addSpectator(user2);
+		robot1.sendCommand(RobotCommand.setPosition(new Pose(2000, 2000, 0)));
+		
+		// Launch the game
 		new Thread(testController).start();
 		
-		// Ensure game events are being propagated
-		robot1.sendCommand(RobotCommand.moveContinuous(10));
-		
+		// Ensure game events are being propagated when robot state changes
+		robot1.sendCommand(RobotCommand.moveContinuous(5));
 		// Give the robot proxy time to report the position change
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		// Ensure the GameEvent was propagated
 		assertEquals(true, user1.getLastEvent() instanceof GameEvent);
-		
 		robot1.sendCommand(RobotCommand.stop());
 		
-		// Ensure termination works
-		testController.triggerTermination();
-		assertEquals(true, testController.isTerminating());
-		
-		// Give the game controller time to terminate
+		// Ensure that commands from the user are propagated to robots correctly
+		user1.processGameplayCommand((float)0, (float)0, (float)0, "w");
+		// Give the robot proxy time to receive the command
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		assertEquals(CommandType.MOVE_CONTINUOUS, robot1.getRobot().getLastCommand().getType());
+		robot1.sendCommand(RobotCommand.stop());
 		
-		// assertEquals(null, testController.getGameModel());
-	}
-
-	@Test
-	public void testProcessInput() {
-		// Not yet implemented (how to test output?)
+		// Ensure termination works
+		testController.triggerTermination();
+		assertEquals(true, testController.isTerminating());
+		// Give the game controller time to terminate
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		assertEquals(null, testController.getGameModel());
 	}
 
 	@Test
@@ -216,10 +215,5 @@ public class GameControllerTest {
 		genCommand = testController.generateCommand(orientation, null, type);
 		assertEquals(CommandType.ROLLING_TURN, genCommand.getType());
 		assertEquals(RobotCommand.MAX_SPEED, genCommand.getThrottle(), 0.05);
-	}
-
-	@Test
-	public void testUpdateRobotPosition() {
-		// Not yet implemented
 	}
 }

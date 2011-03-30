@@ -155,6 +155,7 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 		// Store the old list of cameras, and generate a new list to store
 		// cameras detected during this update
 		List<CameraController> oldCameras = cameras;
+		CameraController oldActiveCam = getActiveCamera();
 		cameras = new ArrayList<CameraController>();
 		
 		// Detect all connected cameras, and generate a new CameraController
@@ -188,7 +189,13 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 			if(cameras.isEmpty()) {
 				selectedCamera = null;
 			} else {
-				selectedCamera = cameras.get(0); // Note: Defaults to first detected camera
+				if(cameras.contains(oldActiveCam)) {
+					setActiveCamera(oldActiveCam);
+				} else {
+					// Note: Defaults to first detected camera if no active
+					// camera was previously selected
+					setActiveCamera(cameras.get(0));
+				}
 			}
 
 		} catch (CaptureException e) {
@@ -319,6 +326,8 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 	 * 			record existed)
 	 */
 	public boolean addUser(User user) {
+		if(user == null) return false;
+		
 		synchronized(clients) {
 			for(User u : clients) {
 				if(u == user) {
@@ -342,6 +351,26 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 		synchronized(clients) {
 			log.info("Removing user \"" + user.getUsername() + "\" from streaming media clients.");
 			return clients.remove(user);
+		}
+	}
+	
+	/**
+	 * Checks if a given user is being served by the MediaStreamer.
+	 * @param user	The user to check.
+	 * @return	True if the user is being served, false if not
+	 */
+	public boolean isServingUser(User user) {
+		synchronized(clients) {
+			return clients.contains(user);
+		}
+	}
+	
+	/**
+	 * @return	The number of users served by the MediaStreamer.
+	 */
+	public int getNumUsers() {
+		synchronized(clients) {
+			return clients.size();
 		}
 	}
 	

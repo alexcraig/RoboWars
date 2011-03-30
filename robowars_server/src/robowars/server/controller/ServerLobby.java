@@ -403,7 +403,6 @@ public class ServerLobby {
 		if(!currentGame.isTerminating()) {
 			log.info("EndCurrentGame() called while GameController thread is still running.");
 			currentGame.triggerTermination();
-			return;
 		}
 		
 		currentGame = null;

@@ -261,17 +261,17 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		
 		case ClientCommand.READY_STATUS:
 			// Request to change ready status
-			handleChangeReadyState(cmd.getBoolData());
+			processChangedReadyState(cmd.getBoolData());
 			break;
 			
 		case ClientCommand.SPECTATOR_STATUS:
 			// Request to change spectator status
-			handleChangeSpectatorState(cmd.getBoolData());
+			processChangedSpectatorState(cmd.getBoolData());
 			break;
 			
 		case ClientCommand.CHAT_MESSAGE:
 			// Chat message
-			lobby.broadcastMessage(user.getUsername() + ": " + cmd.getStringData());
+			processChatMessage(cmd.getStringData());
 			break;
 			
 		case ClientCommand.GAME_TYPE_CHANGE:
@@ -283,7 +283,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 		case ClientCommand.GAMEPLAY_COMMAND:
 			// Gameplay command
-			handleGameplayCommand(cmd.getAzimuth(), cmd.getPitch(), cmd.getRoll(),
+			processGameplayCommand(cmd.getAzimuth(), cmd.getPitch(), cmd.getRoll(),
 					cmd.getStringData());
 			break;
 			
@@ -295,7 +295,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	/**
 	 * Handles user input which requests a new game be launched.
 	 */
-	private void processGameLaunch() {
+	public void processGameLaunch() {
 		if(user.isPureSpectator()) {
 			log.debug("Game launch blocked (" + user.getUsername() + " is a pure spectator)");
 			sendMessage("Spectators may not launch a new game.");
@@ -305,29 +305,45 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	}
 	
 	/**
-	 * Handles client input that corresponds to a change in ready state.
+	 * Broadcasts a chat message through the ServerLobby
+	 * @param message	The chat message to be broadcast
+	 */
+	public void processChatMessage(String message) {
+		lobby.broadcastMessage(user.getUsername() + ": " + message);
+	}
+	
+	/**
+	 * Sets the ready state of the user and broadcasts the event through
+	 * the ServerLobby
 	 * @param newState	The new ready state (true or false)
 	 */
-	private void handleChangeReadyState(boolean newState) {
+	public void processChangedReadyState(boolean newState) {
 		user.setReady(newState);
 		lobby.broadcastUserStateUpdate(this);
 	}
 	
 	/**
-	 * Handles client input that corresponds to a change in spectator state.
+	 * Sets the spectator state of the user and broadcasts the event through
+	 * the ServerLobby
 	 * @param newState	The new spectator state (either true or false)
 	 */
-	private void handleChangeSpectatorState(boolean newState) {
+	public void processChangedSpectatorState(boolean newState) {
 		user.setPureSpectator(newState);
 		lobby.broadcastUserStateUpdate(this);
 	}
 	
 	/**
-	 * Handles user input that should be passed to the game controller
-	 * and treated as a remote robot command.
-	 * @param command	The command string received from the client
+	 * Generates a orientation vector from float inputs, and passes the input
+	 * to the GameController for processing. All values will be clamped to
+	 * the range [1, -1], so care should be taken to perform client side
+	 * input scaling.
+	 * 
+	 * @param azimuth	The azimuth of the client device
+	 * @param pitch		The pitch of the client device
+	 * @param roll		The roll of the client device
+	 * @param buttons	A string containing any buttons pressed by the client
 	 */
-	private void handleGameplayCommand(Float azimuth, Float pitch, Float roll, String buttons) {
+	public void processGameplayCommand(Float azimuth, Float pitch, Float roll, String buttons) {
 		// Ignore commands from unpaired players
 		if(controller == null) { return; }
 		

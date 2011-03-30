@@ -106,7 +106,7 @@ public class TestRobotProxy extends RobotProxy {
 	 */
 	public void sendCommand(RobotCommand command) {
 		getRobot().setLastCommand(command);
-		log.debug("Wrote to robot: " + getIdentifier() + " - " + command.toString());
+		System.out.println("Wrote to robot: " + getIdentifier() + " - " + command.toString());
 		
 		switch(command.getType()) {
 		case SET_POSITION:

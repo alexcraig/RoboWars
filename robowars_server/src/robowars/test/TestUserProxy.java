@@ -1,5 +1,7 @@
 package robowars.test;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.EventObject;
 
 import robowars.server.controller.ServerLobby;
@@ -15,7 +17,11 @@ public class TestUserProxy extends UserProxy {
 	
 	public TestUserProxy(ServerLobby lobby, String username) {
 		super(null, lobby, null);
-		setUser(new User(username, null));
+		try {
+			setUser(new User(username, InetAddress.getByName("127.0.0.1")));
+		} catch (UnknownHostException e) {
+			setUser(new User(username, null));
+		}
 		lastEvent = null;
 	}
 

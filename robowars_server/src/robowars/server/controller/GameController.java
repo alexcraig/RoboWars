@@ -181,6 +181,11 @@ public class GameController implements Runnable, GameListener {
 		synchronized(controlPairs) {
 			for(int i=0; i<controlPairs.size(); i++){
 				RobotProxy proxy=controlPairs.get(i).getRobotProxy();
+				
+				// KLUDGE: Don't send position updates to test robots, as this
+				// causes problems with testing
+				if(proxy instanceof robowars.test.TestRobotProxy) continue;
+				
 				proxy.sendCommand(RobotCommand.setPosition(map.getStartPoint(i)));
 			}
 		}
