@@ -256,7 +256,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 				
 		case ClientCommand.DISCONNECT:
 			// Disconnect message
-			// TODO: Ensure connection is terminated after disconnect received
+			terminateConnection();
 			break;
 		
 		case ClientCommand.READY_STATUS:
@@ -276,9 +276,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 			
 		case ClientCommand.GAME_TYPE_CHANGE:
 			// Request to change game type
-			if(GameType.parseString(cmd.getStringData()) != null) {
-				lobby.setGameType(GameType.parseString(cmd.getStringData()));
-			}
+			processGameTypeChange(cmd.getStringData());
 			break;
 			
 		case ClientCommand.GAMEPLAY_COMMAND:
@@ -310,6 +308,17 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 */
 	public void processChatMessage(String message) {
 		lobby.broadcastMessage(user.getUsername() + ": " + message);
+	}
+	
+	/**
+	 * Processes a request to change the lobby's selected game type.
+	 * @param gameTypeString	The string representation of the
+	 * 							desired game type.
+	 */
+	public void processGameTypeChange(String gameTypeString) {
+		if(GameType.parseString(gameTypeString) != null) {
+			lobby.setGameType(GameType.parseString(gameTypeString));
+		}
 	}
 	
 	/**
