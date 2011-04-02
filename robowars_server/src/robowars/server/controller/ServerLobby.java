@@ -105,7 +105,7 @@ public class ServerLobby {
 			users.add(userProxy);
 			addSuccess = true;
 			log.debug(userProxy.getUser().getUsername() + " added to lobby.");
-			listeners.add(userProxy);
+			addLobbyStateListener(userProxy);
 			for(ServerLobbyListener listener : listeners) {
 				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_JOINED, userProxy.getUser()));
 			}
@@ -127,7 +127,7 @@ public class ServerLobby {
 			for(ServerLobbyListener listener : listeners) {
 				listener.userStateChanged(new LobbyUserEvent(this, ServerLobbyEvent.EVENT_PLAYER_LEFT, userProxy.getUser()));
 			}
-			listeners.remove(userProxy);
+			removeLobbyStateListener(userProxy);
 			
 			// Check if a game is running, and terminate the game
 			// if one of the active players has left
