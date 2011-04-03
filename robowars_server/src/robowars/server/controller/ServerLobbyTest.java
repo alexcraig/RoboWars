@@ -16,6 +16,11 @@ import robowars.test.TestLobbyListener;
 import robowars.test.TestRobotProxy;
 import robowars.test.TestUserProxy;
 
+/**
+ * Unit tests for the ServerLobby class.
+ * 
+ * @author Alexander Craig
+ */
 public class ServerLobbyTest {
 	public static int TEST_MAX_PLAYERS = 4;
 	public static int TEST_MAX_ROBOTS = 4;

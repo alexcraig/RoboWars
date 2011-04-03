@@ -15,6 +15,8 @@ import robowars.shared.model.User;
 /**
  * Manages communications with a single user connected through an existing 
  * TCP socket. 
+ * 
+ * @author Alexander Craig
  */
 public class UserProxy implements Runnable, ServerLobbyListener {
 	/** The logger used by this class */
@@ -63,6 +65,10 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 		controller = null;
 	}
 	
+	/**
+	 * Performs the protocol version and username handshake with the new client,
+	 * then continually reads and processes incoming messages from the client.
+	 */
 	public void run(){
 		log.debug("Opening input/output streams.");
 		try {
@@ -172,6 +178,7 @@ public class UserProxy implements Runnable, ServerLobbyListener {
 	 */
 	public void sendEvent(EventObject event) {
 		// TODO: May want to find a better place to handle this processing
+		
 		// If the outgoing event is a LobbyGameEvent, attach the information
 		// for the currently selected media device
 		if(event instanceof LobbyGameEvent) {

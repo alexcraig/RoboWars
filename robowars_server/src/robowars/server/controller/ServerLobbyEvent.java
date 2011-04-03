@@ -7,6 +7,8 @@ import java.util.EventObject;
  * indicating that a player or robot has left the game, a player has changed
  * their ready / spectator state, a player has sent a chat message, or a game 
  * has been launched or terminated.
+ * 
+ * @author Alexander Craig
  */
 public abstract class ServerLobbyEvent extends EventObject {
 	private static final long serialVersionUID = 6651435788123635338L;

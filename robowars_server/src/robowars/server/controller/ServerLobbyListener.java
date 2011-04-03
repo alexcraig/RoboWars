@@ -5,6 +5,8 @@ import java.util.EventListener;
 /**
  * Interface defining functions that all classes wishing to listen on a
  * ServerLobby must implement.
+ * 
+ * @author Alexander Craig
  */
 public interface ServerLobbyListener extends EventListener {
 	

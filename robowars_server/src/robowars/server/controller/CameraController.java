@@ -12,8 +12,10 @@ import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
 
 /**
  * Handles data transfer with a single connected USB camera. This class also
- * stores information on the location and field of view of the connected
- * camera (which is required for rendering calculations).
+ * handles access to information on the location and field of view of the 
+ * connected camera (which is required for rendering calculations).
+ * 
+ * @author Alexander Craig
  */
 public class CameraController {
 	/** The logger used by this class */
@@ -27,7 +29,7 @@ public class CameraController {
 	
 	/** 
 	 * A text description of the device (usually the name of the camera, ex.
-	 * "Logitech Quickcam Pro 9000"
+	 * "Logitech Quickcam Pro 9000")
 	 */
 	private String deviceDescription;
 	
@@ -48,6 +50,10 @@ public class CameraController {
 		position = new CameraPosition();
 	}
 	
+	/**
+	 * @return	The device identifier of the camera (a unique string used by
+	 * 			LTI-Civil to identify the camera).
+	 */
 	public String getDeviceId() {
 		if(deviceInfo == null) return null;
 		
@@ -63,8 +69,9 @@ public class CameraController {
 	}
 	
 	/**
-	 * @return	A MediaLocator object specifying where the video source for this
-	 * 			camera can be read.
+	 * Opens a CaptureStream for this camera.
+	 * @return	An instance of CaptureStream which can be used to read frames
+	 * 			from the camera.
 	 */
 	public CaptureStream getCaptureStream() {
 		if(deviceInfo == null) return null;

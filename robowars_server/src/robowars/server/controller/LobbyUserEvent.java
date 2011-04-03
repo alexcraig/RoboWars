@@ -6,6 +6,8 @@ import robowars.shared.model.User;
  * Event class indicating that the state of a user connected to a server
  * lobby has changed (either the player has joined/left the server or their
  * spectator / ready status has been modified.
+ * 
+ * @author Alexander Craig
  */
 public class LobbyUserEvent extends ServerLobbyEvent {
 	private static final long serialVersionUID = -830593124712928721L;

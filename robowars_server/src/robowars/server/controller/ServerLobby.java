@@ -12,6 +12,8 @@ import robowars.shared.model.GameType;
  * game play. This classes responsibilities include managing the lists of 
  * connected robots and users, selecting game types, selecting user / robot 
  * pairs, and launching new games (generating instances of GameController).
+ * 
+ * @author Alexander Craig
  */
 public class ServerLobby {
 	
@@ -31,7 +33,7 @@ public class ServerLobby {
 	 * A list of all currently connected user proxies. Users are ordered by the
 	 * time since they last controlled a robot. New users are added to the end
 	 * of the queue. 
-	 * */
+	 **/
 	private List<UserProxy> users;
 	
 	/** A list of all currently connected robot proxies */
@@ -91,6 +93,7 @@ public class ServerLobby {
 	 * Adds a user to the end of the list of connected users. The user
 	 * must already be connected (i.e. has gone through the authentication
 	 * and user name selection handshake).
+	 * 
 	 * @param userProxy	The user to add
 	 * @return True if the user was successfully added, false if not
 	 */
