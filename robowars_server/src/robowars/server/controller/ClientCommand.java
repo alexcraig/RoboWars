@@ -15,6 +15,8 @@ import java.io.Serializable;
  * LAUNCH_GAME - No Data
  * GAMEPLAY_COMMAND - Orientation Floats, String<Optional - Buttons Pressed>
  * DISCONNECT - No Data
+ * 
+ * @author Alexander Craig
  */
 public class ClientCommand implements Serializable {
 	private static final long serialVersionUID = 1832713935557007848L;
@@ -30,7 +32,7 @@ public class ClientCommand implements Serializable {
 	
 	/** 
 	 * Boolean flag used to indicate status for status changing messages
-	 * (Changing ready or spectator status)
+	 * (Changing ready or spectator status).
 	 */
 	private Boolean boolData;
 	

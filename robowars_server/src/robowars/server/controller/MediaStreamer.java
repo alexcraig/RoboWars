@@ -27,10 +27,11 @@ import com.lti.civil.awt.AWTImageConverter;
 import com.lti.civil.impl.jni.NativeCaptureSystemFactory;
 
 /**
- * Handles the streaming of live video and transmission of other camera
- * status messages to connected users. This class also stores a list of
- * all available cameras, and manages the selection of a currently active
- * camera.
+ * Handles the streaming of live video to connected users. This class also 
+ * stores a list of all available cameras, and manages the selection of a 
+ * currently active camera.
+ * 
+ * @author Alexander Craig
  */
 public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 	/** The logger used by this class */
@@ -427,11 +428,9 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 			try {
 				lastImageWrite = System.currentTimeMillis();
 				
-				long preSocket = System.currentTimeMillis();
 				ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
 				DataOutputStream dataOut = new DataOutputStream(byteOutput);
 				
-				BufferedImage bufImg = AWTImageConverter.toBufferedImage(image);
 				ImageIO.write(AWTImageConverter.toBufferedImage(image), "jpg", dataOut);
 				dataOut.flush();
 				
@@ -442,8 +441,6 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 				// log.info("Sending data as " + numPackets + " packets.");
 				
 				byteOutput.reset();
-				
-				int dataIndex = 0;
 				
 				for(int segIndex = 0; segIndex < numPackets; segIndex++) {
 					// Write out the frame sequence number (either 1 or 0)
@@ -481,9 +478,6 @@ public class MediaStreamer implements ServerLobbyListener, CaptureObserver {
 						}
 					}
 				}
-				
-				//log.info("Writing image to clients took: " 
-				//		+ (System.currentTimeMillis() - preSocket) + " ms.");
 				
 				dataOut.close();
 			} catch (IOException e1) {

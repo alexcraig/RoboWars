@@ -5,6 +5,8 @@ package robowars.server.controller;
  * Event class indicating that a server lobby has broadcasted a chat message
  * that should be displayed on all views and broadcast to connected
  * users.
+ * 
+ * @author Alexander Craig
  */
 public class LobbyChatEvent extends ServerLobbyEvent {
 	private static final long serialVersionUID = -4763514958441257998L;

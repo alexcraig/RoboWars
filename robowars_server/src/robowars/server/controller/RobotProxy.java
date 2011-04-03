@@ -3,24 +3,26 @@ package robowars.server.controller;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-
-import robowars.robot.LejosInputStream;
-import robowars.robot.LejosOutputStream;
-import robowars.shared.model.CommandType;
-import robowars.shared.model.GameRobot;
-import robowars.shared.model.RobotCommand;
-import robowars.shared.model.RobotMap;
-import robowars.shared.model.Posture;
-
 import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
 import lejos.pc.comm.NXTCommFactory;
 import lejos.pc.comm.NXTInfo;
 import lejos.robotics.Pose;
 
+import org.apache.log4j.Logger;
+
+import robowars.robot.LejosInputStream;
+import robowars.robot.LejosOutputStream;
+import robowars.shared.model.CommandType;
+import robowars.shared.model.GameRobot;
+import robowars.shared.model.Posture;
+import robowars.shared.model.RobotCommand;
+import robowars.shared.model.RobotMap;
+
 /**
  * Manages communications with a single connected NXT robot.
+ * 
+ * @author Alexander Craig
  */
 public class RobotProxy {
 	/** The logger used by this class */
@@ -28,12 +30,6 @@ public class RobotProxy {
 	
 	/** The NXTComm object to use to initiate communication with the robot. */
 	private NXTComm nxtComm;
-	
-	/** 
-	 * Object used as a lock to ensure the input and output streams are never
-	 * used at the same time.
-	 */
-	private Object ioLock;
 	
 	/** Stream for robot output */
 	private LejosOutputStream outputStream;
@@ -64,10 +60,7 @@ public class RobotProxy {
 	 */
 	public RobotProxy(ServerLobby lobby, NXTInfo nxtInfo) {
 		this.lobby = lobby;
-		ioLock = new Object();
-		
-		// Use test sizes for now, actual dimensions should probably be sent
-		// by the robot
+
 		robot = (new GameRobot(nxtInfo.name));
 		
 		controller = null;
@@ -151,11 +144,9 @@ public class RobotProxy {
 	public void sendCommand(RobotCommand command) {
 		if(outputStream != null) {
 			try {
-				//synchronized(ioLock) {
-					outputStream.writeObject(command);
-					getRobot().setLastCommand(command);
-					log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString()+" "+commandSent++);
-				//}
+				outputStream.writeObject(command);
+				getRobot().setLastCommand(command);
+				log.info("Wrote to robot: " + getIdentifier() + " - " + command.toString()+" "+commandSent++);
 			} catch (IOException e) {
 				log.error("Error writing command to robot: " + getIdentifier());
 				return;
@@ -192,9 +183,7 @@ public class RobotProxy {
             try {
 				while (true) {
 				    
-					//synchronized(ioLock) {
-						readObj = inputStream.readObject();
-					//}
+					readObj = inputStream.readObject();
 					
 					if(readObj == null) break;
 					
@@ -229,11 +218,14 @@ public class RobotProxy {
 		}
 	}
 
+	/**
+	 * Sends a map of colors and grid coordinates to the robot.
+	 * @param map	The map to send to the robot.
+	 */
 	public void sendMap(RobotMap map) {
 		try {
 			outputStream.writeObject(map);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

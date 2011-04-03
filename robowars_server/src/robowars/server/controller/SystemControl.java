@@ -11,6 +11,8 @@ import robowars.test.TestRobotProxy;
  * Entry point for the RoboWars server. This class is responsible for launching
  * all other main components of the system (TcpServer, BluetoothServer, 
  * AdminView and SystemLobby)
+ * 
+ * @author Alexander Craig
  */
 public class SystemControl {
 	/** 
@@ -55,9 +57,8 @@ public class SystemControl {
 		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer(),
 				bluetooth);
 		
-		// TESTING
-		// new TestRobotProxy(lobby, "TestRobot1");
-		// new TestRobotProxy(lobby, "TestRobot2");
+		// TESTING - Uncomment to add test robots
+		new TestRobotProxy(lobby, "SystemControlRobot1");
+		// new TestRobotProxy(lobby, "SystemControlRobot2");
 	}
-	
 }

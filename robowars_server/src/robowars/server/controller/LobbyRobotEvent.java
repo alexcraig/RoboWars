@@ -3,6 +3,8 @@ package robowars.server.controller;
 /**
  * Event class indicating that a robot proxy has either joined or left a
  * server lobby.
+ * 
+ * @author Alexander Craig
  */
 public class LobbyRobotEvent extends ServerLobbyEvent {
 	private static final long serialVersionUID = -6157884753933448378L;

@@ -1,6 +1,6 @@
 package robowars.server.controller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -8,20 +8,21 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.lti.civil.CaptureException;
-import com.lti.civil.CaptureObserver;
-import com.lti.civil.CaptureStream;
-import com.lti.civil.Image;
-
 import robowars.shared.model.GameType;
 import robowars.shared.model.User;
 import robowars.test.TestMediaStreamer;
 import robowars.test.TestRobotProxy;
 import robowars.test.TestUserProxy;
 
+import com.lti.civil.CaptureException;
+import com.lti.civil.CaptureObserver;
+import com.lti.civil.CaptureStream;
+import com.lti.civil.Image;
+
 /**
  * Unit tests for the MediaStreamer, CameraController and CameraPosition 
  * classes.
+ * 
  * Note: These tests assume a USB webcam is connected to the system,
  * and will fail if no camera is available.
  * 

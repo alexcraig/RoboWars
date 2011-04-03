@@ -1,18 +1,18 @@
 package robowars.server.controller;
 
-import java.util.ArrayList;
-
-import org.apache.log4j.Logger;
-
 import lejos.pc.comm.NXTComm;
 import lejos.pc.comm.NXTCommException;
 import lejos.pc.comm.NXTCommFactory;
 import lejos.pc.comm.NXTInfo;
 
+import org.apache.log4j.Logger;
+
 /**
- * Uses Bluetooth to discover and attempt a connection to any available NXT
- * robots. A new RobotProxy is generated for every successfully initiated
+ * Uses Bluetooth to discover and attempt to open a connection to any available 
+ * NXT robots. A new RobotProxy is generated for every successfully initiated
  * connection.
+ * 
+ * @author Alexander Craig
  */
 public class BluetoothServer {
 	/** The logger used by this class */
@@ -30,7 +30,9 @@ public class BluetoothServer {
 	}
 	
 	/**
-	 * Initiates a single search for new robots to connect.
+	 * Initiates a single search for new robots to connect, and generates a new
+	 * RobotProxy for each robot which is detected (that is not already registered
+	 * with the ServerLobby).
 	 */
 	public void initRobotDetection() {
 		new Thread(new Runnable() {

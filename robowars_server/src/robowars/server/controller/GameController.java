@@ -1,11 +1,8 @@
 package robowars.server.controller;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
-import lejos.robotics.Pose;
 
 import org.apache.log4j.Logger;
 
@@ -17,16 +14,18 @@ import robowars.shared.model.GameListener;
 import robowars.shared.model.GameModel;
 import robowars.shared.model.GameType;
 import robowars.shared.model.LightCycles;
+import robowars.shared.model.Posture;
 import robowars.shared.model.RobotCommand;
 import robowars.shared.model.RobotMap;
 import robowars.shared.model.TankSimulation;
-import robowars.shared.model.Posture;
 
 /**
  * Manages communication with an instance of GameModel. This classes 
  * responsibilities include storing user / robot control pairs, broadcasting
  * game state changes to connected players, passing robot position updates
  * to the game model, and launching or terminating games.
+ * 
+ * @author Alexander Craig
  */
 public class GameController implements Runnable, GameListener {
 	/** The logger used by this class */
@@ -182,8 +181,8 @@ public class GameController implements Runnable, GameListener {
 			for(int i=0; i<controlPairs.size(); i++){
 				RobotProxy proxy=controlPairs.get(i).getRobotProxy();
 				
-				// KLUDGE: Don't send position updates to test robots, as this
-				// causes problems with testing
+				// KLUDGE: Don't send map based position updates to test robots,
+				// as this causes problems with testing
 				if(proxy instanceof robowars.test.TestRobotProxy) continue;
 				
 				proxy.sendCommand(RobotCommand.setPosition(map.getStartPoint(i)));
@@ -456,6 +455,9 @@ public class GameController implements Runnable, GameListener {
 		}
 	}
 	
+	/**
+	 * @return	The GameModel managed by this GameController
+	 */
 	public GameModel getGameModel(){
 		return model;
 	}

@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
  * Listens for incoming TCP connections to a specified port, and generates a new
  * UserProxy for each new connection. This class also ensures that each
  * UserProxy is associated with an instance of ServerLobby and MediaServer.
+ * 
+ * @author Alexander Craig
  */
 public class TcpServer implements Runnable {
 	/** The logger used by this class */

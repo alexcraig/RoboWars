@@ -3,6 +3,8 @@ package robowars.server.controller;
 /** 
  * Represents a pairing between a UserProxy and a RobotProxy
  * for the purposes of exchanging control commands.
+ * 
+ * @author Alexander Craig
  */
 public class ControlPair {
 	/** The user issuing remote control commands */

@@ -6,6 +6,8 @@ import robowars.shared.model.GameType;
 /**
  * Event class indicating that a server lobby has either launched or terminated
  * a game.
+ * 
+ * @author Alexander Craig
  */
 public class LobbyGameEvent extends ServerLobbyEvent {
 	private static final long serialVersionUID = -4326889526179283306L;
