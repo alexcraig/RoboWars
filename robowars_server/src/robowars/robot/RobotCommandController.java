@@ -14,7 +14,7 @@ public class RobotCommandController extends Thread{
 	private LejosInputStream dataIn;
 	private ColorSensor colorSensor;
 	
-	public RobotCommandController(RobotMovement movement, boolean test){
+	public RobotCommandController(RobotMovement movement){
 		 NXTConnection connection = Bluetooth.waitForConnection();
 		 LCD.drawString("Connected",0,0);
 		 dataOut=new LejosOutputStream(connection.openDataOutputStream());
@@ -22,7 +22,7 @@ public class RobotCommandController extends Thread{
 		 LCD.drawString("Streams opened",0,1);
 		 this.move=movement;
 		 LCD.drawString("Move created", 0, 3);
-		 colorSensor=new ColorSensor(dataOut, move, test);
+		 colorSensor=new ColorSensor(dataOut, move, false);
 		 try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e2) {
