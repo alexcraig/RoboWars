@@ -161,10 +161,6 @@ public class LightCycles extends GameModel {
 	}
 	
 	public void generateProjectile(GameRobot robot) {}
-
-	public void processCommand(RobotCommand command) {
-		super.processCommand(command);
-	}
 	
 	public boolean isValidCommand(RobotCommand command){
 		if (command.getType() == CommandType.MOVE_CONTINUOUS ||

@@ -64,7 +64,7 @@ public abstract class GameModel implements Serializable{
 
 	public abstract void updateGameState(long timeElapsed);
 
-	public boolean updateRobotPosition(String identifier, Posture Posture) {
+	public boolean updateRobotPosition(String identifier, Posture posture) {
 		GameRobot robot = null;
 
 		for(GameRobot r : robots){
@@ -75,7 +75,7 @@ public abstract class GameModel implements Serializable{
 		if(robot == null)
 			return false;//error, robot with specified identifier doesn't exist.
 
-		robot.setPosture(Posture);
+		robot.setPosture(posture);
 		notifyListeners(GameEvent.ROBOT_MOVED);
 		return true;
 	}
@@ -100,11 +100,6 @@ public abstract class GameModel implements Serializable{
 	
 	public ArrayList<GameRobot> getGameRobotList(){
 		return robots;
-	}
-
-	public void processCommand(RobotCommand command) {
-		if(isValidCommand(command))
-			return;
 	}
 
 	public abstract boolean isValidCommand(RobotCommand command);
@@ -144,13 +139,4 @@ public abstract class GameModel implements Serializable{
 	public void addEntity(GameEntity e){
 		entities.add(e);
 	}
-
-	private byte[] serializeState() {
-		return null;
-	}
-
-	private byte[] marshallState() {
-		return null;
-	}
-
 }
