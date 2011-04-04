@@ -12,7 +12,6 @@ public class GameRobot extends GameEntity implements Serializable{
 
 	private int health;
 	private int startingHealth;
-	private Vector initLocation;
 	private Posture lastPosture;
 	private String robotIdentifier;
 	private RobotCommand command;
@@ -27,7 +26,6 @@ public class GameRobot extends GameEntity implements Serializable{
 		super(Posture, shape, id);
 		this.startingHealth=health;
 		this.health=health;
-		this.initLocation=Posture.getLocation();
 		this.lastPosture = Posture;
 		this.robotIdentifier=robotId;
 		command = null;
@@ -53,7 +51,6 @@ public class GameRobot extends GameEntity implements Serializable{
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
-		this.initLocation = posture.getLocation();
 		this.lastPosture = posture;
 
 		robotIdentifier = identifier;
@@ -80,7 +77,6 @@ public class GameRobot extends GameEntity implements Serializable{
 
 		startingHealth = DEFAULT_START_HEALTH;
 		health = startingHealth;
-		this.initLocation= posture.getLocation();
 		this.lastPosture = posture;
 
 		robotIdentifier = identifier;

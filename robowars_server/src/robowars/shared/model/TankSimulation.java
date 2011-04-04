@@ -96,10 +96,6 @@ public class TankSimulation extends GameModel {
 		return false;
 	}
 
-	public void processCommand(RobotCommand command) {
-		super.processCommand(command);
-	}
-
 	public boolean isValidCommand(RobotCommand command){
 		return true;
 	}
