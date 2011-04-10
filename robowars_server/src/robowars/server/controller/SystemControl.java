@@ -57,8 +57,15 @@ public class SystemControl {
 		new AdminView(USER_PROTOCOL_VERSION, lobby, tcpServer.getMediaStreamer(),
 				bluetooth);
 		
-		// TESTING - Uncomment to add test robots
-		new TestRobotProxy(lobby, "SystemControlRobot1");
-		// new TestRobotProxy(lobby, "SystemControlRobot2");
+		if(args.length == 1) {
+			try {
+				int numTestRobots = Integer.parseInt(args[0]);
+				for(int i = 0; i < numTestRobots; i++) {
+					new TestRobotProxy(lobby, "SystemControlRobot" + i);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid number of test robots specified.");
+			}
+		}
 	}
 }
