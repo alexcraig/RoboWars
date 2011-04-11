@@ -7,7 +7,6 @@ import java.util.Date;
 
 import javax.swing.JFrame;
 
-import robowars.robot.Listener;
 import robowars.server.view.Admin2DGameView;
 import robowars.shared.model.*;
 

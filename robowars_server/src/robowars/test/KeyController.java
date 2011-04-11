@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 import org.apache.log4j.Logger;
 
 import robowars.robot.LejosInputStream;
-import robowars.robot.Listener;
 import robowars.server.controller.RobotProxy;
 
 import lejos.pc.comm.NXTComm;

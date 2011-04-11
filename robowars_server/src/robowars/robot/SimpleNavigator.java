@@ -11,6 +11,10 @@ import lejos.robotics.*;
 import lejos.robotics.navigation.Pilot;
 import lejos.robotics.navigation.TachoPilot;
 
+/* NOTICE: This has been modified to fix problems with pairty switches and reverse driving
+ * UpdatePos has been modified to allow for these new features
+ * @mwright
+ */
 /*
  * WARNING: THIS CLASS IS SHARED BETWEEN THE classes AND pccomms PROJECTS.
  * DO NOT EDIT THE VERSION IN pccomms AS IT WILL BE OVERWRITTEN WHEN THE PROJECT IS BUILT.
@@ -331,6 +335,10 @@ public float getAngle()
     return _pose.angleTo(new Point(x, y));
   }
 
+  	/**
+  	 * Modified version of the original updatePose function
+  	 * has been modified to account for parity switches
+  	 */
     public void updatePose()
 	{
 	    if(_current) return;

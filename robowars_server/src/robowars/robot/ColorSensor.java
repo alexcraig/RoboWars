@@ -17,25 +17,26 @@ import lejos.nxt.SensorPort;
 import lejos.robotics.Pose;
 import lejos.robotics.Colors.Color;
 
-public class ColorSensor{
+public class ColorSensor implements Runnable{
 	private ColorLightSensor sensor;
 	private RobotMap map;
 	private LejosOutputStream output;
 	private RobotMovement move;
 	private static final float ROBOT_RADIUS=10;
 	private boolean test;
-	public ColorSensor(LejosOutputStream output, RobotMovement move){
+	public ColorSensor(LejosOutputStream output, RobotMovement move) {
 		this(output, move, false);
 	}
 	public ColorSensor(LejosOutputStream output, RobotMovement move, boolean test){
 		sensor=new ColorLightSensor(SensorPort.S1, ColorLightSensor.TYPE_COLORFULL);
 		sensor.setFloodlight(true);
 		sensor.setType(ColorLightSensor.TYPE_COLORFULL);
-		this.map=generate();
+		this.map=generate(21,21,(float) 6.35);
 		this.output=output;
 		this.move=move;
 		this.test=test;
 	}
+	//function to read in new values, and then snap to that new locations or just straight read if in test mode.
 	public void read(){
 		if(!test){
     		int [] vals=new int[4];
@@ -91,10 +92,11 @@ public class ColorSensor{
 			}
 		}
 	}
-	public static RobotMap generate(){
-		int ROWS=21;
-		int COL=21;
-		float SPACE=(float) 6.35;
+	//Generates a local copy of the RobotMap
+	public static RobotMap generate(int rows, int cols, float space){
+		int ROWS=rows;
+		int COL=cols;
+		float SPACE=space;
 		RobotMap map=new RobotMap();
 		for(int r=ROWS; r>1; r--){
 			for(int c=COL; c>1; c--){
@@ -106,6 +108,10 @@ public class ColorSensor{
 		}
 		System.out.println("Map Generated");
 		return map;
+	}
+	@Override
+	public void run() {
+		while(true){read();}
 	}
 }
 

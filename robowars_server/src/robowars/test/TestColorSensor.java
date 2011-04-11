@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 
 import robowars.robot.LejosInputStream;
 import robowars.robot.LejosOutputStream;
-import robowars.robot.Listener;
 import robowars.robot.SquareComponent;
 import robowars.server.controller.RobotProxy;
 

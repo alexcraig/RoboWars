@@ -18,8 +18,16 @@ import robowars.shared.model.RobotMap;
 public class IOTest {
 
 	/**
-	 * @param args
+	 * Test class for IOStreams and message protocol
+	 * tests the 10 commands and objects for the robots
+	 * 
+	 * It writes the 10 commands or objects to a file in the 
+	 * same manner as they would receive going over bluetooth
+	 * which are then read back into the system and verified.
 	 */
+	public static final float DOT_SPACING=6.35f;
+	public static final int COLS=21;
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		RobotCommand mc =RobotCommand.moveContinuous(100);
@@ -55,7 +63,7 @@ public class IOTest {
 			v.addElement(2);
 			v.addElement(3);
 			out.writeObject(v);
-			map=ColorSensor.generate();
+			map=ColorSensor.generate(COLS,COLS,DOT_SPACING);
 			out.writeObject(map);
 			out.close();
 		} catch (FileNotFoundException e) {
@@ -80,7 +88,7 @@ public class IOTest {
 			testP=(Pose) in.readObject();
 			System.out.println("POSE: "+(p.getX()==testP.getX()&&p.getY()==testP.getY()&&p.getHeading()==testP.getHeading()));
 			Vector testV=(Vector)in.readObject();
-			System.out.println("Color Vector:"+(v.get(0)==testV.get(0)&&v.get(1)==testV.get(1)&&v.get(2)==testV.get(2)));
+			System.out.println("COLOR VECTOR:"+(v.get(0)==testV.get(0)&&v.get(1)==testV.get(1)&&v.get(2)==testV.get(2)));
 			System.out.println("ROBOT MAP:"+testMap((RobotMap) in.readObject(), map));
 			
 		} catch (FileNotFoundException e) {
@@ -93,6 +101,9 @@ public class IOTest {
 
 
 	}
+	/**
+	 * Function to test if each map point has been recovered
+	 */
 	private static boolean testMap(RobotMap in, RobotMap test){
 		for(int i=0; i<in.getPoints().size(); i++){
 			for(int x=0; x<((Vector)in.getPoints().get(i)).size(); x++){

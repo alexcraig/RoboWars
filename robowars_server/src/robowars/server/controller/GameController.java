@@ -35,6 +35,10 @@ public class GameController implements Runnable, GameListener {
 	public static final float PITCH_SCALING_FACTOR = RobotCommand.MAX_SPEED;
 	public static final float ROLL_SCALING_FACTOR = (float)200;
 	
+	/** dimensions for Grid */
+	public static final float DOT_SPACING=6.35f;
+	public static final int COLS=21;
+	
 	/** 
 	 * If a calculated move value is less than RobotCommand.MAX_SPEED / STOP THRESHOLD,
 	 * a STOP command will be sent instead (effectively sets what fraction of max
@@ -176,7 +180,7 @@ public class GameController implements Runnable, GameListener {
 	 * Main loop of GameController (performs real-time physics updates on GameModel)
 	 */
 	public void run() {
-		RobotMap map=ColorSensor.generate();
+		RobotMap map=ColorSensor.generate(COLS,COLS,DOT_SPACING);
 		synchronized(controlPairs) {
 			for(int i=0; i<controlPairs.size(); i++){
 				RobotProxy proxy=controlPairs.get(i).getRobotProxy();

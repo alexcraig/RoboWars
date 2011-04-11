@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import javax.swing.JComponent;
-
+/**square used to show what the robot is seeing with colour sensor test*/
 public class SquareComponent extends JComponent{
 	private static final long serialVersionUID = 1L;
 	private float r,gr,b=0;

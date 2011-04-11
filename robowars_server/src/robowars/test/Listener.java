@@ -1,4 +1,4 @@
-package robowars.robot;
+package robowars.test;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import robowars.robot.LejosOutputStream;
 import robowars.server.controller.RobotProxy;
 import robowars.shared.model.CommandType;
 import robowars.shared.model.RobotCommand;
@@ -14,7 +15,11 @@ import java.math.*;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-
+/**
+ * Used to act as the keyListener for the test suite
+ * @author mwright
+ *
+ */
 public class Listener implements KeyListener{
 	private LejosOutputStream dataOut;
 	private static Logger log = Logger.getLogger(RobotProxy.class);

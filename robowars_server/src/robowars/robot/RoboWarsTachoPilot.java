@@ -6,6 +6,13 @@ import lejos.robotics.TachoMotor;
 import lejos.robotics.navigation.Pilot;
 
 /*
+ * NOTICE: This is based off the TachoPilot class provided by LeJOS
+ * There have been modifications to allow geared wheels and to have a 
+ * functioning 360 degree steering system.
+ * @mwright
+ */
+
+/*
  * WARNING: THIS CLASS IS SHARED BETWEEN THE classes AND pccomms PROJECTS.
  * DO NOT EDIT THE VERSION IN pccomms AS IT WILL BE OVERWRITTEN WHEN THE PROJECT IS BUILT.
  */
@@ -50,6 +57,10 @@ import lejos.robotics.navigation.Pilot;
  **/
 public class RoboWarsTachoPilot implements Pilot {
 
+	/**
+	 * Gear Ratio for the motor to the wheels
+	 */
+	protected final float _gearRatio=3.39f;
 	/**
 	 * Left motor.
 	 */
@@ -430,8 +441,7 @@ public class RoboWarsTachoPilot implements Pilot {
 	 *         tacho count;
 	 */
 	public float getAngle() {
-		float gearRatio=(float) 3.39;
-		return _parity * gearRatio
+		return _parity * _gearRatio
 				* ((_right.getTachoCount() / _rightTurnRatio) - (_left
 						.getTachoCount() / _leftTurnRatio)) / 2.0f;
 	}
@@ -463,7 +473,6 @@ public class RoboWarsTachoPilot implements Pilot {
 	 * @return distance traveled since last reset of tacho count.
 	 **/
 	public float getTravelDistance() {
-		float _gearRatio=(float) 3.39;
 		float left = _left.getTachoCount() / _leftDegPerDistance;
 		float right = _right.getTachoCount() / _rightDegPerDistance;
 		return _parity * _gearRatio *(left + right) / 2.0f;
@@ -662,12 +671,13 @@ public class RoboWarsTachoPilot implements Pilot {
 	public int getParity(){
 		return _parity;
 	}
+	/* used to toggle parity and send the command to steer*/
 	public void robowarsSteer(float turnBearing, float throttle) {
 		if(throttle<0)_parity=1;
 		else _parity=-1;
 		steer(turnBearing);
 	}
-
+	/*toggles parity*/
 	public void toggleParity() {
 		if(_parity==1)_parity=-1;
 		else _parity=1;	

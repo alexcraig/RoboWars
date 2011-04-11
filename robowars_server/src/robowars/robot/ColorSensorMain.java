@@ -5,7 +5,9 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.NXTConnection;
-
+/*
+ * Main Method used to start colour sensor for testing purposes.
+ */
 public class ColorSensorMain {
 
 	/**

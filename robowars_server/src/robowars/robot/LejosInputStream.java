@@ -125,6 +125,7 @@ public class LejosInputStream {
 			String h=s;
 			return new Pose(Float.parseFloat(x),Float.parseFloat(y),Float.parseFloat(h));
 		}
+		//robotMap
 		else if((char) input=='3'){
 			String s="";
 			while((input=in.read())!=-1&&input!=0){
